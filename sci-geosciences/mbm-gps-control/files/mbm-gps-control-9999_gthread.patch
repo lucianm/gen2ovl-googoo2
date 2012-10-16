@@ -1,0 +1,11 @@
+diff -Naur mbm-gps-control-9999.orig/src/gps_control.c mbm-gps-control-9999/src/gps_control.c
+--- mbm-gps-control-9999.orig/src/gps_control.c	2012-07-27 21:20:42.000000000 +0200
++++ mbm-gps-control-9999/src/gps_control.c	2012-07-27 21:21:25.986560866 +0200
+@@ -22,7 +22,6 @@
+ #include <gtk/gtk.h>
+ #include <string.h>
+ #include <glib.h>
+-#include <glib/gthread.h>
+ #include <dbus/dbus.h>
+ #include <dbus/dbus-glib-lowlevel.h>
+ #include <dbus/dbus-glib.h>
