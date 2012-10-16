@@ -1,0 +1,34 @@
+#!/sbin/runscript
+# Copyright 1999-2012 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header: Exp $
+
+SOCKETDIR="/var/run/lirc"
+command="/usr/sbin/${SVCNAME}"
+command_args="${EVENTLIRCD_OPTS}"
+start_stop_daemon_args="--quiet"
+description="LIRC helper Daemon for unifying and hotplugging event devices"
+
+depend() {
+	need udev
+	provide lirc
+	use logger
+}
+
+start_pre() {
+	if ! [[ -d ${SOCKETDIR} ]]; then
+		einfo "Creating missing directory '${SOCKETDIR}' ..."
+		mkdir -p ${SOCKETDIR}
+		if [ $? -ne 0 ]; then
+			eend $? "Unable to create missing directory '${SOCKETDIR}' ..."
+			return 1
+		fi
+	fi
+}
+
+if [ "${RC_VERSION:-0}" = "0" ]; then
+	start() {
+		eerror "This script cannot be used for baselayout-1."
+		return 1
+	}
+fi

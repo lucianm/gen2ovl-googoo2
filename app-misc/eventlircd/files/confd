@@ -1,0 +1,23 @@
+#
+# From the command-line options of the daemon, please DONT'T EVER use in $EVENTLIRCD_OPTS:
+#    - A DIFFERENT DIRECTORY OF THE SOCKET;
+#    - any of the --verbose switches;
+#    - the '-f --foreground' switch.
+# Otherwise, the scripts will not run properly, or not run at all, you have been warned !!!!
+
+# eventlircd --help
+#
+# Usage: eventlircd [options]
+#    -h --help              print this help message and exit
+#    -V --version           print the program version and exit
+#    -v --verbose           increase the output message verbosity (-v, -vv or -vvv)
+#    -f --foreground        run in the foreground
+#    -e --evmap=<dir>       directory containing input device event map files (default is '/etc/eventlircd.d')
+#    -s --socket=<socket>   lircd socket (default is '/var/run/lirc/lircd')
+#    -m --mode=<mode>       lircd socket mode (default is '0666')
+#    -R --repeat-filter     enable repeat filtering (default is 'false')
+#    -r --release=<suffix>  generate key release events suffixed with <suffix>
+
+
+#EVENTLIRCD_OPTS="--release=_UP"
+EVENTLIRCD_OPTS=""

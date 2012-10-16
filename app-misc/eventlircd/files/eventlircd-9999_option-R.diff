@@ -1,0 +1,21 @@
+diff -Naur eventlircd-9999_orig/src/main.c eventlircd-9999/src/main.c
+--- eventlircd-9999_orig/src/main.c	2012-01-10 14:19:32.000000000 +0100
++++ eventlircd-9999/src/main.c	2012-01-10 15:00:28.256838467 +0100
+@@ -73,7 +73,7 @@
+ 
+     openlog(progname, LOG_CONS | LOG_PERROR | LOG_PID, LOG_DAEMON);
+ 
+-    while((opt = getopt_long(argc, argv, "hVvfe:s:m:r:", longopts, NULL)) != -1)
++    while((opt = getopt_long(argc, argv, "hVvfe:s:m:r:R", longopts, NULL)) != -1)
+     {
+         switch(opt)
+         {
+@@ -90,7 +90,7 @@
+ 		fprintf(stdout, "    -m --mode=<mode>       lircd socket mode (default is '%04o')\n",
+                                                             lircd_socket_mode);
+ 		fprintf(stdout, "    -R --repeat-filter     enable repeat filtering (default is '%s')\n",
+-                                                            input_repeat_filter ? "false" : "true");
++                                                            input_repeat_filter ? "true" : "false");
+ 		fprintf(stdout, "    -r --release=<suffix>  generate key release events suffixed with <suffix>\n");
+                 exit(EX_OK);
+                 break;

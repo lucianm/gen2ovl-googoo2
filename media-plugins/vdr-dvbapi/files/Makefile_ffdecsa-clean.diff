@@ -1,0 +1,14 @@
+diff -Naur vdr-dvbapi-plugin_orig/Makefile vdr-dvbapi-plugin/Makefile
+--- vdr-dvbapi-plugin_orig/Makefile	2012-01-04 01:51:10.000000000 +0100
++++ vdr-dvbapi-plugin/Makefile	2012-01-04 01:52:07.620999996 +0100
+@@ -87,7 +87,9 @@
+ 	@-rm -rf $(TMPDIR)/$(ARCHIVE)
+ 	@echo Distribution package created as $(PACKAGE).tgz
+ 
+-clean:
++clean: clean-ffdecsa
+ 	@-rm -f $(PODIR)/*.mo $(PODIR)/*.pot
+ 	@-rm -f $(OBJS)  $(DEPFILE) *.so *.tgz core* *~ $(PODIR)/*.mo $(PODIR)/*.pot
++
++clean-ffdecsa:
+ 	@$(MAKE) -C $(FFDECSADIR) clean
