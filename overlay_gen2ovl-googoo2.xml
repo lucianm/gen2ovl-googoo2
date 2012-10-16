@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repositories version="1.0">
+	<repo priority="80" quality="experimental" status="unofficial">
+		<name>gen2ovl-googoo2</name>
+		<description>Private overlay with ebuilds related to VDR and more...</description>
+		<owner>
+			<email>lucianm@users.sourceforge.net</email>
+		</owner>
+		<source type="git">git://github.com/lucianm/gen2ovl-googoo2.git</source>
+	</repo>
+</repositories>
