@@ -13,8 +13,7 @@ SLOT="unstable"
 KEYWORDS="~amd64 ~x86"
 IUSE="totem +vlc gnome-mplayer"
 
-DEPEND=">=virtual/libstdc++-3.3
-	totem? ( >=media-video/totem-2.32.0-r2  )
+DEPEND="totem? ( >=media-video/totem-2.32.0-r2  )
 	gnome-mplayer? ( >=media-video/gnome-mplayer-1.0.5_beta1 )
 	vlc? ( >media-video/vlc-1.10 )
 	dev-lang/python[sqlite]
