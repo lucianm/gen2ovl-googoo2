@@ -85,9 +85,9 @@ src_install() {
 	dosym /usr/share/vdr/${VDRPLUGIN}/logos /etc/vdr/plugins/${VDRPLUGIN}/logos
 	dosym /etc/graphlcd.conf /etc/vdr/plugins/${VDRPLUGIN}/graphlcd.conf
 
-	dosym /usr/share/vdr/${VDRPLUGIN}/fonts/ttf-bitstream-vera/VeraBd.ttf /etc/vdr/plugins/${VDRPLUGIN}/fonts/VeraBd.ttf
-	dosym /usr/share/vdr/${VDRPLUGIN}/fonts/ttf-bitstream-vera/Vera.ttf /etc/vdr/plugins/${VDRPLUGIN}/fonts/Vera.ttf
-	dosym /usr/share/vdr/${VDRPLUGIN}/fonts/dejavu/DejaVuSansCondensed.ttf /etc/vdr/plugins/${VDRPLUGIN}/fonts/DejaVuSansCondensed.ttf
+	dosym /usr/share/fonts/ttf-bitstream-vera/VeraBd.ttf /usr/share/vdr/${VDRPLUGIN}/fonts/VeraBd.ttf
+	dosym /usr/share/fonts/ttf-bitstream-vera/Vera.ttf /usr/share/vdr/${VDRPLUGIN}/fonts/Vera.ttf
+	dosym /usr/share/fonts/dejavu/DejaVuSansCondensed.ttf /usr/share/vdr/${VDRPLUGIN}/fonts/DejaVuSansCondensed.ttf
 
 }
 
