@@ -17,7 +17,9 @@ SRC_URI="http://sopcast-player.googlecode.com/files/${MY_P}-${PV}.tar.gz"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE=""
-RESTRICT="strip"
+
+#RESTRICT="strip"
+QA_PRESTRIPPED="/opt/${PN}/${PN}"
 
 # All dependencies might not be listed, since the binary blob's homepage only lists libstdc++
 RDEPEND="amd64? ( app-emulation/emul-linux-x86-compat )
