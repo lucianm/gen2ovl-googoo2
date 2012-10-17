@@ -1,0 +1,23 @@
+diff -ru control-0.0.2a.orig/gateway.c control-0.0.2a/gateway.c
+--- control-0.0.2a.orig/gateway.c	2004-07-02 21:24:22.000000000 +0200
++++ control-0.0.2a/gateway.c	2005-01-10 21:30:41.090607920 +0100
+@@ -102,7 +102,8 @@
+ 
+       uint64 Command = 0;
+       uint i = 0;
+-      int t0 = time_ms();
++      cTimeMs t0;
++      t0.Set();
+       while (_active && i < sizeof(Command)) {
+ 
+         uchar ch;
+@@ -131,7 +132,7 @@
+           // of their codes, so we'll need to wait some 100ms to see if
+           // there is more coming up - or whether this really is the 'ESC'
+           // key (if somebody knows how to clean this up, please let me know):
+-          if (Command == 0x1B && time_ms() - t0 < 100)
++          if (Command == 0x1B && t0.Elapsed() < 100)
+             continue;
+ 
+           if (Command) {
+Only in control-0.0.2a: gateway.c~
