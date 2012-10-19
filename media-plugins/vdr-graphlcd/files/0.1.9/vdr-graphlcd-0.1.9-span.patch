@@ -1,0 +1,1475 @@
+diff -Nru graphlcd-0.1.9/display.c graphlcd-0.1.9-span/display.c
+--- graphlcd-0.1.9/display.c	2011-02-13 14:54:35.000000000 +0100
++++ graphlcd-0.1.9-span/display.c	2011-02-24 21:51:01.875384935 +0100
+@@ -75,7 +75,6 @@
+     bitmap(NULL),
+     GraphLCDState(NULL)
+ {
+-    cfgDir = "";
+     fontDir = "";
+     logoDir = "";
+ 
+@@ -116,6 +115,7 @@
+     LastTimeBrightness = 0;
+     bBrightnessActive = true;
+     LastTimeSA.Set(0); //span
++    showSA = 1;
+ 
+     conv = new cCharSetConv(cCharSetConv::SystemCharacterTable() ? cCharSetConv::SystemCharacterTable() : "UTF-8", "ISO-8859-1");
+ }
+@@ -134,23 +134,26 @@
+     } 
+ }
+ 
+-int cGraphLCDDisplay::Init(GLCD::cDriver * Lcd, const char * CfgDir)
++int cGraphLCDDisplay::Init(GLCD::cDriver * Lcd)
+ {
+-    if (!Lcd || !CfgDir)
++    if (!Lcd)
+         return 2;
+     mLcd = Lcd;
+-    cfgDir = CfgDir;
+-    fontDir = cfgDir + "/fonts";
+-    logoDir = cfgDir + "/logos";
+ 
+-    logoList = new cGraphLCDLogoList(logoDir.c_str(), cfgDir.c_str());
++    fontDir = cfgDir;
++    fontDir = fontDir + "/fonts";
++    logoDir = cfgDir;
++    logoDir = logoDir + "/logos";
++
++    logoList = new cGraphLCDLogoList(logoDir.c_str(), cfgDir);
+     if (!logoList)
+     {
+         esyslog("graphlcd plugin: ERROR out of memory\n");
+         return 1;
+     }
+ 
+-    std::string fontListFile = cfgDir + "/fonts.conf";
++    std::string fontListFile = cfgDir;
++    fontListFile = fontListFile + "/fonts.conf";
+     if (fontList.Load(fontListFile) == false)
+     {
+         esyslog("graphlcd plugin: ERROR: Could not load %s!\n", fontListFile.c_str());
+@@ -411,12 +414,16 @@
+                                 timerclear(&UpdateAt);
+                                 update = false;
+                                 bitmap->Clear();
+-                                DisplayTime();
+-                                DisplayLogo();
+-                                DisplayReplay(replay);
++
++                                DisplaySA();
++                                if(!showSA || GraphLCDSetup.Mixed) {
++                                  DisplayReplay(replay);
++                                  DisplayTime();
++                                  DisplayLogo();
+                                 //DisplaySymbols();
+-                                DisplayVolume();
+-                                DisplayMessage();
++                                  DisplayVolume();
++                                  DisplayMessage();
++                                }
+                                 mLcd->SetScreen(bitmap->Data(), bitmap->Width(), bitmap->Height(), bitmap->LineSize());
+                                 mLcd->Refresh(false);
+                                 LastTime = CurrTime;
+@@ -1512,8 +1519,6 @@
+                           nTopY + nProgressbarHeight,
+                           GLCD::clrBlack, false);
+ 
+-    DisplaySA(); //span
+-
+     if (1 < replay.total && 1 < replay.current) // Don't show full progressbar for endless streams
+     {
+         bitmap->DrawRectangle(FRAME_SPACE_X,
+@@ -1529,6 +1534,7 @@
+ // if (!IsLogoActive() || nTopY > logo->Height())
+ // nMaxX = max(1, bitmap->Width() - 1 - (2 * FRAME_SPACE_X));
+ 
++
+     switch (replay.mode)
+     {
+         case eReplayDVD:
+@@ -2043,136 +2049,177 @@
+ 
+ void cGraphLCDDisplay::DisplaySA() //span
+ {
+-// Spectrum Analyzer visualization
+-    if ( GraphLCDSetup.enableSpectrumAnalyzer && GraphLCDSetup.pluginSpectrumAnalyzer )
+-    {
+-        if (cPluginManager::CallFirstService(SPAN_GET_BAR_HEIGHTS_ID, NULL))
+-        {
+-            Span_GetBarHeights_v1_0 GetBarHeights;
++  showSA = 0;
++  
++  if (GraphLCDSetup.BGColorIsBlack) {
++    bgcolor = GLCD::clrBlack;
++    fgcolor = GLCD::clrWhite;
++    }
++  else {
++    bgcolor = GLCD::clrWhite;
++    fgcolor = GLCD::clrBlack;
++  }
+ 
+-            int bandsSA = 20;
+-            int falloffSA = 8;
+-            int channelsSA = 1;
+-
+-            unsigned int bar;
+-            unsigned int *barHeights = new unsigned int[bandsSA];
+-            unsigned int *barHeightsLeftChannel = new unsigned int[bandsSA];
+-            unsigned int *barHeightsRightChannel = new unsigned int[bandsSA];
+-            unsigned int volumeLeftChannel;
+-            unsigned int volumeRightChannel;
+-            unsigned int volumeBothChannels;
+-            unsigned int *barPeaksBothChannels = new unsigned int[bandsSA];
+-            unsigned int *barPeaksLeftChannel = new unsigned int[bandsSA];
+-            unsigned int *barPeaksRightChannel = new unsigned int[bandsSA];
+-
+-            GetBarHeights.bands                   = bandsSA;
+-            GetBarHeights.barHeights              = barHeights;
+-            GetBarHeights.barHeightsLeftChannel   = barHeightsLeftChannel;
+-            GetBarHeights.barHeightsRightChannel  = barHeightsRightChannel;
+-            GetBarHeights.volumeLeftChannel       = &volumeLeftChannel;
+-            GetBarHeights.volumeRightChannel      = &volumeRightChannel;
+-            GetBarHeights.volumeBothChannels      = &volumeBothChannels;
+-            GetBarHeights.name                    = "graphlcd";
+-            GetBarHeights.falloff                 = falloffSA;
+-            GetBarHeights.barPeaksBothChannels    = barPeaksBothChannels;
+-            GetBarHeights.barPeaksLeftChannel     = barPeaksLeftChannel;
+-            GetBarHeights.barPeaksRightChannel    = barPeaksRightChannel;
+-
+-            if ( cPluginManager::CallFirstService(SPAN_GET_BAR_HEIGHTS_ID, &GetBarHeights ))
+-            {
+-                int i;
+-                int barWidth = 2;
+-                int saStartX = FRAME_SPACE_X;
+-                int saEndX = saStartX + barWidth*bandsSA*2 + bandsSA/4 - 1;
+-                int saStartY = FRAME_SPACE_Y;
+-                int saEndY = FRAME_SPACE_Y + bitmap->Height()/2 - 3;
+-
+-                LastTimeSA.Set(100);
++// Spectrum Analyzer visualization
++  if ( GraphLCDSetup.enableSpectrumAnalyzer && GraphLCDSetup.pluginSpectrumAnalyzer ) {
++    if (cPluginManager::CallFirstService(SPAN_GET_BAR_HEIGHTS_ID, NULL)) {
+ 
+-                if ( GraphLCDSetup.SAShowVolume )
+-                {
++      Span_GetBarHeights_v1_0 GetBarHeights;
++      int falloffSA = GraphLCDSetup.FallOff;
+ 
+-                    saStartX = FRAME_SPACE_X  + bitmap->Width()/2 - (barWidth*bandsSA*2 + bandsSA/4)/2 - 2;
+-                    saEndX = saStartX + barWidth*bandsSA*2 + bandsSA/4 - 1;
++      unsigned int bar;
++      unsigned int *barHeights                   = new unsigned int[GraphLCDSetup.BandsSA];
++      unsigned int *barHeightsLeftChannel        = new unsigned int[GraphLCDSetup.BandsSA];
++      unsigned int *barHeightsRightChannel       = new unsigned int[GraphLCDSetup.BandsSA];
++      unsigned int volumeLeftChannel;
++      unsigned int volumeRightChannel;
++      unsigned int volumeBothChannels;
++      unsigned int *barPeaksBothChannels         = new unsigned int[GraphLCDSetup.BandsSA];
++      unsigned int *barPeaksLeftChannel          = new unsigned int[GraphLCDSetup.BandsSA];
++      unsigned int *barPeaksRightChannel         = new unsigned int[GraphLCDSetup.BandsSA];
++
++      GetBarHeights.bands                        = GraphLCDSetup.BandsSA;
++      GetBarHeights.barHeights                   = barHeights;
++      GetBarHeights.barHeightsLeftChannel        = barHeightsLeftChannel;
++      GetBarHeights.barHeightsRightChannel       = barHeightsRightChannel;
++      GetBarHeights.volumeLeftChannel            = &volumeLeftChannel;
++      GetBarHeights.volumeRightChannel           = &volumeRightChannel;
++      GetBarHeights.volumeBothChannels           = &volumeBothChannels;
++      GetBarHeights.name                         = "graphlcd";
++      GetBarHeights.falloff                      = falloffSA;
++      GetBarHeights.barPeaksBothChannels         = barPeaksBothChannels;
++      GetBarHeights.barPeaksLeftChannel          = barPeaksLeftChannel;
++      GetBarHeights.barPeaksRightChannel         = barPeaksRightChannel;
++
++      if ( cPluginManager::CallFirstService(SPAN_GET_BAR_HEIGHTS_ID, &GetBarHeights )) {
++
++        showSA = 1;
++        int i;
++        int barPeak = 0;
++        LastTimeSA.Set(GraphLCDSetup.UpdateSA);
++
++        // background
++        bitmap->DrawRectangle(GraphLCDSetup.DisplayX,
++                              GraphLCDSetup.DisplayY,
++                              GraphLCDSetup.DisplayX + GraphLCDSetup.DisplayWidth,
++                              GraphLCDSetup.DisplayY + GraphLCDSetup.DisplayHeight,
++                              bgcolor, true);
++
++        switch(GraphLCDSetup.Visualization) {
++          case 1: // MONO
++            for ( i=0; i < GraphLCDSetup.BandsSA; i++ ) {
++              // the bar
++              bar     = (barHeights[i]*(GraphLCDSetup.DisplayHeight -1))/100;
++              barPeak = (barPeaksBothChannels[i]*(GraphLCDSetup.DisplayHeight))/100;
++//              printf("barPeak=%i\n",barPeak);
++              if(barPeak > 0) {
++                // barPeak
++                bitmap->DrawRectangle(  GraphLCDSetup.DisplayX + GraphLCDSetup.OffsetX1 + (i*GraphLCDSetup.BarWidth) + i + (i*2),
++                                       (GraphLCDSetup.DisplayY + GraphLCDSetup.DisplayHeight) - GraphLCDSetup.OffsetY1 - barPeak,
++                                        GraphLCDSetup.DisplayX + GraphLCDSetup.OffsetX1 + (i*GraphLCDSetup.BarWidth) + i + (i*2) + GraphLCDSetup.BarWidth,
++                                       (GraphLCDSetup.DisplayY + GraphLCDSetup.DisplayHeight) - GraphLCDSetup.OffsetY1 - barPeak + GraphLCDSetup.PeakHeight,
++                                        fgcolor, true);
++                // bar
++                bitmap->DrawRectangle(  GraphLCDSetup.DisplayX + GraphLCDSetup.OffsetX1 + (i*GraphLCDSetup.BarWidth) + i + (i*2),
++                                       (GraphLCDSetup.DisplayY + GraphLCDSetup.DisplayHeight) - GraphLCDSetup.OffsetY1 - bar,
++                                        GraphLCDSetup.DisplayX + GraphLCDSetup.OffsetX1 + (i*GraphLCDSetup.BarWidth) + i + (i*2) + GraphLCDSetup.BarWidth,
++                                       (GraphLCDSetup.DisplayY + GraphLCDSetup.DisplayHeight) - GraphLCDSetup.OffsetY1,
++                                        fgcolor, true);
++                }
++              else {
++                bitmap->DrawRectangle(  GraphLCDSetup.DisplayX + GraphLCDSetup.OffsetX1 + (i*GraphLCDSetup.BarWidth) + i + (i*2),
++                                       (GraphLCDSetup.DisplayY + GraphLCDSetup.DisplayHeight) - GraphLCDSetup.OffsetY1 - bar,
++                                        GraphLCDSetup.DisplayX + GraphLCDSetup.OffsetX1 + (i*GraphLCDSetup.BarWidth) + i + (i*2) + GraphLCDSetup.BarWidth,
++                                       (GraphLCDSetup.DisplayY + GraphLCDSetup.DisplayHeight) - GraphLCDSetup.OffsetY1,
++                                        fgcolor, true);
++
++              }
++            }
++            break;
++
++          case 2: // STEREO X-BAND VERT
++            for ( i=0; i < GraphLCDSetup.BandsSA; i++ ) {
++              // the bar
++              bar     = (volumeLeftChannel*(GraphLCDSetup.DisplayWidth -GraphLCDSetup.OffsetX1 -GraphLCDSetup.OffsetX2))/100;
++              bitmap->DrawRectangle(GraphLCDSetup.OffsetX1,
++                                    GraphLCDSetup.OffsetY1 +GraphLCDSetup.Channel1Left,
++                                    GraphLCDSetup.OffsetX1 +bar,
++                                    GraphLCDSetup.OffsetY1 +GraphLCDSetup.Channel1Left +GraphLCDSetup.BarWidth,
++                                    fgcolor, true);
++
++
++
++              bar     = (volumeRightChannel*(GraphLCDSetup.DisplayWidth -GraphLCDSetup.OffsetX1 -GraphLCDSetup.OffsetX2))/100;
++              bitmap->DrawRectangle(GraphLCDSetup.OffsetX1,
++                                    GraphLCDSetup.OffsetY1 +GraphLCDSetup.Channel2Left,
++                                    GraphLCDSetup.OffsetX1 +bar,
++                                    GraphLCDSetup.OffsetY1 +GraphLCDSetup.Channel2Left +GraphLCDSetup.BarWidth,
++                                    fgcolor, true);
++            }
++            break;
++
++          case 3: // STEREO
++            for ( i=0; i < GraphLCDSetup.BandsSA; i++ ) {
++              // the bar
++              bar     = (barHeightsLeftChannel[i]*(GraphLCDSetup.DisplayHeight -1))/100;
++              barPeak = (barPeaksLeftChannel[i]*(GraphLCDSetup.DisplayHeight))/100;
++              if(barPeak > 0) {
++                // left barPeak
++                bitmap->DrawRectangle(  GraphLCDSetup.DisplayX + GraphLCDSetup.OffsetX1 + (i*GraphLCDSetup.BarWidth) + i + (i*2),
++                                       (GraphLCDSetup.DisplayY + GraphLCDSetup.DisplayHeight) - GraphLCDSetup.OffsetY1 - barPeak,
++                                        GraphLCDSetup.DisplayX + GraphLCDSetup.OffsetX1 + (i*GraphLCDSetup.BarWidth) + i + (i*2) + GraphLCDSetup.BarWidth,
++                                       (GraphLCDSetup.DisplayY + GraphLCDSetup.DisplayHeight) - GraphLCDSetup.OffsetY1 - barPeak + GraphLCDSetup.PeakHeight,
++                                        fgcolor, true);
++                // left bar
++                bitmap->DrawRectangle(  GraphLCDSetup.DisplayX + GraphLCDSetup.OffsetX1 + (i*GraphLCDSetup.BarWidth) + i + (i*2),
++                                       (GraphLCDSetup.DisplayY + GraphLCDSetup.DisplayHeight) - GraphLCDSetup.OffsetY1 - bar,
++                                        GraphLCDSetup.DisplayX + GraphLCDSetup.OffsetX1 + (i*GraphLCDSetup.BarWidth) + i + (i*2) + GraphLCDSetup.BarWidth,
++                                       (GraphLCDSetup.DisplayY + GraphLCDSetup.DisplayHeight) - GraphLCDSetup.OffsetY1,
++                                        fgcolor, true);
++                }
++              else {
++                bitmap->DrawRectangle(  GraphLCDSetup.DisplayX + GraphLCDSetup.OffsetX1 + (i*GraphLCDSetup.BarWidth) + i + (i*2),
++                                       (GraphLCDSetup.DisplayY + GraphLCDSetup.DisplayHeight) - GraphLCDSetup.OffsetY1 - bar,
++                                        GraphLCDSetup.DisplayX + GraphLCDSetup.OffsetX1 + (i*GraphLCDSetup.BarWidth) + i + (i*2) + GraphLCDSetup.BarWidth,
++                                       (GraphLCDSetup.DisplayY + GraphLCDSetup.DisplayHeight) - GraphLCDSetup.OffsetY1,
++                                        fgcolor, true);
++              }
++
++              bar     = (barHeightsRightChannel[i]*(GraphLCDSetup.DisplayHeight -1))/100;
++              barPeak = (barPeaksRightChannel[i]*(GraphLCDSetup.DisplayHeight))/100;
++              if(barPeak > 0) {
++                // right barPeak
++                bitmap->DrawRectangle(  GraphLCDSetup.Channel2Left + GraphLCDSetup.DisplayX + GraphLCDSetup.OffsetX1 + (i*GraphLCDSetup.BarWidth) + i + (i*2),
++                                       (GraphLCDSetup.DisplayY + GraphLCDSetup.DisplayHeight) - GraphLCDSetup.OffsetY1 - barPeak,
++                                        GraphLCDSetup.Channel2Left + GraphLCDSetup.DisplayX + GraphLCDSetup.OffsetX1 + (i*GraphLCDSetup.BarWidth) + i + (i*2) + GraphLCDSetup.BarWidth,
++                                       (GraphLCDSetup.DisplayY + GraphLCDSetup.DisplayHeight) - GraphLCDSetup.OffsetY1 - barPeak + GraphLCDSetup.PeakHeight,
++                                        fgcolor, true);
++                // right bar
++                bitmap->DrawRectangle(  GraphLCDSetup.Channel2Left + GraphLCDSetup.DisplayX + GraphLCDSetup.OffsetX1 + (i*GraphLCDSetup.BarWidth) + i + (i*2),
++                                       (GraphLCDSetup.DisplayY + GraphLCDSetup.DisplayHeight) - GraphLCDSetup.OffsetY1 - bar,
++                                        GraphLCDSetup.Channel2Left + GraphLCDSetup.DisplayX + GraphLCDSetup.OffsetX1 + (i*GraphLCDSetup.BarWidth) + i + (i*2) + GraphLCDSetup.BarWidth,
++                                       (GraphLCDSetup.DisplayY + GraphLCDSetup.DisplayHeight) - GraphLCDSetup.OffsetY1,
++                                        fgcolor, true);
++                }
++              else {
++                bitmap->DrawRectangle(  GraphLCDSetup.Channel2Left + GraphLCDSetup.DisplayX + GraphLCDSetup.OffsetX1 + (i*GraphLCDSetup.BarWidth) + i + (i*2),
++                                       (GraphLCDSetup.DisplayY + GraphLCDSetup.DisplayHeight) - GraphLCDSetup.OffsetY1 - bar,
++                                        GraphLCDSetup.Channel2Left + GraphLCDSetup.DisplayX + GraphLCDSetup.OffsetX1 + (i*GraphLCDSetup.BarWidth) + i + (i*2) + GraphLCDSetup.BarWidth,
++                                       (GraphLCDSetup.DisplayY + GraphLCDSetup.DisplayHeight) - GraphLCDSetup.OffsetY1,
++                                        fgcolor, true);
++              }
++            }
++            break;
++        }
++
++        delete [] barHeights;
++        delete [] barHeightsLeftChannel;
++        delete [] barHeightsRightChannel;
++        delete [] barPeaksBothChannels;
++        delete [] barPeaksLeftChannel;
++        delete [] barPeaksRightChannel;
+ 
+-                    // left volume
+-                    bitmap->DrawRectangle(FRAME_SPACE_X,
+-                                          saStartY,
+-                                          saStartX-1,
+-                                          saEndY + 1,
+-                                          GLCD::clrWhite, true);
+-
+-                    for ( i=0; (i<(int)logo->Width()/2-2) && (i<3*((int)volumeLeftChannel*(int)saStartX)/100); i++)
+-                    {
+-                        bitmap->DrawRectangle(saStartX - i - 2,
+-                                              saStartY + saEndY/2 - i,
+-                                              saStartX - i - 4,
+-                                              saStartY + saEndY/2 + i,
+-                                              GLCD::clrBlack, true);
+-                    }
+-
+-                    // right volume
+-                    bitmap->DrawRectangle(saEndX + 1,
+-                                          saStartY,
+-                                          bitmap->Width() - 1,
+-                                          saEndY + 1,
+-                                          GLCD::clrWhite, true);
+-
+-                    for ( i=0; (i<(int)logo->Width()/2-2) && (i<3*((int)volumeRightChannel*(int)saStartX)/100); i++)
+-                    {
+-                        bitmap->DrawRectangle(saEndX + 2 + i,
+-                                              saStartY + saEndY/2 - i,
+-                                              saEndX + i + 4,
+-                                              saStartY + saEndY/2 + i,
+-                                              GLCD::clrBlack, true);
+-                    }
+-                }
+-                // black background
+-                bitmap->DrawRectangle(saStartX,
+-                                      saStartY,
+-                                      saEndX,
+-                                      saEndY + 1,
+-                                      GLCD::clrBlack, true);
+-
+-                for ( i=0; i < bandsSA; i++ )
+-                {
+-/*
+-                    if ( channelsSA == 2 )
+-                    {
+-                        bar = barHeightsLeftChannel[i];
+-                        bar = barHeightsRightChannel[i];
+-                     }
+-*/
+-                     if ( channelsSA == 1)
+-                     {
+-                         // the bar
+-                         bar = (barHeights[i]*(saEndY-saStartY))/100;
+-                         bitmap->DrawRectangle(saStartX + barWidth*2*(i)+ barWidth + 1,
+-                                               saEndY,
+-                                               saStartX + barWidth*2*(i) + barWidth+ barWidth + 1,
+-                                               saEndY - bar,
+-                                               GLCD::clrWhite, true);
+-
+-                         // the peak
+-                         bar = (barPeaksBothChannels[i]*(saEndY-saStartY))/100;
+-                         if ( bar > 0 )
+-                         {
+-                             bitmap->DrawRectangle(saStartX + barWidth*2*(i)+ barWidth + 1,
+-                                                   saEndY - bar,
+-                                                   saStartX + barWidth*2*(i) + barWidth+ barWidth + 1,
+-                                                   saEndY - bar+1,
+-                                                   GLCD::clrWhite, true);
+-                         }
+-                     }
+-                }
+-            }
+-
+-            delete [] barHeights;
+-            delete [] barHeightsLeftChannel;
+-            delete [] barHeightsRightChannel;
+-            delete [] barPeaksBothChannels;
+-            delete [] barPeaksLeftChannel;
+-            delete [] barPeaksRightChannel;
+-        }
++      }
+     }
++  }
+ }
+diff -Nru graphlcd-0.1.9/display.h graphlcd-0.1.9-span/display.h
+--- graphlcd-0.1.9/display.h	2011-02-13 14:54:28.000000000 +0100
++++ graphlcd-0.1.9-span/display.h	2011-02-24 21:48:55.551385241 +0100
+@@ -78,7 +78,7 @@
+     cGraphLCDDisplay(void);
+     ~cGraphLCDDisplay(void);
+ 
+-    int Init(GLCD::cDriver * Lcd, const char * CfgDir);
++    int Init(GLCD::cDriver * Lcd);
+     void Tick(void);
+ 
+     void SetChannel(int ChannelNumber);
+@@ -110,7 +110,6 @@
+     const GLCD::cFont * normalFont;
+     const GLCD::cFont * smallFont;
+     const GLCD::cFont * symbols;
+-    std::string cfgDir;
+     std::string fontDir;
+     std::string logoDir;
+ 
+@@ -132,6 +131,9 @@
+ 
+     bool showVolume;
+ 
++    GLCD::eColor bgcolor;
++    GLCD::eColor fgcolor;
++
+     time_t CurrTime;
+     time_t LastTime;
+     time_t LastTimeCheckSym;
+@@ -160,6 +162,8 @@
+     void DisplayVolume();
+     void DisplaySA(); //span
+ 
++    int showSA;
++
+     void UpdateIn(long usec);
+     bool CheckAndUpdateSymbols();
+ 
+diff -Nru graphlcd-0.1.9/global.c graphlcd-0.1.9-span/global.c
+--- graphlcd-0.1.9/global.c	1970-01-01 01:00:00.000000000 +0100
++++ graphlcd-0.1.9-span/global.c	2011-02-23 01:47:38.000000000 +0100
+@@ -0,0 +1,4 @@
++#include <vdr/plugin.h>
++#include "global.h"
++
++const char *cfgDir = NULL;
+diff -Nru graphlcd-0.1.9/global.h graphlcd-0.1.9-span/global.h
+--- graphlcd-0.1.9/global.h	2011-02-13 14:54:28.000000000 +0100
++++ graphlcd-0.1.9-span/global.h	2011-02-23 01:46:10.000000000 +0100
+@@ -30,4 +30,6 @@
+     if (value > max) value = max;
+ }
+ 
++extern const char *cfgDir;
++
+ #endif
+diff -Nru graphlcd-0.1.9/graphlcd/visual/themes/2-Band-stereo-inv.visual graphlcd-0.1.9-span/graphlcd/visual/themes/2-Band-stereo-inv.visual
+--- graphlcd-0.1.9/graphlcd/visual/themes/2-Band-stereo-inv.visual	1970-01-01 01:00:00.000000000 +0100
++++ graphlcd-0.1.9-span/graphlcd/visual/themes/2-Band-stereo-inv.visual	2011-02-24 21:46:10.260509040 +0100
+@@ -0,0 +1,21 @@
++Description: 2-Band-stereo horizontal
++#
++<value> .ID.              =2
++<value> .CHANNEL.         =2
++<value> .BARS.            =2
++<value> .CHANNEL1LEFT.    =0
++<value> .CHANNEL2LEFT.    =3
++<value> .BARWIDTH.        =1
++<value> .DISPLAYWIDTH.    =144
++<value> .DISPLAYHEIGHT.   =5
++<value> .BGCOLORISBLACK.  =0
++<value> .OFFSETX1.        =1
++<value> .OFFSETY1.        =0
++<value> .OFFSETX2.        =0
++<value> .OFFSETY2.        =0
++<value> .FALLOFF.         =19
++<value> .PEAKHEIGHT.      =2
++<value> .UPDATESA.        =50
++<value> .DISPLAYX.        =0
++<value> .DISPLAYY.        =0
++<value> .MIXED.           =1
+diff -Nru graphlcd-0.1.9/graphlcd/visual/themes/4-Band-stereo-inv.visual graphlcd-0.1.9-span/graphlcd/visual/themes/4-Band-stereo-inv.visual
+--- graphlcd-0.1.9/graphlcd/visual/themes/4-Band-stereo-inv.visual	1970-01-01 01:00:00.000000000 +0100
++++ graphlcd-0.1.9-span/graphlcd/visual/themes/4-Band-stereo-inv.visual	2011-02-24 21:46:38.675384904 +0100
+@@ -0,0 +1,20 @@
++Description: 20-Band-mono
++#
++<value> .ID.              =3
++<value> .CHANNEL.         =2
++<value> .BARS.            =4
++<value> .CHANNEL2LEFT.    =74
++<value> .BARWIDTH.        =12
++<value> .DISPLAYWIDTH.    =146
++<value> .DISPLAYHEIGHT.   =30
++<value> .BGCOLORISBLACK.  =0
++<value> .OFFSETX1.        =4
++<value> .OFFSETY1.        =1
++<value> .OFFSETX2.        =0
++<value> .OFFSETY2.        =0
++<value> .FALLOFF.         =20
++<value> .PEAKHEIGHT.      =1
++<value> .UPDATESA.        =1
++<value> .DISPLAYX.        =0
++<value> .DISPLAYY.        =0
++<value> .MIXED.           =0
+diff -Nru graphlcd-0.1.9/graphlcd/visual/themes/4-Band-stereo.visual graphlcd-0.1.9-span/graphlcd/visual/themes/4-Band-stereo.visual
+--- graphlcd-0.1.9/graphlcd/visual/themes/4-Band-stereo.visual	1970-01-01 01:00:00.000000000 +0100
++++ graphlcd-0.1.9-span/graphlcd/visual/themes/4-Band-stereo.visual	2011-02-24 21:47:04.919385613 +0100
+@@ -0,0 +1,20 @@
++Description: 20-Band-mono
++#
++<value> .ID.              =3
++<value> .CHANNEL.         =2
++<value> .BARS.            =4
++<value> .CHANNEL2LEFT.    =74
++<value> .BARWIDTH.        =12
++<value> .DISPLAYWIDTH.    =146
++<value> .DISPLAYHEIGHT.   =30
++<value> .BGCOLORISBLACK.  =1
++<value> .OFFSETX1.        =4
++<value> .OFFSETY1.        =1
++<value> .OFFSETX2.        =0
++<value> .OFFSETY2.        =0
++<value> .FALLOFF.         =20
++<value> .PEAKHEIGHT.      =1
++<value> .UPDATESA.        =1
++<value> .DISPLAYX.        =0
++<value> .DISPLAYY.        =0
++<value> .MIXED.           =0
+diff -Nru graphlcd-0.1.9/graphlcd/visual/themes/9-Band-mono-inv.visual graphlcd-0.1.9-span/graphlcd/visual/themes/9-Band-mono-inv.visual
+--- graphlcd-0.1.9/graphlcd/visual/themes/9-Band-mono-inv.visual	1970-01-01 01:00:00.000000000 +0100
++++ graphlcd-0.1.9-span/graphlcd/visual/themes/9-Band-mono-inv.visual	2011-02-24 21:47:34.991385026 +0100
+@@ -0,0 +1,21 @@
++Description: 20-Band-mono
++#
++<value> .ID.              =1
++<value> .CHANNEL.         =1
++<value> .BARS.            =9
++<value> .CHANNEL1LEFT.    =0
++<value> .CHANNEL2LEFT.    =0
++<value> .BARWIDTH.        =12
++<value> .DISPLAYWIDTH.    =146
++<value> .DISPLAYHEIGHT.   =30
++<value> .BGCOLORISBLACK.  =0
++<value> .OFFSETX1.        =4
++<value> .OFFSETY1.        =1
++<value> .OFFSETX2.        =0
++<value> .OFFSETY2.        =0
++<value> .FALLOFF.         =20
++<value> .PEAKHEIGHT.      =1
++<value> .UPDATESA.        =1
++<value> .DISPLAYX.        =0
++<value> .DISPLAYY.        =0
++<value> .MIXED.           =0
+diff -Nru graphlcd-0.1.9/graphlcd/visual/themes/9-Band-mono.visual graphlcd-0.1.9-span/graphlcd/visual/themes/9-Band-mono.visual
+--- graphlcd-0.1.9/graphlcd/visual/themes/9-Band-mono.visual	1970-01-01 01:00:00.000000000 +0100
++++ graphlcd-0.1.9-span/graphlcd/visual/themes/9-Band-mono.visual	2011-02-24 21:39:48.000000000 +0100
+@@ -0,0 +1,43 @@
++Description: 9-Band-mono
++#
++#
++# ID               : 1=Mono | 2=Stereo horizontal | 3=Stereo vertikal
++# CHANNEL          : Anzahl von Kanaelen (1= mono , 2=stereo)
++# BARS             : Anzahl der Balken
++# CHANNEL1LEFT     : X-Koordinate von ersten Balken ( bei horizontaler Anzeige Y-Koordinate)
++# CHANNEL2LEFT     : s.o nur 2. Balken
++# BARWIDTH.        : Breite von Balken in Pixeln
++# DISPLAYWIDTH.    : Breite von Display oder Zeichenflaeche
++# DISPLAYHEIGHT.   : s.o nur Hoehe
++# BGCOLORISBLACK.  : invertieren 1=Ja 0=Nein
++# OFFSETX1.        : Offset von Balken
++# OFFSETY1.        : s.o
++# OFFSETX2.        : s.o
++# OFFSETY2.        : s.o
++# FALLOFF.         : Falloff von Peakanzeige
++# PEAKHEIGHT.      : Hoehe von Peak
++# UPDATESA.        : Aktualisierungsrate in (ms)
++# DISPLAYX.        : X-Koordinaten von Display bzw. Zeichenflaeche
++# DISPLAYY.        : s.o nur Y-Koordinate
++#
++#
++#
++<value> .ID.              =1
++<value> .CHANNEL.         =1
++<value> .BARS.            =9
++<value>	.CHANNEL1LEFT.    =0
++<value>	.CHANNEL2LEFT.    =0
++<value> .BARWIDTH         =12
++<value> .DISPLAYWIDTH.    =146
++<value> .DISPLAYHEIGHT.   =30
++<value> .BGCOLORISBLACK.  =1
++<value> .OFFSETX1.        =4
++<value> .OFFSETY1.        =1
++<value> .OFFSETX2.        =0
++<value> .OFFSETY2.        =0
++<value> .FALLOFF.         =20
++<value> .PEAKHEIGHT.      =1
++<value> .UPDATESA.        =1
++<value> .DISPLAYX.        =0
++<value> .DISPLAYY.        =0
++<value> .MIXED.           =0
+diff -Nru graphlcd-0.1.9/graphlcd/visual/themes/9-Band-stereo-inv.visual graphlcd-0.1.9-span/graphlcd/visual/themes/9-Band-stereo-inv.visual
+--- graphlcd-0.1.9/graphlcd/visual/themes/9-Band-stereo-inv.visual	1970-01-01 01:00:00.000000000 +0100
++++ graphlcd-0.1.9-span/graphlcd/visual/themes/9-Band-stereo-inv.visual	2011-02-24 21:39:55.000000000 +0100
+@@ -0,0 +1,20 @@
++Description: 20-Band-mono
++#
++<value> .ID.              =3
++<value> .CHANNEL.         =2
++<value> .BARS.            =9
++<value> .CHANNEL2LEFT.    =70
++<value> .BARWIDTH.        =4
++<value> .DISPLAYWIDTH.    =146
++<value> .DISPLAYHEIGHT.   =30
++<value> .BGCOLORISBLACK.  =0
++<value> .OFFSETX1.        =4
++<value> .OFFSETY1.        =1
++<value> .OFFSETX2.        =0
++<value> .OFFSETY2.        =0
++<value> .FALLOFF.         =20
++<value> .PEAKHEIGHT.      =1
++<value> .UPDATESA.        =1
++<value> .DISPLAYX.        =0
++<value> .DISPLAYY.        =0
++<value> .MIXED.           =0
+diff -Nru graphlcd-0.1.9/graphlcd/visual/themes/9-Band-stereo.visual graphlcd-0.1.9-span/graphlcd/visual/themes/9-Band-stereo.visual
+--- graphlcd-0.1.9/graphlcd/visual/themes/9-Band-stereo.visual	1970-01-01 01:00:00.000000000 +0100
++++ graphlcd-0.1.9-span/graphlcd/visual/themes/9-Band-stereo.visual	2011-02-24 21:48:08.512381254 +0100
+@@ -0,0 +1,20 @@
++Description: 20-Band-mono
++#
++<value> .ID.              =3
++<value> .CHANNEL.         =2
++<value> .BARS.            =9
++<value> .CHANNEL2LEFT.    =70
++<value> .BARWIDTH.        =4
++<value> .DISPLAYWIDTH.    =146
++<value> .DISPLAYHEIGHT.   =30
++<value> .BGCOLORISBLACK.  =1
++<value> .OFFSETX1.        =4
++<value> .OFFSETY1.        =1
++<value> .OFFSETX2.        =0
++<value> .OFFSETY2.        =0
++<value> .FALLOFF.         =20
++<value> .PEAKHEIGHT.      =1
++<value> .UPDATESA.        =1
++<value> .DISPLAYX.        =0
++<value> .DISPLAYY.        =0
++<value> .MIXED.           =0
+diff -Nru graphlcd-0.1.9/graphlcd/visual/themes/current.vis graphlcd-0.1.9-span/graphlcd/visual/themes/current.vis
+--- graphlcd-0.1.9/graphlcd/visual/themes/current.vis	1970-01-01 01:00:00.000000000 +0100
++++ graphlcd-0.1.9-span/graphlcd/visual/themes/current.vis	2011-02-24 21:39:06.000000000 +0100
+@@ -0,0 +1,20 @@
++Description: 20-Band-mono
++#
++<value> .ID.              =3
++<value> .CHANNEL. 	  =2
++<value>	.BARS.		  =4
++<value>	.CHANNEL2LEFT.	  =74
++<value>	.BARWIDTH.	  =12
++<value> .DISPLAYWIDTH.    =146
++<value> .DISPLAYHEIGHT.   =30
++<value> .BGCOLORISBLACK.  =0
++<value> .OFFSETX1.        =4
++<value> .OFFSETY1.        =1
++<value> .OFFSETX2.        =0
++<value> .OFFSETY2.        =0
++<value> .FALLOFF.         =20
++<value> .PEAKHEIGHT.      =1
++<value> .UPDATESA.        =1
++<value> .DISPLAYX.        =0
++<value> .DISPLAYY.        =0
++<value> .MIXED.           =0
+diff -Nru graphlcd-0.1.9/i18n.c graphlcd-0.1.9-span/i18n.c
+--- graphlcd-0.1.9/i18n.c	2011-02-13 14:54:27.000000000 +0100
++++ graphlcd-0.1.9-span/i18n.c	2011-02-24 20:57:32.000000000 +0100
+@@ -990,29 +990,5 @@
+ # endif
+ #endif
+     },
+-    {
+-        "Show analyzer volume",
+-        "Zeige Analyzer Lautstärke",
+-        "",// TODO Slovenski
+-        "",// TODO Italiano
+-        "",// TODO Nederlands
+-        "",// TODO Português
+-        "",// TODO Francais
+-        "",// TODO Norsk
+-        "",// TODO Suomi
+-        "",// TODO Polski
+-        "",// TODO Español
+-        "",// TODO Ellinika
+-        "",// TODO Svenska
+-        "",// TODO Românã
+-        "",// TODO Magyar
+-        "",// TODO Català
+-#if VDRVERSNUM > 10302
+-        "",// TODO Russian
+-# if VDRVERSNUM > 10307
+-        "",// TODO Croatian
+-# endif
+-#endif
+-    },
+     { NULL }
+ };
+diff -Nru graphlcd-0.1.9/layout.c graphlcd-0.1.9-span/layout.c
+--- graphlcd-0.1.9/layout.c	2011-02-13 14:54:28.000000000 +0100
++++ graphlcd-0.1.9-span/layout.c	2011-02-23 04:40:54.000000000 +0100
+@@ -39,7 +39,7 @@
+             file = url.substr(4);
+         else
+         {
+-            file = cPlugin::ConfigDirectory(PLUGIN_NAME);
++            file = cfgDir;
+             file += "/fonts/";
+             file += url.substr(4);
+         }
+@@ -61,7 +61,7 @@
+             file = url.substr(4, pos - 4);
+         else
+         {
+-            file = cPlugin::ConfigDirectory(PLUGIN_NAME);
++            file = cfgDir;
+             file += "/fonts/";
+             file += url.substr(4, pos - 4);
+         }
+diff -Nru graphlcd-0.1.9/Makefile graphlcd-0.1.9-span/Makefile
+--- graphlcd-0.1.9/Makefile	2011-02-13 14:54:35.000000000 +0100
++++ graphlcd-0.1.9-span/Makefile	2011-02-23 01:48:49.000000000 +0100
+@@ -66,7 +66,7 @@
+ 
+ ### The object files (add further files here):
+ 
+-OBJS = display.o layout.o logo.o logolist.o menu.o plugin.o setup.o state.o strfct.o widgets.o
++OBJS = display.o global.o layout.o logo.o logolist.o menu.o plugin.o setup.o state.o strfct.o widgets.o visual.o
+ 
+ ### The main target:
+ TARGETS = libvdr-$(PLUGIN).so
+diff -Nru graphlcd-0.1.9/menu.c graphlcd-0.1.9-span/menu.c
+--- graphlcd-0.1.9/menu.c	2011-02-13 14:54:35.000000000 +0100
++++ graphlcd-0.1.9-span/menu.c	2011-02-24 20:56:33.000000000 +0100
+@@ -70,15 +70,14 @@
+         Add(new cMenuEditStraItem(tr("Show Logo on Replay"), &newGraphLCDSetup.ReplayLogo, 4, showLogoValues));
+     }
+     Add(new cMenuEditStraItem(tr("Scroll text lines"), &newGraphLCDSetup.ScrollMode, 3, scrollModeValues));
+-    Add(new cMenuEditIntItem(tr("Scroll speed"), &newGraphLCDSetup.ScrollSpeed, 1, 10));
+-    Add(new cMenuEditIntItem(tr("Scroll time interval"), &newGraphLCDSetup.ScrollTime, 100, 2000));
++    Add(new cMenuEditIntItem(tr("Scroll speed"), &newGraphLCDSetup.ScrollSpeed, 1, 20));
++    Add(new cMenuEditIntItem(tr("Scroll time interval"), &newGraphLCDSetup.ScrollTime, 1, 2000));
+     Add(new cMenuEditIntItem(tr("Brightness on user activity"), &newGraphLCDSetup.BrightnessActive, 0, 100));
+     Add(new cMenuEditIntItem(tr("Brightness on user inactivity"), &newGraphLCDSetup.BrightnessIdle, 0, 100));
+     Add(new cMenuEditIntItem(tr("Brightness delay [s]"), &newGraphLCDSetup.BrightnessDelay, 0, 600));
+     if (newGraphLCDSetup.pluginSpectrumAnalyzer)
+     {
+       Add(new cMenuEditBoolItem(tr("Show spectrum analyzer"), &newGraphLCDSetup.enableSpectrumAnalyzer));
+-      Add(new cMenuEditBoolItem(tr("Show analyzer volume"), &newGraphLCDSetup.SAShowVolume));
+     }
+ }
+ 
+@@ -107,5 +106,4 @@
+     SetupStore("BrightnessIdle", GraphLCDSetup.BrightnessIdle = newGraphLCDSetup.BrightnessIdle);
+     SetupStore("BrightnessDelay", GraphLCDSetup.BrightnessDelay = newGraphLCDSetup.BrightnessDelay);
+     SetupStore("enableSpectrumAnalyzer", GraphLCDSetup.enableSpectrumAnalyzer = newGraphLCDSetup.enableSpectrumAnalyzer); //span
+-    SetupStore("SAShowVolume", GraphLCDSetup.SAShowVolume = newGraphLCDSetup.SAShowVolume);
+ }
+diff -Nru graphlcd-0.1.9/plugin.c graphlcd-0.1.9-span/plugin.c
+--- graphlcd-0.1.9/plugin.c	2011-02-13 14:55:13.000000000 +0100
++++ graphlcd-0.1.9-span/plugin.c	2011-02-24 21:04:21.000000000 +0100
+@@ -16,6 +16,7 @@
+ #include <glcddrivers/drivers.h>
+ 
+ #include "display.h"
++#include "visual.h"
+ #include "global.h"
+ #include "menu.h"
+ 
+@@ -75,7 +76,8 @@
+ 
+ const char * cPluginGraphLCD::CommandLineHelp()
+ {
+-    return "  -c CFG,   --config=CFG   use CFG as driver config file\n"
++    return "  -C DIR,   --cfgDir=DIR   search files for plugin in DIR\n"
++           "  -c CFG,   --config=CFG   use CFG as driver config file\n"
+            "  -d DISP,  --display=DISP use display DISP for output\n";
+ }
+ 
+@@ -83,6 +85,7 @@
+ {
+     static struct option long_options[] =
+     {
++        {"cfgDir",  required_argument, NULL, 'C'},
+         {"config",  required_argument, NULL, 'c'},
+         {"display", required_argument, NULL, 'd'},
+         {NULL}
+@@ -90,10 +93,14 @@
+ 
+     int c;
+     int option_index = 0;
+-    while ((c = getopt_long(argc, argv, "c:d:", long_options, &option_index)) != -1)
++    while ((c = getopt_long(argc, argv, "C:c:d:", long_options, &option_index)) != -1)
+     {
+         switch (c)
+         {
++            case 'C':
++                cfgDir = optarg;
++                break;
++
+             case 'c':
+                 mConfigName = optarg;
+                 break;
+@@ -113,7 +120,13 @@
+ bool cPluginGraphLCD::Initialize()
+ {
+     unsigned int displayNumber = 0;
+-    const char * cfgDir;
++
++    if(cfgDir == NULL) {
++      cfgDir = strdup(ConfigDirectory(PLUGIN_NAME));
++      isyslog("graphlcd plugin: --config not set, use default path '%s'", cfgDir);
++      }
++    else
++      isyslog("graphlcd plugin: --config set: '%s'", cfgDir);
+ 
+     if (mConfigName.length() == 0)
+     {
+@@ -160,14 +173,10 @@
+         return false;
+     }
+ 
+-    cfgDir = ConfigDirectory(PLUGIN_NAME);
+-    if (!cfgDir)
+-        return false;
+-
+     mDisplay = new cGraphLCDDisplay();
+     if (!mDisplay)
+         return false;
+-    if (mDisplay->Init(mLcd, cfgDir) != 0)
++    if (mDisplay->Init(mLcd) != 0)
+         return false;
+ 
+     return true;
+@@ -188,7 +197,15 @@
+         break;
+       }
+     }
+-                                                              
++    
++    if(GLCDVisLoader.LoadVis("current.vis")) {
++      GLCDVisLoader.SetVis();
++      isyslog("graphlcd plugin: loaded visualization data");
++      }
++    else {
++      GraphLCDSetup.enableSpectrumAnalyzer = 0;
++      esyslog("graphlcd plugin: problems while loading data for visualization! -disabled-");
++    }  
+ 
+     dsyslog("graphlcd plugin: waiting for display thread to get ready");
+     for (count = 0; count < 1200; count++)
+@@ -253,7 +270,6 @@
+     else if (!strcasecmp(Name, "BrightnessIdle")) GraphLCDSetup.BrightnessIdle = atoi(Value);
+     else if (!strcasecmp(Name, "BrightnessDelay")) GraphLCDSetup.BrightnessDelay = atoi(Value);
+     else if (!strcasecmp(Name, "enableSpectrumAnalyzer")) GraphLCDSetup.enableSpectrumAnalyzer = atoi(Value);
+-    else if (!strcasecmp(Name, "SAShowVolume")) GraphLCDSetup.SAShowVolume = atoi(Value);
+     else return false;
+     return true;
+ }
+@@ -269,6 +285,8 @@
+         "     Switch Plugin off.",
+         "ON \n"
+         "     Switch Plugin on.",
++        "VIS \n"
++        "     Switch Visualization.",
+         NULL
+     };
+     return HelpPages;
+@@ -301,6 +319,23 @@
+         GraphLCDSetup.PluginActive = 1;
+         return "GraphLCD Plugin switched on.";
+     }
++
++    if (strcasecmp(Command, "VIS") == 0) {
++      if(*Option) {
++        if(GLCDVisLoader.LoadVis(Option)) {
++          GLCDVisLoader.SetVis();
++          isyslog("graphlcd plugin: loaded visualization data");
++          return "GraphLCD Visualization reloaded.";
++          }
++        } 
++      else {
++        GraphLCDSetup.enableSpectrumAnalyzer = 0;
++        esyslog("graphlcd plugin: problems while loading data for visualization! -disabled-");
++        ReplyCode=501;
++        return "Missing filename";
++      }
++    }
++
+     return NULL;
+ }
+ 
+diff -Nru graphlcd-0.1.9/po/de_DE.po graphlcd-0.1.9-span/po/de_DE.po
+--- graphlcd-0.1.9/po/de_DE.po	2011-02-13 14:54:27.000000000 +0100
++++ graphlcd-0.1.9-span/po/de_DE.po	2011-02-24 21:05:31.000000000 +0100
+@@ -7,7 +7,7 @@
+ msgstr ""
+ "Project-Id-Version: VDR 1.5.7\n"
+ "Report-Msgid-Bugs-To: <nobody@domain.com>\n"
+-"POT-Creation-Date: 2011-01-23 21:12+0100\n"
++"POT-Creation-Date: 2011-02-24 21:05+0100\n"
+ "PO-Revision-Date: 2008-07-09 13:14+0200\n"
+ "Last-Translator: Klaus Schmidinger <kls@cadsoft.de>\n"
+ "Language-Team: <vdr@linuxtv.org>\n"
+@@ -129,8 +129,8 @@
+ msgid "Show spectrum analyzer"
+ msgstr "Zeige Spektrumanalyzer"
+ 
+-msgid "Show analyzer volume"
+-msgstr "Zeige Lautstärke im Analyzer"
+-
+ msgid "Unknown title"
+ msgstr "Unbekannter Titel"
++
++#~ msgid "Show analyzer volume"
++#~ msgstr "Zeige Lautstärke im Analyzer"
+diff -Nru graphlcd-0.1.9/po/fi_FI.po graphlcd-0.1.9-span/po/fi_FI.po
+--- graphlcd-0.1.9/po/fi_FI.po	2011-02-13 14:54:27.000000000 +0100
++++ graphlcd-0.1.9-span/po/fi_FI.po	2011-02-24 21:05:31.000000000 +0100
+@@ -10,7 +10,7 @@
+ msgstr ""
+ "Project-Id-Version: VDR 1.5.7\n"
+ "Report-Msgid-Bugs-To: <nobody@domain.com>\n"
+-"POT-Creation-Date: 2011-01-24 21:00+0100\n"
++"POT-Creation-Date: 2011-02-24 21:05+0100\n"
+ "PO-Revision-Date: 2008-07-09 13:14+0200\n"
+ "Last-Translator: Rolf Ahrenberg <rahrenbe@cc.hut.fi>\n"
+ "Language-Team: <vdr@linuxtv.org>\n"
+@@ -132,8 +132,5 @@
+ msgid "Show spectrum analyzer"
+ msgstr ""
+ 
+-msgid "Show analyzer volume"
+-msgstr ""
+-
+ msgid "Unknown title"
+ msgstr "Tuntematon nimi"
+diff -Nru graphlcd-0.1.9/po/fr_FR.po graphlcd-0.1.9-span/po/fr_FR.po
+--- graphlcd-0.1.9/po/fr_FR.po	2011-02-13 14:54:27.000000000 +0100
++++ graphlcd-0.1.9-span/po/fr_FR.po	2011-02-24 21:05:31.000000000 +0100
+@@ -10,7 +10,7 @@
+ msgstr ""
+ "Project-Id-Version: VDR 1.5.7\n"
+ "Report-Msgid-Bugs-To: <nobody@domain.com>\n"
+-"POT-Creation-Date: 2011-01-24 21:00+0100\n"
++"POT-Creation-Date: 2011-02-24 21:05+0100\n"
+ "PO-Revision-Date: 2008-07-09 13:14+0200\n"
+ "Last-Translator: Nicolas Huillard <nhuillard@e-dition.fr>\n"
+ "Language-Team: <vdr@linuxtv.org>\n"
+@@ -132,8 +132,5 @@
+ msgid "Show spectrum analyzer"
+ msgstr ""
+ 
+-msgid "Show analyzer volume"
+-msgstr ""
+-
+ msgid "Unknown title"
+ msgstr "Titre inconnu"
+diff -Nru graphlcd-0.1.9/po/it_IT.po graphlcd-0.1.9-span/po/it_IT.po
+--- graphlcd-0.1.9/po/it_IT.po	2011-02-13 14:54:27.000000000 +0100
++++ graphlcd-0.1.9-span/po/it_IT.po	2011-02-24 21:05:31.000000000 +0100
+@@ -9,7 +9,7 @@
+ msgstr ""
+ "Project-Id-Version: VDR 1.5.7\n"
+ "Report-Msgid-Bugs-To: <nobody@domain.com>\n"
+-"POT-Creation-Date: 2011-01-24 21:00+0100\n"
++"POT-Creation-Date: 2011-02-24 21:05+0100\n"
+ "PO-Revision-Date: 2010-11-06 20:12+0100\n"
+ "Last-Translator: Diego Pierotto <vdr-italian@tiscali.it>\n"
+ "Language-Team:  <vdr@linuxtv.org>\n"
+@@ -134,8 +134,5 @@
+ msgid "Show spectrum analyzer"
+ msgstr ""
+ 
+-msgid "Show analyzer volume"
+-msgstr ""
+-
+ msgid "Unknown title"
+ msgstr "Titolo sconosciuto"
+diff -Nru graphlcd-0.1.9/po/ro_RO.po graphlcd-0.1.9-span/po/ro_RO.po
+--- graphlcd-0.1.9/po/ro_RO.po	2011-02-13 14:54:27.000000000 +0100
++++ graphlcd-0.1.9-span/po/ro_RO.po	2011-02-24 21:05:31.000000000 +0100
+@@ -8,7 +8,7 @@
+ msgstr ""
+ "Project-Id-Version: VDR 1.5.7\n"
+ "Report-Msgid-Bugs-To: <nobody@domain.com>\n"
+-"POT-Creation-Date: 2011-01-24 21:00+0100\n"
++"POT-Creation-Date: 2011-02-24 21:05+0100\n"
+ "PO-Revision-Date: 2008-07-09 13:14+0200\n"
+ "Last-Translator: Lucian Muresan <lucianm@users.sourceforge.net>\n"
+ "Language-Team: <vdr@linuxtv.org>\n"
+@@ -130,8 +130,5 @@
+ msgid "Show spectrum analyzer"
+ msgstr ""
+ 
+-msgid "Show analyzer volume"
+-msgstr ""
+-
+ msgid "Unknown title"
+ msgstr "Titlu necunoscut"
+diff -Nru graphlcd-0.1.9/setup.c graphlcd-0.1.9-span/setup.c
+--- graphlcd-0.1.9/setup.c	2011-02-13 14:54:35.000000000 +0100
++++ graphlcd-0.1.9-span/setup.c	2011-02-24 20:55:46.000000000 +0100
+@@ -30,7 +30,8 @@
+ cGraphLCDSetup GraphLCDSetup;
+ 
+ cGraphLCDSetup::cGraphLCDSetup(void)
+-:   PluginActive(1),
++:
++    PluginActive(1),
+     ShowDateTime(1),
+     ShowChannel(1),
+     ShowLogo(1),
+@@ -54,7 +55,26 @@
+     BrightnessDelay(30),
+     pluginSpectrumAnalyzer(0), // SPAN loaded?
+     enableSpectrumAnalyzer(1),
+-    SAShowVolume(1)
++    // Visual
++    Visualization(4),
++    Channel1Left(0),
++    Channel2Left(0),
++    BarWidth(2),
++    ChannelsSA(2),
++    BandsSA(30),
++    DisplayWidth(64),
++    DisplayHeight(16),
++    BGColorIsBlack(1),
++    OffsetX1(0),
++    OffsetY1(0),
++    OffsetX2(0),
++    OffsetY2(0),
++    FallOff(19),
++    PeakHeight(2),
++    UpdateSA(100),
++    DisplayX(0),
++    DisplayY(0),
++    Mixed(0)
+ {
+ }
+ 
+@@ -94,5 +114,4 @@
+     BrightnessDelay = source->BrightnessDelay;
+     pluginSpectrumAnalyzer = source->pluginSpectrumAnalyzer;
+     enableSpectrumAnalyzer = source->enableSpectrumAnalyzer;
+-    SAShowVolume = source->SAShowVolume;
+ }
+diff -Nru graphlcd-0.1.9/setup.h graphlcd-0.1.9-span/setup.h
+--- graphlcd-0.1.9/setup.h	2011-02-13 14:54:28.000000000 +0100
++++ graphlcd-0.1.9-span/setup.h	2011-02-24 20:55:02.000000000 +0100
+@@ -28,6 +28,7 @@
+ #ifndef _GRAPHLCD_SETUP_H_
+ #define _GRAPHLCD_SETUP_H_
+ 
++#include <string>
+ 
+ class cGraphLCDSetup
+ {
+@@ -56,7 +57,27 @@
+     int BrightnessDelay;
+     int pluginSpectrumAnalyzer;
+     int enableSpectrumAnalyzer;
+-    int SAShowVolume;
++
++    // Visual
++    int Visualization;
++    int Channel1Left;
++    int Channel2Left;
++    int BarWidth;
++    int ChannelsSA;
++    int BandsSA;
++    int DisplayWidth;
++    int DisplayHeight;
++    int BGColorIsBlack;
++    int OffsetX1;
++    int OffsetY1;
++    int OffsetX2;
++    int OffsetY2;
++    int FallOff;
++    int PeakHeight;
++    int UpdateSA;
++    int DisplayX;
++    int DisplayY;
++    int Mixed;
+ 
+ public:
+     cGraphLCDSetup(void);
+diff -Nru graphlcd-0.1.9/state.c graphlcd-0.1.9-span/state.c
+--- graphlcd-0.1.9/state.c	2011-02-13 14:54:28.000000000 +0100
++++ graphlcd-0.1.9-span/state.c	2011-02-24 09:32:31.000000000 +0100
+@@ -130,7 +130,7 @@
+ void cGraphLCDState::Replaying(const cControl * Control, const char * Name, const char *FileName, bool On)
+ #endif
+ {
+-    //printf("graphlcd plugin: cGraphLCDState::Replaying %s\n", Name);
++//    printf("graphlcd plugin: cGraphLCDState::Replaying %s\n", Name);
+     if (GraphLCDSetup.PluginActive)
+     {
+ #if VDRVERSNUM < 10338
+diff -Nru graphlcd-0.1.9/visual.c graphlcd-0.1.9-span/visual.c
+--- graphlcd-0.1.9/visual.c	1970-01-01 01:00:00.000000000 +0100
++++ graphlcd-0.1.9-span/visual.c	2011-02-24 20:54:22.000000000 +0100
+@@ -0,0 +1,302 @@
++/*
++ *GraphTFT-Plugin to VDR (C++)
++ *
++ * (C) 2006 Morone
++ *
++ * This code is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License
++ * as published by the Free Software Foundation; either version 2
++ * of the License, or (at your option) any later version.
++ *
++ * This code is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
++ * Or, point your browser to http://www.gnu.org/copyleft/gpl.html
++ */
++
++#include <string.h>
++#include <stdlib.h>
++#include <fstream>
++#include <vdr/plugin.h>
++#include "visual.h"
++#include "setup.h"
++#include "global.h"
++
++cGLCDVisLoader GLCDVisLoader;
++
++// --- cGLCDVisLoader ---------------------------------------------------------------
++
++cGLCDVisLoader::cGLCDVisLoader(void)
++{
++
++  Visualization = "4";
++  ChannelsSA = "1";
++  BandsSA = "10";
++  DisplayWidth ="64";
++  DisplayHeight = "16";
++  BGColorIsBlack = "1";
++  OffsetX1 = "0";
++  OffsetY1 = "0";
++  OffsetX2 = "0";
++  OffsetY2 = "0";
++  FallOff = "8";
++  PeakHeight = "1";
++  UpdateSA = "100";
++  DisplayX = "0";
++  DisplayY = "0";
++  Mixed ="0";
++};
++
++
++cGLCDVisLoader::~cGLCDVisLoader()
++{
++}
++
++int cGLCDVisLoader::LoadVis(const char *VisName)
++{
++  using namespace std;
++  ifstream filestr;
++  std::string line;
++  std::string Value;
++  std::string datei;
++  std::string visname;
++
++  bool result=false;
++  visname = VisName;
++
++  datei = cfgDir;
++  datei = datei + "/visual/themes/";
++  datei = datei + visname;
++
++  filestr.open (datei.c_str());
++  if(filestr) {
++    dsyslog("graphlcd plugin: Load visfile '%s'\n", datei.c_str());
++    while (getline(filestr, line, '\n')) {
++      int len = line.length();
++      string::size_type pos = line.find ("<value>",0);
++
++      if(pos != string::npos) {
++        if (strstr(line.c_str(),".ID.")) {
++          Value   = line.substr(len -1, len);
++          Visualization  = Value;
++          }
++        else if (strstr(line.c_str(),".CHANNEL.")) {
++          Value   = line.substr(len -1, len);
++          ChannelsSA  = Value;
++	  }
++        else if (strstr(line.c_str(),".BARS.")) {
++          pos = line.rfind ("=",len);
++          if(pos != string::npos) {
++	    Value   = line.substr(pos +1,len);
++	    BandsSA = Value;
++	    }     
++          }    
++        else if (strstr(line.c_str(),".CHANNEL1LEFT.")) {
++          pos = line.rfind ("=",len);
++          if(pos != string::npos) {
++	    Value   = line.substr(pos +1,len);
++	    Channel1Left = Value;
++	    }     
++          }    
++        else if (strstr(line.c_str(),".CHANNEL2LEFT.")) {
++          pos = line.rfind ("=",len);
++          if(pos != string::npos) {
++            Value   = line.substr(pos +1,len);
++            Channel2Left = Value;
++	    }     
++          }    
++        else if (strstr(line.c_str(),".BARWIDTH.")) {
++          pos = line.rfind ("=",len);
++          if(pos != string::npos) {
++	    Value   = line.substr(pos +1,len);
++	    BarWidth = Value;
++	    }     
++          }    
++        else if (strstr(line.c_str(),".DISPLAYWIDTH.")) {
++          pos = line.rfind ("=",len);
++          if(pos != string::npos) {
++	    Value   = line.substr(pos +1,len);
++	    DisplayWidth = Value;
++	    }     
++          }    
++        else if (strstr(line.c_str(),".DISPLAYHEIGHT.")) {
++          pos = line.rfind ("=",len);
++          if(pos != string::npos) {
++	    Value   = line.substr(pos +1,len);
++	    DisplayHeight = Value;
++	  } 
++        }
++        else if (strstr(line.c_str(),".BGCOLORISBLACK.")) {
++          pos = line.rfind ("=",len);
++          if(pos != string::npos) {
++	    Value   = line.substr(pos +1,len);
++	    BGColorIsBlack = Value;
++	    }     
++          }
++        else if (strstr(line.c_str(),".OFFSETX1.")) {
++          pos = line.rfind ("=",len);
++          if(pos != string::npos) {
++	    Value   = line.substr(pos +1,len);
++	    OffsetX1 = Value;
++	  } 
++        }
++        else if (strstr(line.c_str(),".OFFSETY1.")) {
++          pos = line.rfind ("=",len);
++          if(pos != string::npos) {
++	    Value   = line.substr(pos +1,len);
++	    OffsetY1 = Value;
++	  } 
++        }
++        else if (strstr(line.c_str(),".OFFSETX2.")) {
++          pos = line.rfind ("=",len);
++          if(pos != string::npos) {
++	    Value   = line.substr(pos +1,len);
++	    OffsetX2 = Value;
++	  } 
++        }
++        else if (strstr(line.c_str(),".OFFSETY2.")) {
++          pos = line.rfind ("=",len);
++          if(pos != string::npos) {
++	    Value   = line.substr(pos +1,len);
++	    OffsetY2 = Value;
++	  } 
++        }
++        else if (strstr(line.c_str(),".FALLOFF.")) {
++          pos = line.rfind ("=",len);
++          if(pos != string::npos) {
++	    Value   = line.substr(pos +1,len);
++	    FallOff = Value;
++	  } 
++        }
++        else if (strstr(line.c_str(),".PEAKHEIGHT.")) {
++          pos = line.rfind ("=",len);
++          if(pos != string::npos) {
++	    Value   = line.substr(pos +1,len);
++	    PeakHeight = Value;
++	  } 
++        }
++        else if (strstr(line.c_str(),".UPDATESA.")) {
++          pos = line.rfind ("=",len);
++          if(pos != string::npos) {
++	    Value   = line.substr(pos +1,len);
++	    UpdateSA = Value;
++	  } 
++        }
++        else if (strstr(line.c_str(),".DISPLAYX.")) {
++          pos = line.rfind ("=",len);
++          if(pos != string::npos) {
++	    Value   = line.substr(pos +1,len);
++	    DisplayX = Value;
++	  } 
++        }
++        else if (strstr(line.c_str(),".DISPLAYY.")) {
++          pos = line.rfind ("=",len);
++          if(pos != string::npos) {
++	    Value   = line.substr(pos +1,len);
++	    DisplayY = Value;
++	  } 
++        }
++        else if (strstr(line.c_str(),".MIXED.")) {
++          pos = line.rfind ("=",len);
++          if(pos != string::npos) {
++	    Value   = line.substr(pos +1,len);
++	    Mixed    = Value;
++	  }
++        }
++      }
++    }
++    
++    filestr.close();
++    result = true;
++  }
++
++  return result;
++}
++
++void cGLCDVisLoader::SetVis(void)
++{
++  GraphLCDSetup.Visualization  = atoi(Visualization.c_str());
++  GraphLCDSetup.ChannelsSA     = atoi(ChannelsSA.c_str());
++  GraphLCDSetup.BandsSA        = atoi(BandsSA.c_str());
++  GraphLCDSetup.Channel1Left   = atoi(Channel1Left.c_str());
++  GraphLCDSetup.Channel2Left   = atoi(Channel2Left.c_str());
++  GraphLCDSetup.BarWidth       = atoi(BarWidth.c_str());
++  GraphLCDSetup.DisplayWidth   = atoi(DisplayWidth.c_str());
++  GraphLCDSetup.DisplayHeight  = atoi(DisplayHeight.c_str());
++  GraphLCDSetup.BGColorIsBlack = atoi(BGColorIsBlack.c_str());
++  GraphLCDSetup.OffsetX1       = atoi(OffsetX1.c_str());
++  GraphLCDSetup.OffsetY1       = atoi(OffsetY1.c_str());
++  GraphLCDSetup.OffsetX2       = atoi(OffsetX2.c_str());
++  GraphLCDSetup.OffsetY2       = atoi(OffsetY2.c_str());
++  GraphLCDSetup.FallOff        = atoi(FallOff.c_str());
++  GraphLCDSetup.PeakHeight     = atoi(PeakHeight.c_str());
++  GraphLCDSetup.UpdateSA       = atoi(UpdateSA.c_str());
++  GraphLCDSetup.DisplayX       = atoi(DisplayX.c_str());
++  GraphLCDSetup.DisplayY       = atoi(DisplayY.c_str());
++  GraphLCDSetup.Mixed          = atoi(Mixed.c_str());
++
++
++  printf("GLCD-Visualization =%i\n", GraphLCDSetup.Visualization);
++  printf("GLCD-Channels      =%i\n", GraphLCDSetup.ChannelsSA);
++  printf("GLCD-Bands         =%i\n", GraphLCDSetup.BandsSA);
++  printf("GLCD-Channel1Left  =%i\n", GraphLCDSetup.Channel1Left);
++  printf("GLCD-Channel2Left  =%i\n", GraphLCDSetup.Channel2Left);
++  printf("GLCD-BarWidth      =%i\n", GraphLCDSetup.BarWidth);
++  printf("GLCD-DisplayWidth  =%i\n", GraphLCDSetup.DisplayWidth);
++  printf("GLCD-DisplayHeight =%i\n", GraphLCDSetup.DisplayHeight);
++  printf("GLCD-BGColorIsBlack=%i\n", GraphLCDSetup.BGColorIsBlack);
++  printf("GLCD-OffsetX1      =%i\n", GraphLCDSetup.OffsetX1);
++  printf("GLCD-OffsetY1      =%i\n", GraphLCDSetup.OffsetY1);
++  printf("GLCD-OffsetX2      =%i\n", GraphLCDSetup.OffsetX2);
++  printf("GLCD-OffsetY2      =%i\n", GraphLCDSetup.OffsetY2);
++  printf("GLCD-FallOff       =%i\n", GraphLCDSetup.FallOff);
++  printf("GLCD-PeakHeight    =%i\n", GraphLCDSetup.PeakHeight);
++  printf("GLCD-UpdateSA      =%i\n", GraphLCDSetup.UpdateSA);
++  printf("GLCD-DisplayX      =%i\n", GraphLCDSetup.DisplayX);
++  printf("GLCD-DisplayY      =%i\n", GraphLCDSetup.DisplayY);
++  printf("GLCD-Mixed         =%i\n", GraphLCDSetup.Mixed);
++  
++}
++
++int cGLCDVisLoader::StoreVis(const char *Vis)
++{
++  using namespace std;
++  ifstream filestr;
++  std::string line;
++  std::string datei;
++  std::string dateiout;
++  std::string vis;
++ 
++  bool res=false;
++  
++  vis = Vis;
++  
++  datei = cfgDir;
++  datei = datei + "/visual/themes/";
++  datei = datei + vis;
++  
++  dateiout = cfgDir;
++  dateiout = dateiout + "/visual/themes/current.vis";
++  
++  if( FILE *f = fopen(dateiout.c_str(), "w")) {
++    filestr.open(datei.c_str());
++    if(filestr) {
++      while (getline(filestr, line, '\n')) {
++        line = line + "\n";
++        fprintf(f, line.c_str());
++      }
++      filestr.close();
++    }
++    res = true;
++    fclose(f);
++  }
++  else
++    res = false;
++
++  return res;
++}
+diff -Nru graphlcd-0.1.9/visual.h graphlcd-0.1.9-span/visual.h
+--- graphlcd-0.1.9/visual.h	1970-01-01 01:00:00.000000000 +0100
++++ graphlcd-0.1.9-span/visual.h	2011-02-24 21:05:16.000000000 +0100
+@@ -0,0 +1,60 @@
++/*
++ * GraphTFT-Plugin to VDR (C++)
++ *
++ * (C) 2006 Morone
++ *
++ * This code is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License
++ * as published by the Free Software Foundation; either version 2
++ * of the License, or (at your option) any later version.
++ *
++ * This code is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
++ * Or, point your browser to http://www.gnu.org/copyleft/gpl.html
++ */
++
++#ifndef ___GLCDVisLoader_H
++#define ___GLCDVisLoader_H
++
++#include <string> 
++
++class cGLCDVisLoader {
++private:
++  std::string Visualization;
++  std::string Channel1Left;
++  std::string Channel2Left;
++  std::string BarWidth;
++  std::string ChannelsSA;
++  std::string BandsSA;
++  std::string DisplayWidth;
++  std::string DisplayHeight;
++  std::string BGColorIsBlack;
++  std::string OffsetX1;
++  std::string OffsetY1;
++  std::string OffsetX2;
++  std::string OffsetY2;
++  std::string FallOff;
++  std::string PeakHeight;
++  std::string UpdateSA;
++  std::string DisplayX;
++  std::string DisplayY;
++  std::string Mixed;
++
++
++public:
++  cGLCDVisLoader(void);
++  virtual ~cGLCDVisLoader();
++  int LoadVis(const char *VisName);
++  void SetVis(void);
++  int StoreVis(const char *Vis);
++};
++
++extern cGLCDVisLoader GLCDVisLoader;
++
++#endif //___GLCDVisLoader_H

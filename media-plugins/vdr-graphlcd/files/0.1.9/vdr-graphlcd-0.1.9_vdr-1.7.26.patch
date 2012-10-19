@@ -1,0 +1,46 @@
+diff -Naur graphlcd-0.1.9_orig/state.c graphlcd-0.1.9/state.c
+--- graphlcd-0.1.9_orig/state.c	2011-02-13 14:54:28.000000000 +0100
++++ graphlcd-0.1.9/state.c	2012-05-01 02:33:26.747655002 +0200
+@@ -74,12 +74,16 @@
+ {
+ }
+ 
+-void cGraphLCDState::ChannelSwitch(const cDevice * Device, int ChannelNumber)
+-{
++#if VDRVERSNUM >= 10726
++void cGraphLCDState::ChannelSwitch(const cDevice * Device, int ChannelNumber, bool LiveView) {
++#else
++void cGraphLCDState::ChannelSwitch(const cDevice * Device, int ChannelNumber) {
++    bool LiveView = Device->IsPrimaryDevice() && !EITScanner.UsesDevice(Device);
++#endif
+     //printf("graphlcd plugin: cGraphLCDState::ChannelSwitch %d %d\n", Device->CardIndex(), ChannelNumber);
+     if (GraphLCDSetup.PluginActive)
+     {
+-        if (ChannelNumber > 0 && Device->IsPrimaryDevice() && !EITScanner.UsesDevice(Device))
++        if (ChannelNumber > 0 && LiveView)
+         {
+             if (ChannelNumber == cDevice::CurrentChannel())
+             {
+diff -Naur graphlcd-0.1.9_orig/state.h graphlcd-0.1.9/state.h
+--- graphlcd-0.1.9_orig/state.h	2011-02-13 14:54:35.000000000 +0100
++++ graphlcd-0.1.9/state.h	2012-05-01 02:33:14.999655001 +0200
+@@ -4,6 +4,7 @@
+  *  state.h  -  status monitor class
+  *
+  *  (c) 2001-2004 Carsten Siebholz <c.siebholz AT t-online de>
++ *  (c) 2010-2012 Wolfgang Astleitner <mrwastl AT users sourceforge net>
+  **/
+ 
+ #ifndef _GRAPHLCD_STATE_H_
+@@ -100,7 +101,11 @@
+     void SetChannel(int ChannelNumber);
+     void GetProgramme();
+ protected:
++#if VDRVERSNUM >= 10726
++    virtual void ChannelSwitch(const cDevice *Device, int ChannelNumber, bool LiveView);
++#else
+     virtual void ChannelSwitch(const cDevice *Device, int ChannelNumber);
++#endif
+ #if VDRVERSNUM < 10338
+     virtual void Recording(const cDevice *Device, const char *Name);
+     virtual void Replaying(const cControl *Control, const char *Name);
