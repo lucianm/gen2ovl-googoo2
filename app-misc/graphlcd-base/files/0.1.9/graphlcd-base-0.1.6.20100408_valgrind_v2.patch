@@ -1,0 +1,68 @@
+diff -Naur graphlcd-base-0.1.6.20100408_orig/glcddrivers/image.c graphlcd-base-0.1.6.20100408/glcddrivers/image.c
+--- graphlcd-base-0.1.6.20100408_orig/glcddrivers/image.c	2010-04-08 21:07:37.000000000 +0200
++++ graphlcd-base-0.1.6.20100408/glcddrivers/image.c	2010-04-15 10:37:36.604434378 +0200
+@@ -30,6 +30,7 @@
+ 
+ cDriverImage::~cDriverImage()
+ {
++    DeInit();
+     delete oldConfig;
+ }
+ 
+@@ -71,9 +72,15 @@
+ int cDriverImage::DeInit()
+ {
+     if (newLCD)
++    {
+         delete[] newLCD;
++        newLCD = 0;
++    }
+     if (oldLCD)
++    {
+         delete[] oldLCD;
++        oldLCD = 0;
++    }
+     return 0;
+ }
+ 
+diff -Naur graphlcd-base-0.1.6.20100408_orig/glcddrivers/noritake800.c graphlcd-base-0.1.6.20100408/glcddrivers/noritake800.c
+--- graphlcd-base-0.1.6.20100408_orig/glcddrivers/noritake800.c	2010-04-15 10:31:51.000000000 +0200
++++ graphlcd-base-0.1.6.20100408/glcddrivers/noritake800.c	2010-04-15 10:37:36.604434378 +0200
+@@ -170,13 +170,13 @@
+     int x;
+ 
+     if (m_pVFDMem)
+-        for (x = 0; x < (width + 7) / 8; x++)
++        for (x = 0; x < width; x++)
+         {
+             delete[] m_pVFDMem[x];
+         }
+     delete[] m_pVFDMem;
+     if (m_pDrawMem)
+-        for (x = 0; x < (width + 7) / 8; x++)
++        for (x = 0; x < width; x++)
+         {
+             delete[] m_pDrawMem[x];
+         }
+diff -Naur graphlcd-base-0.1.6.20100408_orig/tools/showpic/showpic.c graphlcd-base-0.1.6.20100408/tools/showpic/showpic.c
+--- graphlcd-base-0.1.6.20100408_orig/tools/showpic/showpic.c	2010-04-08 21:07:37.000000000 +0200
++++ graphlcd-base-0.1.6.20100408/tools/showpic/showpic.c	2010-04-15 10:39:15.817755631 +0200
+@@ -219,6 +219,7 @@
+ 		if (glcd.Load(image, picFile) == false)
+ 		{
+ 			fprintf(stderr, "ERROR: Failed loading file %s\n", picFile.c_str());
++			delete lcd;
+ 			return 8;
+ 		}
+ 
+diff -Naur graphlcd-base-0.1.6.20100408_orig/tools/showtext/showtext.c graphlcd-base-0.1.6.20100408/tools/showtext/showtext.c
+--- graphlcd-base-0.1.6.20100408_orig/tools/showtext/showtext.c	2010-04-08 21:07:37.000000000 +0200
++++ graphlcd-base-0.1.6.20100408/tools/showtext/showtext.c	2010-04-15 10:40:26.917748711 +0200
+@@ -274,6 +274,7 @@
+ 
+ 	lcd->DeInit();
+ 	delete lcd;
++	delete bitmap;
+ 
+ 	return 0;
+ }
