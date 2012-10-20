@@ -7,8 +7,9 @@ EAPI="4"
 inherit eutils flag-o-matic multilib toolchain-funcs
 
 DESCRIPTION="Glue library for the glcdlib LCDproc driver based on GraphLCD"
-HOMEPAGE="http://www.muresan.de/graphlcd/lcdproc/"
-SRC_URI="http://www.muresan.de/graphlcd/lcdproc/${P}.tar.bz2"
+HOMEPAGE="http://lucianm.github.com/GLCDprocDriver/"
+SRC_URI="https://github.com/downloads/lucianm/GLCDprocDriver/${P}.tar.bz2"
+
 
 KEYWORDS="~amd64 ~x86 ~ppc"
 SLOT="0"
@@ -34,5 +35,5 @@ src_compile() {
 src_install()
 {
 	emake DESTDIR="${D}/usr" LIBDIR="${D}/usr/$(get_libdir)" install || die "make install failed"
-	dodoc AUTHORS README INSTALL TODO ChangeLog
+	dodoc AUTHORS README.md INSTALL TODO ChangeLog
 }
