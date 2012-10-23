@@ -43,7 +43,7 @@ DEPEND="${RDEPEND}
 src_prepare() {
 	vdr-plugin_src_prepare
 
-	epatch "${FILESDIR}/${P}-Makefile.patch"
+	#epatch "${FILESDIR}/${P}-Makefile.patch"
 }
 
 src_compile() {
