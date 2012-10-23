@@ -1,0 +1,22 @@
+#!/sbin/runscript
+# Copyright 1999-2012 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header: Exp $
+
+depend(){
+	use LCDd
+	after ntp-client
+}
+
+start() {
+	ebegin "Starting lcdproc"
+	start-stop-daemon --start --background --pidfile /var/run/lcdproc.pid \
+		--exec /usr/bin/lcdproc ${LCDPROC_CLIENT_OPTS}
+	eend $?
+}
+
+stop() {
+	ebegin "Stopping lcdproc"
+	start-stop-daemon --stop --quiet --pidfile /var/run/lcdproc.pid
+	eend $?
+}
