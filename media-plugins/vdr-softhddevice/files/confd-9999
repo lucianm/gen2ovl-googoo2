@@ -1,0 +1,88 @@
+# /etc/conf.d/vdr.softhddevice
+# Configuration for vdrplugin softhddevice
+# $Header: $
+#
+
+# ################################################
+# Audio Settings
+# ################################################
+#
+# Hint: you can use "aplay -l" from media-sound/alsa-utils to determine
+#       the ALSA devices in you computer
+#
+#       example output of "aplay -l":
+#       **** List of PLAYBACK Hardware Devices ****
+#       card 0: NVidia [HDA NVidia], device 0: VT1708S Analog [VT1708S Analog]
+#       Subdevices: 1/1
+#       Subdevice #0: subdevice #0
+#       card 0: NVidia [HDA NVidia], device 1: VT1708S Digital [VT1708S Digital]
+#       Subdevices: 1/1
+#       Subdevice #0: subdevice #0
+#       card 0: NVidia [HDA NVidia], device 2: VT1708S HP [VT1708S HP]
+#       Subdevices: 1/1
+#       Subdevice #0: subdevice #0
+#       card 0: NVidia [HDA NVidia], device 3: HDMI 0 [HDMI 0]
+#       Subdevices: 1/1
+#       Subdevice #0: subdevice #0
+#
+#       Device "hw:0,0" is the analog output
+#       Device "hw:0,3" is the digital output on the HDMI connector
+#
+# Audio device: 
+#   example for ALSA: hw:0,0
+#   example for OSS:  /dev/dsp
+SOFTHDDEVICE_AUDIO_DEVICE=hw:0,0
+
+# Audio device for pass-through
+#   if enabled in the plugin settings
+#SOFTHDDEVICE_AUDIO_PASSTHROUGHDEVICE=hw:0,1
+
+# audio mixer channel name (default: PCM)
+#   used for hardware volume setting
+#SOFTHDDEVICE_AUDIO_MIXERCHANNEL=PCM
+
+
+# ################################################
+# Video Settings
+# ################################################
+#
+# Basic Video Settings:
+#
+#   X11 display name (default: :0.0)
+#SOFTHDDEVICE_VIDEO_DISPLAY=:0.0
+#
+#   video device used (default: autodetected)
+#   possible values: vaapi / vdpau / noop
+SOFTHDDEVICE_VIDEO_DEVICE=vaapi
+#
+#
+# Expert Video Settings:
+#
+#   let softhddevice plugin start the x11 server
+#SOFTHDDEVICE_VIDEO_START_X11SERVER=no
+#
+#   x11 window geometry (default: autodetected)
+#   give Witdth/Height/X/Y as Wxh+x+y
+#     example: 1680x1050+0+0
+#SOFTHDDEVICE_VIDEO_GEOMETRY=
+#
+#   if started with window manager: start in 
+#   fullscreen windows
+#SOFTHDDEVICE_VIDEO_START_FULLSCREEN=no
+
+
+# ################################################
+# Misc Settings
+# ################################################
+#
+#   start plugin in suspended mode
+#SOFTHDDEVICE_START_SUSPENDED=no
+
+#  workarounds for misc. problems 
+#  give a space-separated list of workarounds
+#    no-hw-decoder           disable hw decoder, use software decoder only
+#    no-mpeg-hw-decoder      disable hw decoder for mpeg only
+#    alsa-driver-broken      disable broken alsa driver message
+#    ignore-repeat-pict      disable repeat pict message
+#SOFTHDDEVICE_WORKAROUNDS=""
+
