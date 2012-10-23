@@ -1,10 +1,10 @@
 # Copyright 1999-2012 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: Exp $
+# $Header: /var/cvsroot/gentoo-x86/media-plugins/vdr-xvdr/vdr-xvdr-9999.ebuild,v 1.5 2012/05/01 11:44:37 hd_brummy Exp $
 
-EAPI=2
+EAPI="4"
 
-inherit vdr-plugin git-2
+inherit vdr-plugin-2 git-2
 
 EGIT_REPO_URI="git://github.com/pipelka/vdr-plugin-xvdr.git"
 
@@ -16,22 +16,20 @@ LICENSE="GPL-2"
 SLOT="0"
 IUSE=""
 
-DEPEND=">=media-video/vdr-1.6
-	sys-libs/zlib"
-
+DEPEND=">=media-video/vdr-1.6"
 RDEPEND="${DEPEND}"
 
 S=${WORKDIR}/${PN}-plugin
 
 src_prepare() {
-	vdr-plugin_src_prepare
+	vdr-plugin-2_src_prepare
 
 	fix_vdr_libsi_include recplayer.c
 	fix_vdr_libsi_include receiver.c
 }
 
 src_install() {
-	vdr-plugin_src_install
+	vdr-plugin-2_src_install
 
 	insinto /etc/vdr/plugins/xvdr
 	doins xvdr/allowed_hosts.conf
