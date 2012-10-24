@@ -19,7 +19,8 @@ SLOT="0"
 KEYWORDS="amd64 x86"
 IUSE=""
 
-DEPEND=">=media-video/vdr-1.6.0"
+DEPEND=">=media-video/vdr-1.6.0
+	dev-libs/libpcre"
 RDEPEND="${DEPEND}"
 
 src_install() {
