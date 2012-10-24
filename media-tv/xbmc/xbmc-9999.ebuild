@@ -104,6 +104,7 @@ DEPEND="${COMMON_DEPEND}
 	dev-util/gperf
 	x11-proto/xineramaproto
 	dev-util/cmake
+	dev-lang/swig
 	x86? ( dev-lang/nasm )"
 
 pkg_setup() {
