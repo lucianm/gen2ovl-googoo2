@@ -1,0 +1,11 @@
+diff -Naur tntnet-2.1_orig/framework/defcomp/Makefile.am tntnet-2.1/framework/defcomp/Makefile.am
+--- tntnet-2.1_orig/framework/defcomp/Makefile.am	2012-02-01 20:36:41.000000000 +0100
++++ tntnet-2.1/framework/defcomp/Makefile.am	2012-10-25 01:12:00.070101661 +0200
+@@ -16,3 +16,7 @@
+ tntnet_la_CXXFLAGS = $(PTHREAD_CFLAGS)
+ tntnet_la_LDFLAGS = -module -version-info @sonumber@ @SHARED_LIB_FLAG@
+ tntnet_la_LIBADD = $(top_builddir)/framework/common/libtntnet.la $(PTHREAD_LIBS)
++if HAVE_MINIZIP
++tntnet_la_CXXFLAGS += $(MINIZIP_CFLAGS)
++tntnet_la_LDFLAGS += $(MINIZIP_LIBS)
++endif
