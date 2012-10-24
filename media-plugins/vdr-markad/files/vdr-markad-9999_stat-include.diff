@@ -1,0 +1,12 @@
+diff -Naur markad-9999_orig/command/markad-standalone.cpp markad-9999/command/markad-standalone.cpp
+--- markad-9999_orig/command/markad-standalone.cpp	2010-08-25 00:51:35.000000000 +0200
++++ markad-9999/command/markad-standalone.cpp	2010-08-25 00:53:26.934457028 +0200
+@@ -17,6 +17,8 @@
+ #include <sys/time.h>
+ #include <sys/resource.h>
+ #include <sys/wait.h>
++#include <sys/types.h>
++#include <sys/stat.h>
+ #include <pthread.h>
+ #include <poll.h>
+ #include <locale.h>
