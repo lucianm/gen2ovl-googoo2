@@ -16,8 +16,8 @@ LICENSE="GPL-2"
 SLOT="0"
 IUSE="debug"
 
-DEPEND=""
-RDEPEND="${DEPEND}"
+RDEPEND=">=media-tv/xbmc-12.0"
+DEPEND="${RDEPEND}"
 
 S=${WORKDIR}/${PN}
 
