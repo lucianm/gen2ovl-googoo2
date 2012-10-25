@@ -1,20 +1,378 @@
 diff -Naur upnp_orig/Makefile upnp/Makefile
---- upnp_orig/Makefile	2012-10-25 02:57:12.000000000 +0200
-+++ upnp/Makefile	2012-10-25 02:58:18.160364561 +0200
-@@ -83,6 +83,9 @@
+--- upnp_orig/Makefile	2012-10-25 16:57:27.000000000 +0200
++++ upnp/Makefile	2012-10-25 16:57:51.294719684 +0200
+@@ -25,6 +25,7 @@
+ 
+ VDRDIR ?= ../../..
+ LIBDIR ?= ../../lib
++SUBPLUGDIR ?= ./plugins
+ TMPDIR ?= /tmp
+ 
+ PLUGINDIR= ./PLUGINS
+@@ -36,7 +37,9 @@
+ 
+ ### Allow user defined options to overwrite defaults:
+ 
++-include $(VDRDIR)/Make.global
+ -include $(VDRDIR)/Make.config
++-include Make.config
+ 
+ ### The version number of VDR's plugin API (taken from VDR's "config.h"):
+ 
+@@ -54,6 +57,19 @@
+ DEFINES += -D_GNU_SOURCE -DPLUGIN_NAME_I18N='"$(PLUGIN)"'
+ DEFINES += -DPLUGINDIR=\"$(PLUGINLIBDIR)\"
+ 
++
++# export to subplugins makefiles:
++export VERSION
++export APIVERSION
++export INCLUDES
++export SHAREDDEFINES
++export SHAREDLIBS
++export CXX
++export CXXFLAGS
++export VDRDIR
++export LIBDIR
++export TMPDIR
++
+ ### The object files (add further files here):
+ 
+ TNTOBJ =	httptnt/deviceDescription.o \
+@@ -82,7 +98,7 @@
+ 
  ### The main target:
  
- all: libvdr-$(PLUGIN).so i18n
-+	@$(MAKE) -C plugins/profiler/vdrDVBProfiler all
-+	@$(MAKE) -C plugins/provider/recProvider all
-+	@$(MAKE) -C plugins/provider/vdrProvider all
+-all: libvdr-$(PLUGIN).so i18n
++all: libvdr-$(PLUGIN).so i18n subplugins
  
  ### Implicit rules:
  
-@@ -142,3 +145,6 @@
+@@ -136,9 +152,17 @@
+ 	@-rm -rf $(TMPDIR)/$(ARCHIVE)
+ 	@mkdir $(TMPDIR)/$(ARCHIVE)
+ 	@cp -a * $(TMPDIR)/$(ARCHIVE)
+-	@tar czf $(PACKAGE).tgz -C $(TMPDIR) --exclude debian --exclude CVS --exclude .svn $(ARCHIVE)
++	@tar czf $(PACKAGE).tgz -C $(TMPDIR) --exclude debian --exclude CVS --exclude .svn --exclude .git --exclude .gitignore $(ARCHIVE)
+ 	@-rm -rf $(TMPDIR)/$(ARCHIVE)
+ 	@echo Distribution package created as $(PACKAGE).tgz
  
- clean:
+-clean:
++clean-core:
  	@-rm -f $(OBJS) $(DEPFILE) *.so *.so.$(APIVERSION) *.tgz core* *~ $(PODIR)/*.mo $(PODIR)/*.pot
-+	@$(MAKE) -C plugins/profiler/vdrDVBProfiler clean
-+	@$(MAKE) -C plugins/provider/recProvider clean
-+	@$(MAKE) -C plugins/provider/vdrProvider clean
++
++clean-subplugins:
++	@for i in `ls -A -I ".*" $(SUBPLUGDIR)`; do for j in `ls -A -I ".*" $(SUBPLUGDIR)/$$i`; do $(MAKE) -f ../../../Makefile.plugins -C "$(SUBPLUGDIR)/$$i/$$j" clean; done; done
++
++clean: clean-core clean-subplugins
++
++subplugins:
++	@for i in `ls -A -I ".*" $(SUBPLUGDIR)`; do for j in `ls -A -I ".*" $(SUBPLUGDIR)/$$i`; do $(MAKE) -f ../../../Makefile.plugins -C "$(SUBPLUGDIR)/$$i/$$j" all || exit 1; done; done
+diff -Naur upnp_orig/Makefile.plugins upnp/Makefile.plugins
+--- upnp_orig/Makefile.plugins	1970-01-01 01:00:00.000000000 +0100
++++ upnp/Makefile.plugins	2012-10-25 16:56:02.000000000 +0200
+@@ -0,0 +1,64 @@
++#
++# UPnP/DLNA subplugins Makefile
++#
++# This code is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License
++# as published by the Free Software Foundation; either version 2
++# of the License, or (at your option) any later version.
++#
++# This code is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write to the Free Software
++# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
++# Or, point your browser to http://www.gnu.org/copyleft/gpl.html
++
++### Includes and Defines
++
++SINCLUDES += -I../../../include
++SINCLUDES += $(shell echo "$(INCLUDES)" | sed -e 's+-I *+-I+g' | sed -e 's+-I\([^/]\)+-I../../\1+g')
++
++-include *.mk
++
++UPNPAPIVERSION = $(shell sed -ne '/define UPNPPLUGIN_VERSION/s/^.*"\(.*\)".*$$/\1/p' ../../../include/plugin.h)
++
++### The version number of the subplugin (taken from the main source file):
++SUBPLUGVERSION = $(shell grep 'static const char \*VERSION *=' $(SUBPLUGIN)$(CATEGORY).cpp | awk '{ print $$6 }' | sed -e 's/[";]//g')
++
++DEFINES  += -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
++
++LIBS     += -L$(LIBDIR) -Wl,-R$(LIBDIR) $(LIBDIR)/libvdr-upnp.so.$(APIVERSION)
++
++# Dependencies:
++
++MAKEDEP = g++ -MM -MG
++DEPFILE = .dependencies
++$(DEPFILE): $(OBJS:%.o=%.cpp) $(wildcard *.h)
++	@$(MAKEDEP) $(DEFINES) $(SHAREDDEFINES) $(SINCLUDES) $(OBJS:%.o=%.cpp) > $@
++
++-include $(DEPFILE)
++
++### Targets:
++
++LIBUPNP    = libupnp-$(TARGET).so
++LIBUPNPVER = libupnp-$(TARGET)-$(UPNPAPIVERSION).so.$(APIVERSION)
++
++BUILDTARGETS = $(LIBDIR)/$(LIBUPNPVER)
++
++all: $(BUILDTARGETS)
++.PHONY: clean dist
++
++%.o: %.cpp
++	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(SHAREDDEFINES) $(SINCLUDES) $<
++
++$(LIBUPNP): $(OBJS)
++	$(CXX) $(CXXFLAGS) -shared $(OBJS) $(LIBS) $(SHAREDLIBS) -o $@
++
++$(LIBDIR)/$(LIBUPNPVER): $(LIBUPNP)
++	@cp -p $< $@
++
++clean:
++	@-rm -f $(OBJS) $(CLEAN_RM) $(DEPFILE) $(LIBUPNP) $(LIBDIR)/$(LIBUPNPVER) core* *~
+diff -Naur upnp_orig/plugins/profiler/vdrDVBProfiler/Makefile upnp/plugins/profiler/vdrDVBProfiler/Makefile
+--- upnp_orig/plugins/profiler/vdrDVBProfiler/Makefile	2012-10-25 16:57:27.000000000 +0200
++++ upnp/plugins/profiler/vdrDVBProfiler/Makefile	1970-01-01 01:00:00.000000000 +0100
+@@ -1,59 +0,0 @@
+-#
+-# Makefile for a UPnP profiler plugin
+-#
+-# $Id$
+-#
+-
+-#
+-# This is the profile of the profiler plugin. It is used
+-# to determine how a resource may be accessed.
+-#
+-PROFILE = dvb
+-
+-### The version number of this plugin (taken from the main source file):
+-
+-VERSION = $(shell grep 'static const char \*VERSION *=' $(PROFILE)Profiler.cpp | awk '{ print $$6 }' | sed -e 's/[";]//g')
+-
+-### The C++ compiler and options:
+-
+-CXX      ?= g++
+-CXXFLAGS ?= -g -O3 -Wall -Werror=overloaded-virtual -Wno-parentheses -fPIC
+-
+-UPNPDIR ?= ../../..
+-VDRLIBDIR ?= $(UPNPDIR)/../../lib
+-
+-APIVERSION = $(shell sed -ne '/define UPNPPLUGIN_VERSION/s/^.*"\(.*\)".*$$/\1/p' $(UPNPDIR)/include/plugin.h)
+-
+-VDRDIR ?= $(UPNPDIR)/../../..
+-VDRAPIVERSION = $(shell sed -ne '/define APIVERSION/s/^.*"\(.*\)".*$$/\1/p' $(VDRDIR)/config.h)
+-
+-INCLUDES += -I$(UPNPDIR)/include
+-
+-DEFINES  += -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
+-
+-OBJS     = $(PROFILE)Profiler.o
+-
+-LIBS	 = -L$(VDRLIBDIR) -Wl,-R$(VDRLIBDIR) $(VDRLIBDIR)/libvdr-upnp.so.$(VDRAPIVERSION)
+-
+-all: libupnp-$(PROFILE)-profiler.so
+-
+-### Implicit rules:
+-
+-%.o: %.cpp
+-	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
+-
+-### Dependencies:
+-
+-MAKEDEP = $(CXX) -MM -MG
+-DEPFILE = .dependencies
+-$(DEPFILE): Makefile
+-	@$(MAKEDEP) $(DEFINES) $(INCLUDES) $(OBJS:%.o=%.cpp) > $@
+-
+--include $(DEPFILE)
+-
+-libupnp-$(PROFILE)-profiler.so: $(OBJS)
+-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared $(OBJS) $(LIBS) -o $@
+-	@cp --remove-destination $@ $@.$(APIVERSION)
+-	
+-clean:
+-	@-rm -f $(OBJS) $(DEPFILE) *.so *.so.$(APIVERSION) core* *~
+diff -Naur upnp_orig/plugins/profiler/vdrDVBProfiler/Makefile.mk upnp/plugins/profiler/vdrDVBProfiler/Makefile.mk
+--- upnp_orig/plugins/profiler/vdrDVBProfiler/Makefile.mk	1970-01-01 01:00:00.000000000 +0100
++++ upnp/plugins/profiler/vdrDVBProfiler/Makefile.mk	2012-10-25 16:57:51.295719684 +0200
+@@ -0,0 +1,13 @@
++#
++# Makefile for a UPnP subplugin
++#
++# $Id$
++#
++
++SUBPLUGIN = dvb
++CATEGORY  = Profiler
++TARGET    = $(CATEGORY)-$(SUBPLUGIN)
++OBJS      = $(SUBPLUGIN)$(CATEGORY).o
++
++# any special libs?
++#LIBS      = -L$(VDRLIBDIR) -Wl,-R$(VDRLIBDIR)
+diff -Naur upnp_orig/plugins/provider/recProvider/Makefile upnp/plugins/provider/recProvider/Makefile
+--- upnp_orig/plugins/provider/recProvider/Makefile	2012-10-25 16:57:27.000000000 +0200
++++ upnp/plugins/provider/recProvider/Makefile	1970-01-01 01:00:00.000000000 +0100
+@@ -1,59 +0,0 @@
+-#
+-# Makefile for a UPnP provider plugin
+-#
+-# $Id$
+-#
+-
+-#
+-# This is the schema of the provider plugin. It is used
+-# to determine how a resource may be accessed.
+-#
+-SCHEMA = rec
+-
+-### The version number of this plugin (taken from the main source file):
+-
+-VERSION = $(shell grep 'static const char \*VERSION *=' $(SCHEMA)Provider.cpp | awk '{ print $$6 }' | sed -e 's/[";]//g')
+-
+-### The C++ compiler and options:
+-
+-CXX      ?= g++
+-CXXFLAGS ?= -g -O3 -Wall -Werror=overloaded-virtual -Wno-parentheses -fPIC
+-
+-UPNPDIR ?= ../../..
+-VDRLIBDIR ?= $(UPNPDIR)/../../lib
+-
+-APIVERSION = $(shell sed -ne '/define UPNPPLUGIN_VERSION/s/^.*"\(.*\)".*$$/\1/p' $(UPNPDIR)/include/plugin.h)
+-
+-VDRDIR ?= $(UPNPDIR)/../../..
+-VDRAPIVERSION = $(shell sed -ne '/define APIVERSION/s/^.*"\(.*\)".*$$/\1/p' $(VDRDIR)/config.h)
+-
+-INCLUDES += -I$(UPNPDIR)/include
+-
+-DEFINES  += -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
+-
+-OBJS     = $(SCHEMA)Provider.o
+-
+-LIBS	 = -L$(VDRLIBDIR) -Wl,-R$(VDRLIBDIR) $(VDRLIBDIR)/libvdr-upnp.so.$(VDRAPIVERSION)
+-
+-all: libupnp-$(SCHEMA)-provider.so
+-
+-### Implicit rules:
+-
+-%.o: %.cpp
+-	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
+-
+-### Dependencies:
+-
+-MAKEDEP = $(CXX) -MM -MG
+-DEPFILE = .dependencies
+-$(DEPFILE): Makefile
+-	@$(MAKEDEP) $(DEFINES) $(INCLUDES) $(OBJS:%.o=%.cpp) > $@
+-
+--include $(DEPFILE)
+-
+-libupnp-$(SCHEMA)-provider.so: $(OBJS)
+-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared $(OBJS) $(LIBS) -o $@
+-	@cp --remove-destination $@ $@.$(APIVERSION)
+-	
+-clean:
+-	@-rm -f $(OBJS) $(DEPFILE) *.so *.so.$(APIVERSION) core* *~
+diff -Naur upnp_orig/plugins/provider/recProvider/Makefile.mk upnp/plugins/provider/recProvider/Makefile.mk
+--- upnp_orig/plugins/provider/recProvider/Makefile.mk	1970-01-01 01:00:00.000000000 +0100
++++ upnp/plugins/provider/recProvider/Makefile.mk	2012-10-25 16:57:51.296719684 +0200
+@@ -0,0 +1,13 @@
++#
++# Makefile for a UPnP subplugin
++#
++# $Id$
++#
++
++SUBPLUGIN = rec
++CATEGORY  = Provider
++TARGET    = $(CATEGORY)-$(SUBPLUGIN)
++OBJS      = $(SUBPLUGIN)$(CATEGORY).o
++
++# any special libs?
++#LIBS      = -L$(VDRLIBDIR) -Wl,-R$(VDRLIBDIR)
+diff -Naur upnp_orig/plugins/provider/vdrProvider/Makefile upnp/plugins/provider/vdrProvider/Makefile
+--- upnp_orig/plugins/provider/vdrProvider/Makefile	2012-10-25 16:57:27.000000000 +0200
++++ upnp/plugins/provider/vdrProvider/Makefile	1970-01-01 01:00:00.000000000 +0100
+@@ -1,59 +0,0 @@
+-#
+-# Makefile for a UPnP provider plugin
+-#
+-# $Id$
+-#
+-
+-#
+-# This is the schema of the provider plugin. It is used
+-# to determine how a resource may be accessed.
+-#
+-SCHEMA = vdr
+-
+-### The version number of this plugin (taken from the main source file):
+-
+-VERSION = $(shell grep 'static const char \*VERSION *=' $(SCHEMA)Provider.cpp | awk '{ print $$6 }' | sed -e 's/[";]//g')
+-
+-### The C++ compiler and options:
+-
+-CXX      ?= g++
+-CXXFLAGS ?= -g -O3 -Wall -Werror=overloaded-virtual -Wno-parentheses -fPIC
+-
+-UPNPDIR ?= ../../..
+-VDRLIBDIR ?= $(UPNPDIR)/../../lib
+-
+-APIVERSION = $(shell sed -ne '/define UPNPPLUGIN_VERSION/s/^.*"\(.*\)".*$$/\1/p' $(UPNPDIR)/include/plugin.h)
+-
+-VDRDIR ?= $(UPNPDIR)/../../..
+-VDRAPIVERSION = $(shell sed -ne '/define APIVERSION/s/^.*"\(.*\)".*$$/\1/p' $(VDRDIR)/config.h)
+-
+-INCLUDES += -I$(UPNPDIR)/include
+-
+-DEFINES  += -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
+-
+-OBJS     = $(SCHEMA)Provider.o
+-
+-LIBS	 = -L$(VDRLIBDIR) -Wl,-R$(VDRLIBDIR) $(VDRLIBDIR)/libvdr-upnp.so.$(VDRAPIVERSION)
+-
+-all: libupnp-$(SCHEMA)-provider.so
+-
+-### Implicit rules:
+-
+-%.o: %.cpp
+-	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
+-
+-### Dependencies:
+-
+-MAKEDEP = $(CXX) -MM -MG
+-DEPFILE = .dependencies
+-$(DEPFILE): Makefile
+-	@$(MAKEDEP) $(DEFINES) $(INCLUDES) $(OBJS:%.o=%.cpp) > $@
+-
+--include $(DEPFILE)
+-
+-libupnp-$(SCHEMA)-provider.so: $(OBJS)
+-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared $(OBJS) $(LIBS) -o $@
+-	@cp --remove-destination $@ $@.$(APIVERSION)
+-	
+-clean:
+-	@-rm -f $(OBJS) $(DEPFILE) *.so *.so.$(APIVERSION) core* *~
+diff -Naur upnp_orig/plugins/provider/vdrProvider/Makefile.mk upnp/plugins/provider/vdrProvider/Makefile.mk
+--- upnp_orig/plugins/provider/vdrProvider/Makefile.mk	1970-01-01 01:00:00.000000000 +0100
++++ upnp/plugins/provider/vdrProvider/Makefile.mk	2012-10-25 16:57:51.297719684 +0200
+@@ -0,0 +1,13 @@
++#
++# Makefile for a UPnP subplugin
++#
++# $Id$
++#
++
++SUBPLUGIN = vdr
++CATEGORY  = Provider
++TARGET    = $(CATEGORY)-$(SUBPLUGIN)
++OBJS      = $(SUBPLUGIN)$(CATEGORY).o
++
++# any special libs?
++#LIBS      = -L$(VDRLIBDIR) -Wl,-R$(VDRLIBDIR)

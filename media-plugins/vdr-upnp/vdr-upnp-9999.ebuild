@@ -31,26 +31,20 @@ RDEPEND="${DEPEND}"
 
 PATCHES="${FILESDIR}/${P}_Makefile-plugins.diff"
 
-SUBPLUGINS="plugins/profiler/vdrDVBProfiler plugins/provider/recProvider plugins/provider/vdrProvider"
+#src_prepare() {
+#	vdr-plugin_src_prepare
+#}
 
-src_prepare() {
-
-	vdr-plugin_src_prepare
-
-	for plugdir in ${SUBPLUGINS}; do
-		cd "${S}/${plugdir}"
-		vdr_patchmakefile
-		sed -i "s:/../../lib::" Makefile
-	done
-
+src_compile() {
+	cd "${S}"
+	LIBDIR="${S}" LOCALEDIR="${TMP_LOCALE_DIR}" TMPDIR="${T}" make || die "compilation failed..."
 }
 
 src_install() {
+
 	vdr-plugin_src_install
 
 	insinto "${VDR_PLUGIN_DIR}"
-	for plugdir in ${SUBPLUGINS}; do
-		cd "${S}/${plugdir}"
-		doins *.so.*
-	done
+	doins libupnp-*.so.*
+
 }
