@@ -8,7 +8,6 @@ inherit vdr-plugin eutils git-2
 
 #VERSION="1065" #every bump, new version
 
-DVDARCHIVE="dvdarchive.sh"
 
 DESCRIPTION="Video Disk Recorder - UPnP/DLNA support Plugin"
 HOMEPAGE="http://projects.vdr-developer.org/projects/show/plg-${VDRPLUGIN}"
@@ -32,12 +31,16 @@ RDEPEND="${DEPEND}"
 PATCHES="${FILESDIR}/${P}_Makefile-plugins.diff"
 
 #src_prepare() {
+
 #	vdr-plugin_src_prepare
+
 #}
 
 src_compile() {
+
 	cd "${S}"
 	LIBDIR="${S}" LOCALEDIR="${TMP_LOCALE_DIR}" TMPDIR="${T}" make || die "compilation failed..."
+
 }
 
 src_install() {
@@ -46,5 +49,8 @@ src_install() {
 
 	insinto "${VDR_PLUGIN_DIR}"
 	doins libupnp-*.so.*
+
+	insinto "/etc/vdr/plugins/${VDRPLUGIN}"
+	doins -r httpdocs
 
 }
