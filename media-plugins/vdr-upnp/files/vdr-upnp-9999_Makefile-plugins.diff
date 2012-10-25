@@ -1,0 +1,20 @@
+diff -Naur upnp_orig/Makefile upnp/Makefile
+--- upnp_orig/Makefile	2012-10-25 02:57:12.000000000 +0200
++++ upnp/Makefile	2012-10-25 02:58:18.160364561 +0200
+@@ -83,6 +83,9 @@
+ ### The main target:
+ 
+ all: libvdr-$(PLUGIN).so i18n
++	@$(MAKE) -C plugins/profiler/vdrDVBProfiler all
++	@$(MAKE) -C plugins/provider/recProvider all
++	@$(MAKE) -C plugins/provider/vdrProvider all
+ 
+ ### Implicit rules:
+ 
+@@ -142,3 +145,6 @@
+ 
+ clean:
+ 	@-rm -f $(OBJS) $(DEPFILE) *.so *.so.$(APIVERSION) *.tgz core* *~ $(PODIR)/*.mo $(PODIR)/*.pot
++	@$(MAKE) -C plugins/profiler/vdrDVBProfiler clean
++	@$(MAKE) -C plugins/provider/recProvider clean
++	@$(MAKE) -C plugins/provider/vdrProvider clean
