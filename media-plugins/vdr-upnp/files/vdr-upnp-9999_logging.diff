@@ -1,0 +1,47 @@
+diff -Naur upnp_orig/media/mediaManager.cpp upnp/media/mediaManager.cpp
+--- upnp_orig/media/mediaManager.cpp	2012-10-26 01:12:44.000000000 +0200
++++ upnp/media/mediaManager.cpp	2012-10-26 01:14:29.709719684 +0200
+@@ -474,7 +474,7 @@
+ 
+     connection = tntdb::connect(ss.str());
+ 
+-    dsyslog("UPNP\tPreparing database structure...");
++    dsyslog("UPnP\tPreparing database structure...");
+ 
+     if(!CheckIntegrity()){
+       connection.beginTransaction();
+@@ -584,7 +584,7 @@
+     return false;
+   }
+ 
+-  dsyslog("UPNP\tLoading Plugins...");
++  dsyslog("UPnP\tLoading Plugins...");
+   pluginManager = new upnp::cPluginManager();
+ 
+   if(!pluginManager->LoadPlugins(pluginDirectory)){
+diff -Naur upnp_orig/media/pluginManager.cpp upnp/media/pluginManager.cpp
+--- upnp_orig/media/pluginManager.cpp	2012-10-26 01:12:44.000000000 +0200
++++ upnp/media/pluginManager.cpp	2012-10-26 01:22:17.148719685 +0200
+@@ -405,7 +405,8 @@
+       return true;
+     }
+   } else {
+-    cerr << "Error while opening plugin: " << error << endl;
++    //cerr << "Error while opening plugin: " << error << endl;
++    esyslog("UPnP\tError while opening subplugin: '%s', %s", file.c_str(), error);
+   }
+ 
+   return false;
+diff -Naur upnp_orig/server/server.cpp upnp/server/server.cpp
+--- upnp_orig/server/server.cpp	2012-10-26 01:12:44.000000000 +0200
++++ upnp/server/server.cpp	2012-10-26 01:21:07.199719689 +0200
+@@ -270,7 +270,8 @@
+ 
+ void cMediaServer::RegisterService(cUPnPService* service){
+   if(service != NULL){
+-    cout << "Registered service: " << service->GetServiceDescription().serviceType << endl;
++    //cout << "Registered service: " << service->GetServiceDescription().serviceType << endl;
++    dsyslog("UPnP\tRegistered service: %s", service->GetServiceDescription().serviceType.c_str());
+     GetServices()[service->GetServiceDescription().serviceID] = service;
+   }
+ }

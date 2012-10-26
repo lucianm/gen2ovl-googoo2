@@ -1,14 +1,23 @@
 diff -Naur upnp_orig/Makefile upnp/Makefile
---- upnp_orig/Makefile	2012-10-25 16:57:27.000000000 +0200
-+++ upnp/Makefile	2012-10-25 16:57:51.294719684 +0200
-@@ -25,6 +25,7 @@
+--- upnp_orig/Makefile	2012-10-26 00:41:28.000000000 +0200
++++ upnp/Makefile	2012-10-26 00:42:37.588719684 +0200
+@@ -23,12 +23,13 @@
  
- VDRDIR ?= ../../..
- LIBDIR ?= ../../lib
+ ### The directory environment:
+ 
+-VDRDIR ?= ../../..
+-LIBDIR ?= ../../lib
++VDRDIR ?= $(shell pwd)/../../..
++LIBDIR ?= $(shell pwd)/../../lib
 +SUBPLUGDIR ?= ./plugins
  TMPDIR ?= /tmp
  
  PLUGINDIR= ./PLUGINS
+-PLUGINLIBDIR= /usr/lib/vdr/plugins/upnp
++SUBPLUGINLIBDIR ?= /usr/lib/vdr/plugins/upnp
+ 
+ ### Make sure that necessary options are included:
+ 
 @@ -36,7 +37,9 @@
  
  ### Allow user defined options to overwrite defaults:
@@ -19,10 +28,13 @@ diff -Naur upnp_orig/Makefile upnp/Makefile
  
  ### The version number of VDR's plugin API (taken from VDR's "config.h"):
  
-@@ -54,6 +57,19 @@
- DEFINES += -D_GNU_SOURCE -DPLUGIN_NAME_I18N='"$(PLUGIN)"'
- DEFINES += -DPLUGINDIR=\"$(PLUGINLIBDIR)\"
+@@ -52,7 +55,20 @@
+ INCLUDES += -I$(VDRDIR)/include
  
+ DEFINES += -D_GNU_SOURCE -DPLUGIN_NAME_I18N='"$(PLUGIN)"'
+-DEFINES += -DPLUGINDIR=\"$(PLUGINLIBDIR)\"
++DEFINES += -DPLUGINDIR=\"$(SUBPLUGINLIBDIR)\"
++
 +
 +# export to subplugins makefiles:
 +export VERSION
@@ -35,20 +47,26 @@ diff -Naur upnp_orig/Makefile upnp/Makefile
 +export VDRDIR
 +export LIBDIR
 +export TMPDIR
-+
+ 
  ### The object files (add further files here):
  
- TNTOBJ =	httptnt/deviceDescription.o \
-@@ -82,7 +98,7 @@
+@@ -80,9 +96,14 @@
+ 		
+ LIBS += -lupnp -lcxxtools -ltntnet -ltntdb -ldl
  
++
++### The main target (including subplugins):
++
++all: plugin subplugins
++
  ### The main target:
  
 -all: libvdr-$(PLUGIN).so i18n
-+all: libvdr-$(PLUGIN).so i18n subplugins
++plugin: libvdr-$(PLUGIN).so i18n
  
  ### Implicit rules:
  
-@@ -136,9 +152,17 @@
+@@ -136,9 +157,17 @@
  	@-rm -rf $(TMPDIR)/$(ARCHIVE)
  	@mkdir $(TMPDIR)/$(ARCHIVE)
  	@cp -a * $(TMPDIR)/$(ARCHIVE)
@@ -70,7 +88,7 @@ diff -Naur upnp_orig/Makefile upnp/Makefile
 +	@for i in `ls -A -I ".*" $(SUBPLUGDIR)`; do for j in `ls -A -I ".*" $(SUBPLUGDIR)/$$i`; do $(MAKE) -f ../../../Makefile.plugins -C "$(SUBPLUGDIR)/$$i/$$j" all || exit 1; done; done
 diff -Naur upnp_orig/Makefile.plugins upnp/Makefile.plugins
 --- upnp_orig/Makefile.plugins	1970-01-01 01:00:00.000000000 +0100
-+++ upnp/Makefile.plugins	2012-10-25 16:56:02.000000000 +0200
++++ upnp/Makefile.plugins	2012-10-26 00:41:54.505719680 +0200
 @@ -0,0 +1,64 @@
 +#
 +# UPnP/DLNA subplugins Makefile
@@ -118,7 +136,7 @@ diff -Naur upnp_orig/Makefile.plugins upnp/Makefile.plugins
 +### Targets:
 +
 +LIBUPNP    = libupnp-$(TARGET).so
-+LIBUPNPVER = libupnp-$(TARGET)-$(UPNPAPIVERSION).so.$(APIVERSION)
++LIBUPNPVER = $(LIBUPNP).$(UPNPAPIVERSION)
 +
 +BUILDTARGETS = $(LIBDIR)/$(LIBUPNPVER)
 +
@@ -136,11 +154,39 @@ diff -Naur upnp_orig/Makefile.plugins upnp/Makefile.plugins
 +
 +clean:
 +	@-rm -f $(OBJS) $(CLEAN_RM) $(DEPFILE) $(LIBUPNP) $(LIBDIR)/$(LIBUPNPVER) core* *~
+diff -Naur upnp_orig/Makefile.singleplugin upnp/Makefile.singleplugin
+--- upnp_orig/Makefile.singleplugin	1970-01-01 01:00:00.000000000 +0100
++++ upnp/Makefile.singleplugin	2012-10-26 00:41:54.505719680 +0200
+@@ -0,0 +1,24 @@
++#
++# Common Makefile for building a single UPnP profiler plugin,
++# which is included from the one in the subplugin directory
++
++LIBDIR = ../../../../../lib
++VDRDIR = ../../../../../..
++
++-include $(VDRDIR)/Make.global
++-include $(VDRDIR)/Make.config
++
++### The version number of VDR's plugin API (taken from VDR's "config.h"):
++APIVERSION = $(shell sed -ne '/define APIVERSION/s/^.*"\(.*\)".*$$/\1/p' $(VDRDIR)/config.h)
++
++export LIBDIR
++export VDRDIR
++export APIVERSION
++
++-include *.mk
++
++all:
++	@$(MAKE) -f ../../../Makefile.plugins -C "$(shell pwd)" all
++
++clean:
++	@$(MAKE) -f ../../../Makefile.plugins -C "$(shell pwd)" clean
 diff -Naur upnp_orig/plugins/profiler/vdrDVBProfiler/Makefile upnp/plugins/profiler/vdrDVBProfiler/Makefile
---- upnp_orig/plugins/profiler/vdrDVBProfiler/Makefile	2012-10-25 16:57:27.000000000 +0200
-+++ upnp/plugins/profiler/vdrDVBProfiler/Makefile	1970-01-01 01:00:00.000000000 +0100
-@@ -1,59 +0,0 @@
--#
+--- upnp_orig/plugins/profiler/vdrDVBProfiler/Makefile	2012-10-26 00:41:28.000000000 +0200
++++ upnp/plugins/profiler/vdrDVBProfiler/Makefile	2012-10-26 00:41:54.506719683 +0200
+@@ -1,59 +1,7 @@
+ #
 -# Makefile for a UPnP profiler plugin
 -#
 -# $Id$
@@ -169,7 +215,7 @@ diff -Naur upnp_orig/plugins/profiler/vdrDVBProfiler/Makefile upnp/plugins/profi
 -VDRDIR ?= $(UPNPDIR)/../../..
 -VDRAPIVERSION = $(shell sed -ne '/define APIVERSION/s/^.*"\(.*\)".*$$/\1/p' $(VDRDIR)/config.h)
 -
--INCLUDES += -I$(UPNPDIR)/include
+-INCLUDES += -I$(UPNPDIR)/include -I$(VDRDIR)/include
 -
 -DEFINES  += -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
 -
@@ -192,16 +238,21 @@ diff -Naur upnp_orig/plugins/profiler/vdrDVBProfiler/Makefile upnp/plugins/profi
 -	@$(MAKEDEP) $(DEFINES) $(INCLUDES) $(OBJS:%.o=%.cpp) > $@
 -
 --include $(DEPFILE)
--
++# Wrapper Makefile for a UPnP profiler plugin
++# Please write anything shared among subplugin Makefiles
++# in the one included below, anything specific to this plugin
++# in Makefile.mk in this directory
+ 
 -libupnp-$(PROFILE)-profiler.so: $(OBJS)
 -	$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared $(OBJS) $(LIBS) -o $@
 -	@cp --remove-destination $@ $@.$(APIVERSION)
 -	
 -clean:
 -	@-rm -f $(OBJS) $(DEPFILE) *.so *.so.$(APIVERSION) core* *~
++-include ../../../Makefile.singleplugin
 diff -Naur upnp_orig/plugins/profiler/vdrDVBProfiler/Makefile.mk upnp/plugins/profiler/vdrDVBProfiler/Makefile.mk
 --- upnp_orig/plugins/profiler/vdrDVBProfiler/Makefile.mk	1970-01-01 01:00:00.000000000 +0100
-+++ upnp/plugins/profiler/vdrDVBProfiler/Makefile.mk	2012-10-25 16:57:51.295719684 +0200
++++ upnp/plugins/profiler/vdrDVBProfiler/Makefile.mk	2012-10-26 00:41:54.506719683 +0200
 @@ -0,0 +1,13 @@
 +#
 +# Makefile for a UPnP subplugin
@@ -214,13 +265,13 @@ diff -Naur upnp_orig/plugins/profiler/vdrDVBProfiler/Makefile.mk upnp/plugins/pr
 +TARGET    = $(CATEGORY)-$(SUBPLUGIN)
 +OBJS      = $(SUBPLUGIN)$(CATEGORY).o
 +
-+# any special libs?
-+#LIBS      = -L$(VDRLIBDIR) -Wl,-R$(VDRLIBDIR)
++# any special libs only for this subplugin?
++#LIBS      = -lMY_SPECIAL_LIB
 diff -Naur upnp_orig/plugins/provider/recProvider/Makefile upnp/plugins/provider/recProvider/Makefile
---- upnp_orig/plugins/provider/recProvider/Makefile	2012-10-25 16:57:27.000000000 +0200
-+++ upnp/plugins/provider/recProvider/Makefile	1970-01-01 01:00:00.000000000 +0100
-@@ -1,59 +0,0 @@
--#
+--- upnp_orig/plugins/provider/recProvider/Makefile	2012-10-26 00:41:28.000000000 +0200
++++ upnp/plugins/provider/recProvider/Makefile	2012-10-26 00:41:54.506719683 +0200
+@@ -1,59 +1,7 @@
+ #
 -# Makefile for a UPnP provider plugin
 -#
 -# $Id$
@@ -249,7 +300,7 @@ diff -Naur upnp_orig/plugins/provider/recProvider/Makefile upnp/plugins/provider
 -VDRDIR ?= $(UPNPDIR)/../../..
 -VDRAPIVERSION = $(shell sed -ne '/define APIVERSION/s/^.*"\(.*\)".*$$/\1/p' $(VDRDIR)/config.h)
 -
--INCLUDES += -I$(UPNPDIR)/include
+-INCLUDES += -I$(UPNPDIR)/include -I$(VDRDIR)/include
 -
 -DEFINES  += -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
 -
@@ -272,16 +323,21 @@ diff -Naur upnp_orig/plugins/provider/recProvider/Makefile upnp/plugins/provider
 -	@$(MAKEDEP) $(DEFINES) $(INCLUDES) $(OBJS:%.o=%.cpp) > $@
 -
 --include $(DEPFILE)
--
++# Wrapper Makefile for a UPnP profiler plugin
++# Please write anything shared among subplugin Makefiles
++# in the one included below, anything specific to this plugin
++# in Makefile.mk in this directory
+ 
 -libupnp-$(SCHEMA)-provider.so: $(OBJS)
 -	$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared $(OBJS) $(LIBS) -o $@
 -	@cp --remove-destination $@ $@.$(APIVERSION)
 -	
 -clean:
 -	@-rm -f $(OBJS) $(DEPFILE) *.so *.so.$(APIVERSION) core* *~
++-include ../../../Makefile.singleplugin
 diff -Naur upnp_orig/plugins/provider/recProvider/Makefile.mk upnp/plugins/provider/recProvider/Makefile.mk
 --- upnp_orig/plugins/provider/recProvider/Makefile.mk	1970-01-01 01:00:00.000000000 +0100
-+++ upnp/plugins/provider/recProvider/Makefile.mk	2012-10-25 16:57:51.296719684 +0200
++++ upnp/plugins/provider/recProvider/Makefile.mk	2012-10-26 00:41:54.506719683 +0200
 @@ -0,0 +1,13 @@
 +#
 +# Makefile for a UPnP subplugin
@@ -294,13 +350,13 @@ diff -Naur upnp_orig/plugins/provider/recProvider/Makefile.mk upnp/plugins/provi
 +TARGET    = $(CATEGORY)-$(SUBPLUGIN)
 +OBJS      = $(SUBPLUGIN)$(CATEGORY).o
 +
-+# any special libs?
-+#LIBS      = -L$(VDRLIBDIR) -Wl,-R$(VDRLIBDIR)
++# any special libs only for this subplugin?
++#LIBS      = -lMY_SPECIAL_LIB
 diff -Naur upnp_orig/plugins/provider/vdrProvider/Makefile upnp/plugins/provider/vdrProvider/Makefile
---- upnp_orig/plugins/provider/vdrProvider/Makefile	2012-10-25 16:57:27.000000000 +0200
-+++ upnp/plugins/provider/vdrProvider/Makefile	1970-01-01 01:00:00.000000000 +0100
-@@ -1,59 +0,0 @@
--#
+--- upnp_orig/plugins/provider/vdrProvider/Makefile	2012-10-26 00:41:28.000000000 +0200
++++ upnp/plugins/provider/vdrProvider/Makefile	2012-10-26 00:41:54.507719685 +0200
+@@ -1,59 +1,7 @@
+ #
 -# Makefile for a UPnP provider plugin
 -#
 -# $Id$
@@ -329,7 +385,7 @@ diff -Naur upnp_orig/plugins/provider/vdrProvider/Makefile upnp/plugins/provider
 -VDRDIR ?= $(UPNPDIR)/../../..
 -VDRAPIVERSION = $(shell sed -ne '/define APIVERSION/s/^.*"\(.*\)".*$$/\1/p' $(VDRDIR)/config.h)
 -
--INCLUDES += -I$(UPNPDIR)/include
+-INCLUDES += -I$(UPNPDIR)/include -I$(VDRDIR)/include
 -
 -DEFINES  += -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
 -
@@ -352,16 +408,21 @@ diff -Naur upnp_orig/plugins/provider/vdrProvider/Makefile upnp/plugins/provider
 -	@$(MAKEDEP) $(DEFINES) $(INCLUDES) $(OBJS:%.o=%.cpp) > $@
 -
 --include $(DEPFILE)
--
++# Wrapper Makefile for a UPnP profiler plugin
++# Please write anything shared among subplugin Makefiles
++# in the one included below, anything specific to this plugin
++# in Makefile.mk in this directory
+ 
 -libupnp-$(SCHEMA)-provider.so: $(OBJS)
 -	$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared $(OBJS) $(LIBS) -o $@
 -	@cp --remove-destination $@ $@.$(APIVERSION)
 -	
 -clean:
 -	@-rm -f $(OBJS) $(DEPFILE) *.so *.so.$(APIVERSION) core* *~
++-include ../../../Makefile.singleplugin
 diff -Naur upnp_orig/plugins/provider/vdrProvider/Makefile.mk upnp/plugins/provider/vdrProvider/Makefile.mk
 --- upnp_orig/plugins/provider/vdrProvider/Makefile.mk	1970-01-01 01:00:00.000000000 +0100
-+++ upnp/plugins/provider/vdrProvider/Makefile.mk	2012-10-25 16:57:51.297719684 +0200
++++ upnp/plugins/provider/vdrProvider/Makefile.mk	2012-10-26 00:41:54.507719685 +0200
 @@ -0,0 +1,13 @@
 +#
 +# Makefile for a UPnP subplugin
@@ -374,5 +435,5 @@ diff -Naur upnp_orig/plugins/provider/vdrProvider/Makefile.mk upnp/plugins/provi
 +TARGET    = $(CATEGORY)-$(SUBPLUGIN)
 +OBJS      = $(SUBPLUGIN)$(CATEGORY).o
 +
-+# any special libs?
-+#LIBS      = -L$(VDRLIBDIR) -Wl,-R$(VDRLIBDIR)
++# any special libs only for this subplugin?
++#LIBS      = -lMY_SPECIAL_LIB
