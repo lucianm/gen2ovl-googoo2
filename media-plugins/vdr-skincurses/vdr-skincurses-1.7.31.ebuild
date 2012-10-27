@@ -9,7 +9,7 @@ IUSE=""
 inherit vdr-plugin-2
 
 DESCRIPTION="VDR plugin: show content of menu in a shell window"
-HOMEPAGE="http://www.cadsoft.de/vdr/"
+HOMEPAGE="http://www.tvdr.de"
 SRC_URI="ftp://ftp.tvdr.de/vdr/Developer/vdr-${PV}.tar.bz2"
 
 KEYWORDS="~x86 ~amd64"
