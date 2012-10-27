@@ -1,6 +1,6 @@
 diff -Naur upnp_orig/media/mediaManager.cpp upnp/media/mediaManager.cpp
---- upnp_orig/media/mediaManager.cpp	2012-10-27 01:14:40.523000010 +0200
-+++ upnp/media/mediaManager.cpp	2012-10-27 01:15:42.954000010 +0200
+--- upnp_orig/media/mediaManager.cpp	2012-10-27 22:46:25.000000000 +0200
++++ upnp/media/mediaManager.cpp	2012-10-27 22:46:55.756637548 +0200
 @@ -475,7 +475,7 @@
  
      connection = tntdb::connect(ss.str());
@@ -20,27 +20,25 @@ diff -Naur upnp_orig/media/mediaManager.cpp upnp/media/mediaManager.cpp
  
    if(!pluginManager->LoadPlugins(pluginDirectory)){
 diff -Naur upnp_orig/media/pluginManager.cpp upnp/media/pluginManager.cpp
---- upnp_orig/media/pluginManager.cpp	2012-10-27 01:14:40.524000010 +0200
-+++ upnp/media/pluginManager.cpp	2012-10-27 01:15:42.955000010 +0200
-@@ -405,7 +405,8 @@
+--- upnp_orig/media/pluginManager.cpp	2012-10-27 22:46:25.000000000 +0200
++++ upnp/media/pluginManager.cpp	2012-10-27 22:48:37.568637548 +0200
+@@ -405,7 +405,7 @@
        return true;
      }
    } else {
--    cerr << "Error while opening plugin: " << error << endl;
-+    //cerr << "Error while opening plugin: " << error << endl;
-+    esyslog("UPnP\tError while opening subplugin: '%s', %s", file.c_str(), error);
+-    esyslog("UPnP\tError while opening plugin: %s", error);
++    esyslog("UPnP\tError while opening plugin: '%s', %s", file.c_str(), error);
    }
  
    return false;
 diff -Naur upnp_orig/server/server.cpp upnp/server/server.cpp
---- upnp_orig/server/server.cpp	2012-10-27 01:14:40.530000010 +0200
-+++ upnp/server/server.cpp	2012-10-27 01:15:42.955000010 +0200
-@@ -270,7 +270,8 @@
+--- upnp_orig/server/server.cpp	2012-10-27 22:46:25.000000000 +0200
++++ upnp/server/server.cpp	2012-10-27 22:49:43.095637547 +0200
+@@ -270,7 +270,7 @@
  
  void cMediaServer::RegisterService(cUPnPService* service){
    if(service != NULL){
 -    cout << "Registered service: " << service->GetServiceDescription().serviceType << endl;
-+    //cout << "Registered service: " << service->GetServiceDescription().serviceType << endl;
 +    dsyslog("UPnP\tRegistered service: %s", service->GetServiceDescription().serviceType.c_str());
      GetServices()[service->GetServiceDescription().serviceID] = service;
    }
