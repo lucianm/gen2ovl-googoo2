@@ -45,7 +45,7 @@ src_prepare() {
 	sed -i Make.config -e "s:usr\/local:usr:" -e "s:FLAGS *=:FLAGS ?=:" || die "sed /usr/local path failed"
 
 	epatch "${FILESDIR}/${P}_prestrip-optional.patch" || die "failed patching with ${FILESDIR}/${P}_prestrip-optional.patch"
-	sed -i "s:PRESTRIP:#PRESTRIP:" Make.config || die "sed HAVE_FREETYPE2 failed"
+	sed -i "s:PRESTRIP:#PRESTRIP:" Make.config || die "sed PRESTRIP failed"
 
 	if use !truetype; then
 		sed -i "s:HAVE_FREETYPE2:#HAVE_FREETYPE2:" Make.config || die "sed HAVE_FREETYPE2 failed"
