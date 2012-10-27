@@ -1,0 +1,495 @@
+diff -Naur upnp_orig/INSTALL upnp/INSTALL
+--- upnp_orig/INSTALL	1970-01-01 01:00:00.000000000 +0100
++++ upnp/INSTALL	2012-10-27 02:47:47.118000010 +0200
+@@ -0,0 +1,14 @@
++- unpack as usually inside the PLUGINS dir of the VDR version against you want to build
++- building the subplugins requires the main plugin to be already installed on the target
++system, therefore you should execute the following sequence:
++
++make
++make install
++make subplugins
++make install-subplugins
++
++ - of course, executing the "install*" targets directly will build the binaries first...
++ - for building / installing just certain subplugins explicitely, just change to their
++ respective directories and execute 'make' / 'make install' there;
++ 
++ - further targets are remove & remove-subplugins
+\ No newline at end of file
+diff -Naur upnp_orig/Make.config upnp/Make.config
+--- upnp_orig/Make.config	1970-01-01 01:00:00.000000000 +0100
++++ upnp/Make.config	2012-10-27 02:39:53.906000010 +0200
+@@ -0,0 +1,57 @@
++#
++# Makefile for a Video Disk Recorder plugin
++#
++# $Id$
++
++# The official name of this plugin.
++# This name will be used in the '-P...' option of VDR to load the plugin.
++# By default the main source file also carries this name.
++# IMPORTANT: the presence of this macro is important for the Make.config
++# file. So it must be defined, even if it is not used here!
++#
++PLUGIN = upnp
++
++### The sources root build directory as seen by the called (to be overrideable by it)
++
++ROOTBUILDDIR ?= $(shell pwd)
++
++### The version number of this plugin (taken from the main source file):
++
++VERSION = $(shell grep 'static const char \*VERSION *=' $(ROOTBUILDDIR)/$(PLUGIN).h | awk '{ print $$6 }' | sed -e 's/[";]//g')
++
++### If you do not want to strip binaries on installing, you may comment this:
++PRESTRIP = -s
++
++### The C++ compiler and options:
++
++CXX      ?= g++
++ECPPC	 ?= ecppc
++CXXFLAGS ?= -g -O3 -Wall -Werror=overloaded-virtual -Wno-parentheses
++
++### The directory environment:
++
++VDRDIR ?= $(ROOTBUILDDIR)/../../..
++VDRINCDIR ?= $(VDRDIR)
++VDRPLUGINLIBDIR ?= /usr/lib/vdr/plugins
++VDRCFGDIR ?= /etc/vdr/plugins/$(PLUGIN)
++VDRRESDIR ?= /usr/share/vdr/$(PLUGIN)
++LIBDIR ?= $(ROOTBUILDDIR)/../../lib
++TMPDIR ?= /tmp
++
++PLUGINDIR= ./PLUGINS
++SUBPLUGINLIBDIR ?= $(VDRPLUGINLIBDIR)/$(PLUGIN)
++
++### The version number of VDR's plugin API (taken from VDR's "config.h"):
++
++APIVERSION = $(shell sed -ne '/define APIVERSION/s/^.*"\(.*\)".*$$/\1/p' $(VDRDIR)/config.h)
++
++### Includes and Defines (add further entries here):
++
++INCLUDES += -I$(VDRDIR)/include
++
++DEFINES += -D_GNU_SOURCE -DPLUGIN_NAME_I18N='"$(PLUGIN)"'
++DEFINES += -DPLUGINDIR=\"$(SUBPLUGINLIBDIR)\"
++
++
++# export to subplugins makefiles:
++export PRESTRIP VERSION APIVERSION INCLUDES SHAREDDEFINES SHAREDLIBS CXX CXXFLAGS VDRDIR VDRINCDIR LIBDIR TMPDIR VDRPLUGINLIBDIR SUBPLUGINLIBDIR
+diff -Naur upnp_orig/Makefile upnp/Makefile
+--- upnp_orig/Makefile	2012-10-27 02:38:56.000000000 +0200
++++ upnp/Makefile	2012-10-27 02:39:53.907000010 +0200
+@@ -9,51 +9,26 @@
+ # IMPORTANT: the presence of this macro is important for the Make.config
+ # file. So it must be defined, even if it is not used here!
+ #
+-PLUGIN = upnp
+ 
+-### The version number of this plugin (taken from the main source file):
++### our common config
+ 
+-VERSION = $(shell grep 'static const char \*VERSION *=' $(PLUGIN).h | awk '{ print $$6 }' | sed -e 's/[";]//g')
+-
+-### The C++ compiler and options:
+-
+-CXX      ?= g++
+-ECPPC	 ?= ecppc
+-CXXFLAGS ?= -g -O3 -Wall -Werror=overloaded-virtual -Wno-parentheses
+-
+-### The directory environment:
+-
+-VDRDIR ?= ../../..
+-LIBDIR ?= ../../lib
+-TMPDIR ?= /tmp
+-
+-PLUGINDIR= ./PLUGINS
+-PLUGINLIBDIR= /usr/lib/vdr/plugins/upnp
++-include Make.config
+ 
+ ### Make sure that necessary options are included:
+ 
+-include $(VDRDIR)/Make.global
++-include $(VDRDIR)/Make.global
+ 
+-### Allow user defined options to overwrite defaults:
++### Allow user defined VDR options to overwrite defaults:
+ 
+ -include $(VDRDIR)/Make.config
+ 
+-### The version number of VDR's plugin API (taken from VDR's "config.h"):
+-
+-APIVERSION = $(shell sed -ne '/define APIVERSION/s/^.*"\(.*\)".*$$/\1/p' $(VDRDIR)/config.h)
++SUBPLUGDIR ?= ./plugins
+ 
+ ### The name of the distribution archive:
+ 
+ ARCHIVE = $(PLUGIN)-$(VERSION)
+ PACKAGE = vdr-$(ARCHIVE)
+ 
+-### Includes and Defines (add further entries here):
+-
+-INCLUDES += -I$(VDRDIR)/include
+-
+-DEFINES += -D_GNU_SOURCE -DPLUGIN_NAME_I18N='"$(PLUGIN)"'
+-DEFINES += -DPLUGINDIR=\"$(PLUGINLIBDIR)\"
+-
+ ### The object files (add further files here):
+ 
+ TNTOBJ =	httptnt/deviceDescription.o \
+@@ -80,6 +55,7 @@
+ 		
+ LIBS += -lupnp -lcxxtools -ltntnet -ltntdb -ldl
+ 
++
+ ### The main target:
+ 
+ all: libvdr-$(PLUGIN).so i18n
+@@ -132,13 +108,36 @@
+ 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -rdynamic -shared $(OBJS) $(LIBS) -o $@
+ 	@cp --remove-destination $@ $(LIBDIR)/$@.$(APIVERSION)
+ 
++install: all
++	@mkdir -p $(VDRPLUGINLIBDIR)
++	@mkdir -p $(VDRCFGDIR)
++#	@mkdir -p $(VDRRESDIR)
++	install -m 755 -o root -g root $(PRESTRIP) $(LIBDIR)/libvdr-$(PLUGIN).so.$(APIVERSION) $(VDRPLUGINLIBDIR)
++	cp --remove-destination --recursive httpdocs $(VDRCFGDIR)
++
++uninstall:
++	rm --recursive $(VDRPLUGINLIBDIR)/libvdr-$(PLUGIN).so.$(APIVERSION)
++#	rm --recursive $(VDRCFGDIR)/httpdocs
++
+ dist: $(I18Npo) clean
+ 	@-rm -rf $(TMPDIR)/$(ARCHIVE)
+ 	@mkdir $(TMPDIR)/$(ARCHIVE)
+ 	@cp -a * $(TMPDIR)/$(ARCHIVE)
+-	@tar czf $(PACKAGE).tgz -C $(TMPDIR) --exclude debian --exclude CVS --exclude .svn $(ARCHIVE)
++	@tar czf $(PACKAGE).tgz -C $(TMPDIR) --exclude debian --exclude CVS --exclude .svn --exclude .git --exclude .gitignore $(ARCHIVE)
+ 	@-rm -rf $(TMPDIR)/$(ARCHIVE)
+ 	@echo Distribution package created as $(PACKAGE).tgz
+ 
+ clean:
+ 	@-rm -f $(OBJS) $(DEPFILE) *.so *.so.$(APIVERSION) *.tgz core* *~ $(PODIR)/*.mo $(PODIR)/*.pot
++
++clean-subplugins:
++	@for i in `ls -A -I ".*" $(SUBPLUGDIR)`; do for j in `ls -A -I ".*" $(SUBPLUGDIR)/$$i`; do $(MAKE) -f ../../../Makefile.plugins -C "$(SUBPLUGDIR)/$$i/$$j" clean; done; done
++
++subplugins:
++	@for i in `ls -A -I ".*" $(SUBPLUGDIR)`; do for j in `ls -A -I ".*" $(SUBPLUGDIR)/$$i`; do $(MAKE) -f ../../../Makefile.plugins -C "$(SUBPLUGDIR)/$$i/$$j" all || exit 1; done; done
++
++install-subplugins:
++	@for i in `ls -A -I ".*" $(SUBPLUGDIR)`; do for j in `ls -A -I ".*" $(SUBPLUGDIR)/$$i`; do $(MAKE) -f ../../../Makefile.plugins -C "$(SUBPLUGDIR)/$$i/$$j" install || exit 1; done; done
++
++uninstall-subplugins:
++	@for i in `ls -A -I ".*" $(SUBPLUGDIR)`; do for j in `ls -A -I ".*" $(SUBPLUGDIR)/$$i`; do $(MAKE) -f ../../../Makefile.plugins -C "$(SUBPLUGDIR)/$$i/$$j" uninstall; done; done
+diff -Naur upnp_orig/Makefile.plugins upnp/Makefile.plugins
+--- upnp_orig/Makefile.plugins	1970-01-01 01:00:00.000000000 +0100
++++ upnp/Makefile.plugins	2012-10-27 02:39:53.907000010 +0200
+@@ -0,0 +1,71 @@
++#
++# UPnP/DLNA subplugins Makefile
++#
++# This code is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License
++# as published by the Free Software Foundation; either version 2
++# of the License, or (at your option) any later version.
++#
++# This code is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write to the Free Software
++# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
++# Or, point your browser to http://www.gnu.org/copyleft/gpl.html
++
++### Includes and Defines
++
++SINCLUDES += -I../../../include
++SINCLUDES += $(shell echo "$(INCLUDES)" | sed -e 's+-I *+-I+g' | sed -e 's+-I\([^/]\)+-I../../\1+g')
++
++-include Makefile
++
++UPNPAPIVERSION = $(shell sed -ne '/define UPNPPLUGIN_VERSION/s/^.*"\(.*\)".*$$/\1/p' ../../../include/plugin.h)
++
++### The version number of the subplugin (taken from the main source file):
++SUBPLUGVERSION = $(shell grep 'static const char \*VERSION *=' $(SUBPLUGIN)$(CATEGORY).cpp | awk '{ print $$6 }' | sed -e 's/[";]//g')
++
++DEFINES  += -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
++
++LIBS     += -L$(LIBDIR) -Wl,-R$(LIBDIR) $(VDRPLUGINLIBDIR)/libvdr-upnp.so.$(APIVERSION)
++
++# Dependencies:
++
++MAKEDEP = g++ -MM -MG
++DEPFILE = .dependencies
++$(DEPFILE): $(OBJS:%.o=%.cpp) $(wildcard *.h)
++	@$(MAKEDEP) $(DEFINES) $(SHAREDDEFINES) $(SINCLUDES) $(OBJS:%.o=%.cpp) > $@
++
++-include $(DEPFILE)
++
++### Targets:
++
++LIBUPNP    = libupnp-$(TARGET).so
++LIBUPNPVER = $(LIBUPNP).$(UPNPAPIVERSION)-$(APIVERSION)
++
++BUILDTARGETS = $(LIBDIR)/$(LIBUPNPVER)
++
++_all: $(BUILDTARGETS)
++.PHONY: clean dist
++
++%.o: %.cpp
++	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(SHAREDDEFINES) $(SINCLUDES) $<
++
++$(LIBUPNP): $(OBJS)
++	$(CXX) $(CXXFLAGS) -shared $(OBJS) $(LIBS) $(SHAREDLIBS) -o $@
++
++$(LIBDIR)/$(LIBUPNPVER): $(LIBUPNP)
++	@cp -p $< $@
++
++_clean:
++	@-rm -f $(OBJS) $(CLEAN_RM) $(DEPFILE) $(LIBUPNP) $(LIBDIR)/$(LIBUPNPVER) core* *~
++
++_install: all
++	@mkdir -p $(SUBPLUGINLIBDIR)
++	install -m 755 -o root -g root $(PRESTRIP) $(LIBDIR)/$(LIBUPNPVER) $(SUBPLUGINLIBDIR)
++
++_uninstall:
++	rm $(SUBPLUGINLIBDIR)/$(LIBUPNPVER)
+diff -Naur upnp_orig/plugins/profiler/vdrDVBProfiler/Makefile upnp/plugins/profiler/vdrDVBProfiler/Makefile
+--- upnp_orig/plugins/profiler/vdrDVBProfiler/Makefile	2012-10-27 02:38:56.000000000 +0200
++++ upnp/plugins/profiler/vdrDVBProfiler/Makefile	2012-10-27 02:39:53.908000010 +0200
+@@ -1,59 +1,27 @@
+ #
+-# Makefile for a UPnP profiler plugin
++# Makefile for a UPnP subplugin
+ #
+ # $Id$
+ #
+ 
+-#
+-# This is the profile of the profiler plugin. It is used
+-# to determine how a resource may be accessed.
+-#
+-PROFILE = dvb
+-
+-### The version number of this plugin (taken from the main source file):
+-
+-VERSION = $(shell grep 'static const char \*VERSION *=' $(PROFILE)Profiler.cpp | awk '{ print $$6 }' | sed -e 's/[";]//g')
+-
+-### The C++ compiler and options:
+-
+-CXX      ?= g++
+-CXXFLAGS ?= -g -O3 -Wall -Werror=overloaded-virtual -Wno-parentheses -fPIC
+-
+-UPNPDIR ?= ../../..
+-VDRLIBDIR ?= $(UPNPDIR)/../../lib
+-
+-APIVERSION = $(shell sed -ne '/define UPNPPLUGIN_VERSION/s/^.*"\(.*\)".*$$/\1/p' $(UPNPDIR)/include/plugin.h)
++SUBPLUGIN = dvb
++CATEGORY  = Profiler
++TARGET    = $(CATEGORY)-$(SUBPLUGIN)
+ 
+-VDRDIR ?= $(UPNPDIR)/../../..
+-VDRAPIVERSION = $(shell sed -ne '/define APIVERSION/s/^.*"\(.*\)".*$$/\1/p' $(VDRDIR)/config.h)
++OBJS      = $(SUBPLUGIN)$(CATEGORY).o
+ 
+-INCLUDES += -I$(UPNPDIR)/include -I$(VDRDIR)/include
+ 
+-DEFINES  += -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
++ROOTBUILDDIR = ../../..
++-include ../../../Make.config
+ 
+-OBJS     = $(PROFILE)Profiler.o
++all:
++	@$(MAKE) -f ../../../Makefile.plugins -C "$(shell pwd)" _all
+ 
+-LIBS	 = -L$(VDRLIBDIR) -Wl,-R$(VDRLIBDIR) $(VDRLIBDIR)/libvdr-upnp.so.$(VDRAPIVERSION)
+-
+-all: libupnp-$(PROFILE)-profiler.so
+-
+-### Implicit rules:
+-
+-%.o: %.cpp
+-	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
+-
+-### Dependencies:
+-
+-MAKEDEP = $(CXX) -MM -MG
+-DEPFILE = .dependencies
+-$(DEPFILE): Makefile
+-	@$(MAKEDEP) $(DEFINES) $(INCLUDES) $(OBJS:%.o=%.cpp) > $@
++clean:
++	@$(MAKE) -f ../../../Makefile.plugins -C "$(shell pwd)" _clean
+ 
+--include $(DEPFILE)
++install:
++	@$(MAKE) -f ../../../Makefile.plugins -C "$(shell pwd)" _install
+ 
+-libupnp-$(PROFILE)-profiler.so: $(OBJS)
+-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared $(OBJS) $(LIBS) -o $@
+-	@cp --remove-destination $@ $@.$(APIVERSION)
+-	
+-clean:
+-	@-rm -f $(OBJS) $(DEPFILE) *.so *.so.$(APIVERSION) core* *~
++uninstall:
++	@$(MAKE) -f ../../../Makefile.plugins -C "$(shell pwd)" _uninstall
+diff -Naur upnp_orig/plugins/provider/recProvider/Makefile upnp/plugins/provider/recProvider/Makefile
+--- upnp_orig/plugins/provider/recProvider/Makefile	2012-10-27 02:38:56.000000000 +0200
++++ upnp/plugins/provider/recProvider/Makefile	2012-10-27 02:39:53.908000010 +0200
+@@ -1,59 +1,27 @@
+ #
+-# Makefile for a UPnP provider plugin
++# Makefile for a UPnP subplugin
+ #
+ # $Id$
+ #
+ 
+-#
+-# This is the schema of the provider plugin. It is used
+-# to determine how a resource may be accessed.
+-#
+-SCHEMA = rec
+-
+-### The version number of this plugin (taken from the main source file):
+-
+-VERSION = $(shell grep 'static const char \*VERSION *=' $(SCHEMA)Provider.cpp | awk '{ print $$6 }' | sed -e 's/[";]//g')
+-
+-### The C++ compiler and options:
+-
+-CXX      ?= g++
+-CXXFLAGS ?= -g -O3 -Wall -Werror=overloaded-virtual -Wno-parentheses -fPIC
+-
+-UPNPDIR ?= ../../..
+-VDRLIBDIR ?= $(UPNPDIR)/../../lib
+-
+-APIVERSION = $(shell sed -ne '/define UPNPPLUGIN_VERSION/s/^.*"\(.*\)".*$$/\1/p' $(UPNPDIR)/include/plugin.h)
++SUBPLUGIN = rec
++CATEGORY  = Provider
++TARGET    = $(CATEGORY)-$(SUBPLUGIN)
+ 
+-VDRDIR ?= $(UPNPDIR)/../../..
+-VDRAPIVERSION = $(shell sed -ne '/define APIVERSION/s/^.*"\(.*\)".*$$/\1/p' $(VDRDIR)/config.h)
++OBJS      = $(SUBPLUGIN)$(CATEGORY).o
+ 
+-INCLUDES += -I$(UPNPDIR)/include -I$(VDRDIR)/include
+ 
+-DEFINES  += -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
++ROOTBUILDDIR = ../../..
++-include ../../../Make.config
+ 
+-OBJS     = $(SCHEMA)Provider.o
++all:
++	@$(MAKE) -f ../../../Makefile.plugins -C "$(shell pwd)" _all
+ 
+-LIBS	 = -L$(VDRLIBDIR) -Wl,-R$(VDRLIBDIR) $(VDRLIBDIR)/libvdr-upnp.so.$(VDRAPIVERSION)
+-
+-all: libupnp-$(SCHEMA)-provider.so
+-
+-### Implicit rules:
+-
+-%.o: %.cpp
+-	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
+-
+-### Dependencies:
+-
+-MAKEDEP = $(CXX) -MM -MG
+-DEPFILE = .dependencies
+-$(DEPFILE): Makefile
+-	@$(MAKEDEP) $(DEFINES) $(INCLUDES) $(OBJS:%.o=%.cpp) > $@
++clean:
++	@$(MAKE) -f ../../../Makefile.plugins -C "$(shell pwd)" _clean
+ 
+--include $(DEPFILE)
++install:
++	@$(MAKE) -f ../../../Makefile.plugins -C "$(shell pwd)" _install
+ 
+-libupnp-$(SCHEMA)-provider.so: $(OBJS)
+-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared $(OBJS) $(LIBS) -o $@
+-	@cp --remove-destination $@ $@.$(APIVERSION)
+-	
+-clean:
+-	@-rm -f $(OBJS) $(DEPFILE) *.so *.so.$(APIVERSION) core* *~
++uninstall:
++	@$(MAKE) -f ../../../Makefile.plugins -C "$(shell pwd)" _uninstall
+diff -Naur upnp_orig/plugins/provider/vdrProvider/Makefile upnp/plugins/provider/vdrProvider/Makefile
+--- upnp_orig/plugins/provider/vdrProvider/Makefile	2012-10-27 02:38:56.000000000 +0200
++++ upnp/plugins/provider/vdrProvider/Makefile	2012-10-27 02:39:53.909000010 +0200
+@@ -1,59 +1,27 @@
+ #
+-# Makefile for a UPnP provider plugin
++# Makefile for a UPnP subplugin
+ #
+ # $Id$
+ #
+ 
+-#
+-# This is the schema of the provider plugin. It is used
+-# to determine how a resource may be accessed.
+-#
+-SCHEMA = vdr
+-
+-### The version number of this plugin (taken from the main source file):
+-
+-VERSION = $(shell grep 'static const char \*VERSION *=' $(SCHEMA)Provider.cpp | awk '{ print $$6 }' | sed -e 's/[";]//g')
+-
+-### The C++ compiler and options:
+-
+-CXX      ?= g++
+-CXXFLAGS ?= -g -O3 -Wall -Werror=overloaded-virtual -Wno-parentheses -fPIC
+-
+-UPNPDIR ?= ../../..
+-VDRLIBDIR ?= $(UPNPDIR)/../../lib
+-
+-APIVERSION = $(shell sed -ne '/define UPNPPLUGIN_VERSION/s/^.*"\(.*\)".*$$/\1/p' $(UPNPDIR)/include/plugin.h)
++SUBPLUGIN = vdr
++CATEGORY  = Provider
++TARGET    = $(CATEGORY)-$(SUBPLUGIN)
+ 
+-VDRDIR ?= $(UPNPDIR)/../../..
+-VDRAPIVERSION = $(shell sed -ne '/define APIVERSION/s/^.*"\(.*\)".*$$/\1/p' $(VDRDIR)/config.h)
++OBJS      = $(SUBPLUGIN)$(CATEGORY).o
+ 
+-INCLUDES += -I$(UPNPDIR)/include -I$(VDRDIR)/include
+ 
+-DEFINES  += -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
++ROOTBUILDDIR = ../../..
++-include ../../../Make.config
+ 
+-OBJS     = $(SCHEMA)Provider.o
++all:
++	@$(MAKE) -f ../../../Makefile.plugins -C "$(shell pwd)" _all
+ 
+-LIBS	 = -L$(VDRLIBDIR) -Wl,-R$(VDRLIBDIR) $(VDRLIBDIR)/libvdr-upnp.so.$(VDRAPIVERSION)
+-
+-all: libupnp-$(SCHEMA)-provider.so
+-
+-### Implicit rules:
+-
+-%.o: %.cpp
+-	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
+-
+-### Dependencies:
+-
+-MAKEDEP = $(CXX) -MM -MG
+-DEPFILE = .dependencies
+-$(DEPFILE): Makefile
+-	@$(MAKEDEP) $(DEFINES) $(INCLUDES) $(OBJS:%.o=%.cpp) > $@
++clean:
++	@$(MAKE) -f ../../../Makefile.plugins -C "$(shell pwd)" _clean
+ 
+--include $(DEPFILE)
++install:
++	@$(MAKE) -f ../../../Makefile.plugins -C "$(shell pwd)" _install
+ 
+-libupnp-$(SCHEMA)-provider.so: $(OBJS)
+-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared $(OBJS) $(LIBS) -o $@
+-	@cp --remove-destination $@ $@.$(APIVERSION)
+-	
+-clean:
+-	@-rm -f $(OBJS) $(DEPFILE) *.so *.so.$(APIVERSION) core* *~
++uninstall:
++	@$(MAKE) -f ../../../Makefile.plugins -C "$(shell pwd)" _uninstall
