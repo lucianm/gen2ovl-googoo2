@@ -4,7 +4,7 @@
 
 EAPI="4"
 
-inherit eutils vdr-plugin
+inherit eutils vdr-plugin-2
 
 EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-${VDRPLUGIN}.git"
 
@@ -34,18 +34,18 @@ src_unpack() {
 	mv "${WORKDIR}/plugin" -Tf "${WORKDIR}/${VDRPLUGIN}-${PV}"
 
 	cd "${S}"
-	vdr-plugin_src_unpack all_but_unpack
+	vdr-plugin-2_src_unpack all_but_unpack
 }
 
 src_prepare() {
 	cd "${WORKDIR}"
 	epatch "${FILESDIR}/${P}_stat-include.diff"
 	cd "${S}"
-	vdr-plugin_src_prepare
+	vdr-plugin-2_src_prepare
 }
 
 src_compile() {
-	vdr-plugin_src_compile
+	vdr-plugin-2_src_compile
 
 	cd "${S}/../command"
 	mkdir -p po
@@ -55,7 +55,7 @@ src_compile() {
 src_install() {
 
 	cd "${S}"
-	vdr-plugin_src_install
+	vdr-plugin-2_src_install
 
 	cd "${S}/../command"
 	dobin markad

@@ -4,7 +4,7 @@
 
 EAPI="4"
 
-inherit vdr-plugin eutils
+inherit vdr-plugin-2 eutils
 
 VERSION="1065" #every bump, new version
 
@@ -24,7 +24,7 @@ DEPEND=">=media-video/vdr-1.6.0
 RDEPEND="${DEPEND}"
 
 src_install() {
-	vdr-plugin_src_install
+	vdr-plugin-2_src_install
 
 	insinto /etc/vdr
 	doins -r "${VDRPLUGIN}"

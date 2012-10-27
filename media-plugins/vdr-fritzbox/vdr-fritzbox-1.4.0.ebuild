@@ -2,9 +2,9 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: /var/cvsroot/gentoo-x86/media-plugins/vdr-fritzbox/vdr-fritzbox-1.3.9.ebuild,v 1.1 2011/03/26 12:57:36 hd_brummy Exp $
 
-EAPI="3"
+EAPI="4"
 
-inherit vdr-plugin
+inherit vdr-plugin-2
 
 DESCRIPTION="VDR Plugin: Inform about incoming phone-calls and use the fritz!box phonebook from vdr menu."
 HOMEPAGE="http://www.joachim-wilke.de/show.htm?alias=vdr-fritz"

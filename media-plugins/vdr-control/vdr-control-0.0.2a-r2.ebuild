@@ -5,7 +5,7 @@
 EAPI="4"
 
 IUSE=""
-inherit vdr-plugin eutils
+inherit vdr-plugin-2 eutils
 
 #RESTRICT="mirror"
 
@@ -23,7 +23,7 @@ PATCHES="${FILESDIR}/${P}-uint64.diff
 	${FILESDIR}/${P}_gcc44.diff"
 
 src_prepare() {
-	vdr-plugin_src_prepare
+	vdr-plugin-2_src_prepare
 	if has_version ">=media-video/vdr-1.3.18"; then
 		einfo "applying VDR >= 1.3.18 patch"
 		epatch "${FILESDIR}/control-vdr-1.3.18.diff"

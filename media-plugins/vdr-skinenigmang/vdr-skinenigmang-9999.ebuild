@@ -4,7 +4,7 @@
 
 EAPI="4"
 
-inherit vdr-plugin git
+inherit vdr-plugin-2 git
 
 DESCRIPTION="VDR - Skin Plugin: enigma-ng"
 HOMEPAGE="http://andreas.vdr-developer.org/enigmang/"
@@ -25,7 +25,7 @@ RDEPEND="${DEPEND}
 S=${WORKDIR}/${VDRPLUGIN}
 
 src_prepare() {
-	vdr-plugin_src_prepare
+	vdr-plugin-2_src_prepare
 
 	use imagemagick && sed -i "s:#HAVE_IMAGEMAGICK:HAVE_IMAGEMAGICK:" Makefile
 
@@ -44,7 +44,7 @@ src_prepare() {
 }
 
 src_install() {
-	vdr-plugin_src_install
+	vdr-plugin-2_src_install
 
 	insinto /etc/vdr/themes
 	doins "${S}"/themes/*

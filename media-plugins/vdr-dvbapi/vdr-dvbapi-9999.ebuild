@@ -2,9 +2,9 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
-EAPI=4
+EAPI="4"
 
-inherit vdr-plugin git-2
+inherit vdr-plugin-2 git-2
 
 EGIT_REPO_URI="git://github.com/manio/vdr-plugin-${VDRPLUGIN}.git"
 
@@ -28,7 +28,7 @@ S=${WORKDIR}/${PN}-plugin
 PARALLEL_MODES=""
 
 pkg_setup() {
-	vdr-plugin_pkg_setup
+	vdr-plugin-2_pkg_setup
 	if use ffdecsa-test; then
 		ewarn ""
 		ewarn "You enabled the 'ffdecsa-test' USE flag, you should know that this ebuild will perform"
@@ -48,7 +48,7 @@ collect_parallel_modes() {
 }
 
 src_prepare() {
-	vdr-plugin_src_prepare
+	vdr-plugin-2_src_prepare
 
 	# manipulating LIBDIR, otherwise it looks for inexistent ../../lib
 	sed -i Makefile \
@@ -133,7 +133,7 @@ src_compile() {
 }
 
 src_install() {
-	vdr-plugin_src_install
+	vdr-plugin-2_src_install
 
 	diropts -gvdr -ovdr
 	keepdir /etc/vdr/plugins/${VDRPLUGIN}

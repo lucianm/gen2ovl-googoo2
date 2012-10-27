@@ -4,7 +4,7 @@
 
 EAPI="4"
 
-inherit flag-o-matic toolchain-funcs vdr-plugin eutils
+inherit flag-o-matic toolchain-funcs vdr-plugin-2 eutils
 
 if [ "${PV}" = "9999" ]; then
 	inherit git-2
@@ -41,7 +41,7 @@ DEPEND="${RDEPEND}
 	jpeg? ( virtual/jpeg )"
 
 src_prepare() {
-	vdr-plugin_src_prepare
+	vdr-plugin-2_src_prepare
 
 	#epatch "${FILESDIR}/${P}-Makefile.patch"
 }
@@ -66,7 +66,7 @@ src_compile() {
 }
 
 src_install() {
-	vdr-plugin_src_install
+	vdr-plugin-2_src_install
 
 	dodoc ChangeLog
 }

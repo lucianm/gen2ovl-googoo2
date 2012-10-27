@@ -2,9 +2,11 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
+EAPI="4"
+
 IUSE=""
 
-inherit vdr-plugin
+inherit vdr-plugin-2
 
 DESCRIPTION="VDR plugin: show content of menu in a shell window"
 HOMEPAGE="http://www.cadsoft.de/vdr/"

@@ -4,7 +4,7 @@
 
 EAPI="4"
 
-inherit eutils vdr-plugin
+inherit eutils vdr-plugin-2
 
 DESCRIPTION="VDR Graphical LCD Plugin"
 HOMEPAGE="http://projects.vdr-developer.org/projects/graphlcd"
@@ -22,7 +22,7 @@ DEPEND=">=media-video/vdr-1.6
 RDEPEND="${DEPEND}"
 
 pkg_setup() {
-	vdr-plugin_pkg_setup
+	vdr-plugin-2_pkg_setup
 
 	if ! getent group lp | grep -q vdr; then
 		echo
@@ -41,7 +41,7 @@ pkg_setup() {
 }
 
 src_prepare() {
-	vdr-plugin_src_prepare
+	vdr-plugin-2_src_prepare
 
 	sed -i "s:/usr/local:/usr:" Makefile
 
@@ -60,7 +60,7 @@ src_prepare() {
 
 src_install() {
 
-	vdr-plugin_src_install
+	vdr-plugin-2_src_install
 
 	insopts -m0644 -ovdr -gvdr
 
@@ -97,7 +97,7 @@ pkg_preinst() {
 }
 
 pkg_postinst() {
-	vdr-plugin_pkg_postinst
+	vdr-plugin-2_pkg_postinst
 
 	elog "Add additional options in /etc/conf.d/vdr.graphlcd"
 	elog

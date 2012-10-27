@@ -1,8 +1,10 @@
-# Copyright 1999-2010 Gentoo Foundation
+# Copyright 1999-2012 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-inherit vdr-plugin
+EAPI="4"
+
+inherit vdr-plugin-2
 
 DESCRIPTION="VDR plugin: to generate and solve Number Place puzzles, so called Sudokus."
 HOMEPAGE="http://projects.vdr-developer.org/projects/show/plg-sudoku

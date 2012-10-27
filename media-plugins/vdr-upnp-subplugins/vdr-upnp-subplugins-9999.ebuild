@@ -4,7 +4,7 @@
 
 EAPI="4"
 
-inherit vdr-plugin eutils git-2
+inherit vdr-plugin-2 git-2
 
 #VERSION="1065" #every bump, new version
 
@@ -29,7 +29,7 @@ PATCHES="${FILESDIR}/vdr-${MAIN_VDRPLUGIN}-${PV}_Makefile-plugins.diff
 
 #src_prepare() {
 
-#	vdr-plugin_src_prepare
+#	vdr-plugin-2_src_prepare
 
 #}
 
@@ -40,7 +40,7 @@ src_compile() {
 		BUILD_TARGETS="subplugins" \
 		VDRPLUGINLIBDIR="${VDR_PLUGIN_DIR}" \
 		ROOTBUILDDIR="${S}" \
-		vdr-plugin_src_compile
+		vdr-plugin-2_src_compile
 
 }
 

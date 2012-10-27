@@ -4,7 +4,7 @@
 
 EAPI="4"
 
-inherit vdr-plugin eutils git
+inherit vdr-plugin-2 eutils git
 
 #VERSION="936" #every bump, new version
 
@@ -34,7 +34,7 @@ src_prepare() {
 		sed -i "s:#WITHPINPLUGIN:WITHPINPLUGIN:" Makefile
 	fi
 
-	vdr-plugin_src_prepare
+	vdr-plugin-2_src_prepare
 
 	if has_version ">=media-video/vdr-1.7.18"; then
 		sed -e "s:Read(f):Read():" -i mymenueditrecording.c
@@ -46,7 +46,7 @@ src_prepare() {
 }
 
 src_install() {
-	vdr-plugin_src_install
+	vdr-plugin-2_src_install
 
 	cd "${S}"
 	newbin scripts/${DVDARCHIVE} dvdarchive.sh

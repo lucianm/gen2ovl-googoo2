@@ -1,10 +1,10 @@
-# Copyright 1999-2010 Gentoo Foundation
+# Copyright 1999-2012 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-EAPI=4
+EAPI="4"
 
-inherit vdr-plugin
+inherit vdr-plugin-2
 
 DESCRIPTION="VDR plugin: for 'software only' playback using xine"
 HOMEPAGE="http://home.vr-web.de/~rnissl/"
@@ -20,7 +20,7 @@ DEPEND=">=media-video/vdr-1.3.9
 RDEPEND="${DEPEND}"
 
 pkg_setup() {
-	vdr-plugin_pkg_setup
+	vdr-plugin-2_pkg_setup
 
 	# we have use depend now, but better check it nevertheless :)
 	if [[ -f /usr/include/xine/vdr.h ]] ; then
@@ -40,11 +40,11 @@ src_prepare() {
 
 	use yaepg && sed -i Makefile -e "s:#VDR_XINE_SET_VIDEO_WINDOW:VDR_XINE_SET_VIDEO_WINDOW:"
 
-	vdr-plugin_src_prepare
+	vdr-plugin-2_src_prepare
 }
 
 src_install() {
-	vdr-plugin_src_install
+	vdr-plugin-2_src_install
 
 	dobin xineplayer
 
@@ -53,7 +53,7 @@ src_install() {
 }
 
 pkg_postinst() {
-	vdr-plugin_pkg_postinst
+	vdr-plugin-2_pkg_postinst
 
 	if [[ -d ${ROOT}/etc/vdr/plugins/xine ]]; then
 		ewarn "You have a leftover directory of vdr-xine."

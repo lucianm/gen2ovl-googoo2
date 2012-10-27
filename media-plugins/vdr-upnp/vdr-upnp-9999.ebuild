@@ -4,7 +4,7 @@
 
 EAPI="4"
 
-inherit vdr-plugin eutils git-2
+inherit vdr-plugin-2 git-2
 
 #VERSION="1065" #every bump, new version
 
@@ -35,7 +35,7 @@ PATCHES="${FILESDIR}/${P}_Makefile-plugins.diff
 
 #src_prepare() {
 
-#	vdr-plugin_src_prepare
+#	vdr-plugin-2_src_prepare
 
 #}
 
@@ -43,13 +43,13 @@ src_compile() {
 
 	VDRDIR="${VDR_INCLUDE_DIR}" \
 		VDRINCDIR="${VDR_INCLUDE_DIR%/vdr}" \
-		vdr-plugin_src_compile
+		vdr-plugin-2_src_compile
 
 }
 
 src_install() {
 
-	vdr-plugin_src_install
+	vdr-plugin-2_src_install
 
 	insinto "/etc/vdr/plugins/${VDRPLUGIN}"
 	doins -r httpdocs

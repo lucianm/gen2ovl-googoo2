@@ -4,7 +4,7 @@
 
 EAPI="4"
 
-inherit vdr-plugin eutils
+inherit vdr-plugin-2 eutils
 
 DESCRIPTION="VDR : CD-Player plugin with CDDB and CD-Text support"
 HOMEPAGE="http://www.uli-eckhardt.de/vdr/cdplayer.en.html"
@@ -22,11 +22,11 @@ DEPEND=">=media-video/vdr-1.6.0
 
 src_compile() {
 	append-ldflags $(no-as-needed)
-	vdr-plugin_src_compile
+	vdr-plugin-2_src_compile
 }
 
 src_install() {
-	vdr-plugin_src_install
+	vdr-plugin-2_src_install
 
 	insinto /etc/vdr/plugins/${VDRPLUGIN}
 	doins "${S}"/contrib/cd.mpg
@@ -34,4 +34,3 @@ src_install() {
 	dodoc "${S}"/contrib/convert.sh
 	fowners -R vdr:vdr /etc/vdr/plugins/${VDRPLUGIN}
 }
-

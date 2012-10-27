@@ -4,7 +4,7 @@
 
 EAPI="4"
 
-inherit vdr-plugin
+inherit vdr-plugin-2
 
 DESCRIPTION="VDR Plugin: systeminfo"
 HOMEPAGE="http://firefly.vdr-developer.org/systeminfo/"
@@ -24,7 +24,7 @@ RDEPEND="sys-apps/lm_sensors
 #PATCHES="${FILESDIR}/${P}_log.diff"
 
 src_install() {
-	vdr-plugin_src_install
+	vdr-plugin-2_src_install
 
 	insinto /usr/share/vdr/systeminfo/
 	insopts -m0755

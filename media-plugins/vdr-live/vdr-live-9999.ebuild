@@ -4,7 +4,7 @@
 
 EAPI="4"
 
-inherit vdr-plugin ssl-cert
+inherit vdr-plugin-2 ssl-cert
 
 DESCRIPTION="VDR Plugin: Web Access To Settings"
 HOMEPAGE="http://live.vdr-developer.org"
@@ -54,14 +54,14 @@ src_unpack() {
 if [[ "${PV}" = "9999" ]]; then
 	git_src_unpack
 	cd "${S}"
-	vdr-plugin_src_unpack all_but_unpack
+	vdr-plugin-2_src_unpack all_but_unpack
 else
-	vdr-plugin_src_unpack
+	vdr-plugin-2_src_unpack
 fi
 }
 
 src_prepare() {
-	vdr-plugin_src_prepare
+	vdr-plugin-2_src_prepare
 
 	#make it work with /bin/sh as indicated in the file header
 	sed -e "18s/==/=/" -i  buildutil/version-util
@@ -74,7 +74,7 @@ src_prepare() {
 }
 
 src_install() {
-	vdr-plugin_src_install
+	vdr-plugin-2_src_install
 
 	cd "${S}/live"
 	insinto /etc/vdr/plugins/live
@@ -84,7 +84,7 @@ src_install() {
 }
 
 pkg_postinst() {
-	vdr-plugin_pkg_postinst
+	vdr-plugin-2_pkg_postinst
 
 	elog "To be able to use all functions of vdr-live"
 	elog "you should emerge and enable"

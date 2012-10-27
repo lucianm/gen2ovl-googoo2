@@ -2,7 +2,9 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
-inherit vdr-plugin
+EAPI="4"
+
+inherit vdr-plugin-2
 
 DESCRIPTION="VDR plugin: allows to control externel jobs from within VDR"
 HOMEPAGE="http://winni.vdr-developer.org/scheduler/index.html"
