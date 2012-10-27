@@ -49,7 +49,7 @@ src_compile() {
 
 	cd "${S}/../command"
 	mkdir -p po
-	emake || die "Compiling command-line markad binary failed"
+	emake
 }
 
 src_install() {

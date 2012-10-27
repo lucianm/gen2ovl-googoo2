@@ -34,12 +34,12 @@ src_prepare() {
 
 src_install() {
 	cd "${S}"
-	dodir /usr/share/${PN} || die
-	insinto /usr/share/${PN} || die
-	doins -r "${S}"/${PN}-${PV}/* || die
-	fperms 755 /usr/share/${PN}/${PN} || die "Errors on permission giving"
-	fperms 755 /usr/share/${PN} || die "Errors on permission folder giving"
-	dosym /usr/share/${PN}/${PN} /usr/bin/${PN} || die "Failed to symlink executable"
+	dodir /usr/share/${PN}
+	insinto /usr/share/${PN}
+	doins -r "${S}"/${PN}-${PV}/*
+	fperms 755 /usr/share/${PN}/${PN}
+	fperms 755 /usr/share/${PN}
+	dosym /usr/share/${PN}/${PN} /usr/bin/${PN}
 	make_desktop_entry tv-maxe TV-maxe \
 		"/usr/share/tv-maxe/tvmaxe_mini.png" \
 		"AudioVideo;Video"

@@ -28,12 +28,12 @@ src_compile() {
 		append-ldflags -g -ggdb -O0
 	fi
 
-	emake || die "emake failed"
-#	emake LDFLAGS="${LDFLAGS}" CXX="$(tc-getCXX)" CXXFLAGS="${CXXFLAGS}" || die
+	emake
+#	emake LDFLAGS="${LDFLAGS}" CXX="$(tc-getCXX)" CXXFLAGS="${CXXFLAGS}"
 }
 
 src_install()
 {
-	emake DESTDIR="${D}/usr" LIBDIR="${D}/usr/$(get_libdir)" install || die "make install failed"
+	emake DESTDIR="${D}/usr" LIBDIR="${D}/usr/$(get_libdir)" install
 	dodoc AUTHORS README INSTALL TODO ChangeLog
 }

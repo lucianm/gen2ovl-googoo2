@@ -20,6 +20,7 @@ KEYWORDS=""
 SLOT="0"
 LICENSE="GPL-2"
 IUSE="driver_ax206_experimental +truetype g15 +imagemagick graphicsmagick serdisplib"
+REQUIRED_USE="imagemagick? ( !graphicsmagick )"
 
 DEPEND="truetype? ( media-libs/freetype )
 	imagemagick? ( media-gfx/imagemagick )
@@ -32,36 +33,22 @@ DEPEND="truetype? ( media-libs/freetype )
 RDEPEND="truetype? ( media-fonts/corefonts )"
 
 
-pkg_setup() {
-	if use imagemagick && use graphicsmagick; then
-		ewarn "the graphicsmagick and imagemagick USE-flags are mutually exclusive"
-		ewarn "graphicsmagick will be disabled in favour of imagemagick"
-	fi
-}
-
-
 src_prepare() {
 
 	sed -i Make.config -e "s:usr\/local:usr:" -e "s:FLAGS *=:FLAGS ?=:" || die "sed /usr/local path failed"
 
-	epatch "${FILESDIR}/${P}_prestrip-optional.patch" || die "failed patching with ${FILESDIR}/${P}_prestrip-optional.patch"
+	epatch "${FILESDIR}/${P}_prestrip-optional.patch"
 	sed -i "s:PRESTRIP:#PRESTRIP:" Make.config || die "sed PRESTRIP failed"
 
 	if use !truetype; then
 		sed -i "s:HAVE_FREETYPE2:#HAVE_FREETYPE2:" Make.config || die "sed HAVE_FREETYPE2 failed"
 	fi
 
-	local WITH_GRAPHICSMAGICK = 0
-	use graphicsmagick && WITH_GRAPHICSMAGICK = 1
-	if use imagemagick && use graphicsmagick; then
-		WITH_GRAPHICSMAGICK = 0
-	fi
-
 	if use imagemagick; then
 		sed -i "s:#HAVE_IMAGEMAGICK:HAVE_IMAGEMAGICK:" Make.config || die "sed HAVE_IMAGEMAGICK failed"
 	fi
 
-	if [[ "$WITH_GRAPHICSMAGICK == 1" ]]; then
+	if use graphicsmagick; then
 		sed -i "s:#HAVE_GRAPHICSMAGICK:HAVE_GRAPHICSMAGICK:" Make.config || die "sed HAVE_GRAPHICSMAGICK failed"
 		sed -i "s/^IMAGELIB\ =\s*$/IMAGELIB\ =\ imagemagick/" glcdgraphics/Makefile || die "sed IMAGELIB failed"
 	fi
@@ -76,7 +63,7 @@ src_prepare() {
 src_install() {
 
 	dodir /lib/udev/rules.d
-	emake DESTDIR="${D}"usr LIBDIR="${D}"usr/$(get_libdir) UDEVRULESDIR="${D}"lib/udev/rules.d install || die "make install failed"
+	emake DESTDIR="${D}"usr LIBDIR="${D}"usr/$(get_libdir) UDEVRULESDIR="${D}"lib/udev/rules.d install
 
 	insinto /etc
 	doins graphlcd.conf

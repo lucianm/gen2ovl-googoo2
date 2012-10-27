@@ -182,7 +182,7 @@ src_configure() {
 
 src_compile() {
 	src_defs_2
-	emake  ${myconf_2} CC=$(tc-getCC) CXX=$(tc-getCXX) ${myconf_2} || die "emake failed"
+	emake  ${myconf_2} CC=$(tc-getCC) CXX=$(tc-getCXX) ${myconf_2}
 }
 
 src_install() {
@@ -198,12 +198,12 @@ src_install() {
 	fi
 
 	insinto "/etc/${PN}"
-	doins -r Distribution/doc/example  || die "installing configuration examples failed"
+	doins -r Distribution/doc/example
 	doinitd "${FILESDIR}/${PN}"
 
 	if use doc; then
-		doman Distribution/doc/man/* || die "doman failed"
-		dodoc -r Distribution/doc/txt/* || die "dodoc failed"
+		doman Distribution/doc/man/*
+		dodoc -r Distribution/doc/txt/*
 	fi
 
 	dodir "/var/log/${PN}"

@@ -25,6 +25,6 @@ S="${WORKDIR}/${PN}"
 
 src_install() {
 	cd "${S}"
-	dobin ${PN} || die " Error. Could not install ${PN}"
-	dodoc README .subscrieri || die "Error. Could not install documentation"
+	dobin ${PN}
+	dodoc README .subscrieri
 }

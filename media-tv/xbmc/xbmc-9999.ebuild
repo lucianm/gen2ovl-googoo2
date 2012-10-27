@@ -225,8 +225,8 @@ src_install() {
 	newicon tools/Linux/xbmc-48x48.png xbmc.png
 
 	insinto "$(python_get_sitedir)" #309885
-	doins tools/EventClients/lib/python/xbmcclient.py || die
-	newbin "tools/EventClients/Clients/XBMC Send/xbmc-send.py" xbmc-send || die
+	doins tools/EventClients/lib/python/xbmcclient.py
+	newbin "tools/EventClients/Clients/XBMC Send/xbmc-send.py" xbmc-send
 }
 
 pkg_postinst() {

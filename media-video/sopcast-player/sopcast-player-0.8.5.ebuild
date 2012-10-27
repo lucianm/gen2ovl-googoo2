@@ -31,7 +31,7 @@ src_prepare() {
 }
 
 src_install() {
-	einstall DESTDIR="${D}" || die "einstall failed"
+	einstall DESTDIR="${D}"
 	cd "${WORKDIR}"
 	elog "For any problems email to Jason Scheunemann at flyguy97@gmail.com or Pietro Acinapura at pietro.ac@gmail.com for Gentoo ebuild!"
 	echo

@@ -62,7 +62,7 @@ src_compile() {
 	append-cxxflags -DHAVE_PTHREAD_NAME
 	tc-export CC CXX
 
-	emake all LIBDIR="." $myconf || die
+	emake all LIBDIR="." $myconf
 }
 
 src_install() {

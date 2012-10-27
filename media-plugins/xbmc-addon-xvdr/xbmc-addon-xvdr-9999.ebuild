@@ -26,11 +26,11 @@ src_prepare() {
 }
 
 src_configure() {
-	econf --prefix=/usr/$(get_libdir)/xbmc || die "econf failed"
+	econf --prefix=/usr/$(get_libdir)/xbmc
 }
 
 src_install() {
-	emake DESTDIR="${D}" install || die "emake install failed"
+	emake DESTDIR="${D}" install
 }
 
 pkg_info() {
