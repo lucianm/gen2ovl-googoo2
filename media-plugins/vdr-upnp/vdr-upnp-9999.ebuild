@@ -28,6 +28,8 @@ DEPEND=">=media-video/vdr-1.7.27
 
 RDEPEND="${DEPEND}"
 
+PDEPEND="=media-plugins/${PN}-subplugins-${PV}"
+
 PATCHES="${FILESDIR}/${P}_Makefile-plugins.diff
 	${FILESDIR}/${P}_logging.diff"
 
@@ -39,18 +41,15 @@ PATCHES="${FILESDIR}/${P}_Makefile-plugins.diff
 
 src_compile() {
 
-#	BUILD_PARAMS="-j1" vdr-plugin_src_compile
-	cd "${S}"
-	LIBDIR="${S}" LOCALEDIR="${TMP_LOCALE_DIR}" TMPDIR="${T}" SUBPLUGINLIBDIR="${VDR_PLUGIN_DIR}/${VDRPLUGIN}" make || die "compilation failed..."
+	VDRDIR="${VDR_INCLUDE_DIR}" \
+		VDRINCDIR="${VDR_INCLUDE_DIR%/vdr}" \
+		vdr-plugin_src_compile
 
 }
 
 src_install() {
 
 	vdr-plugin_src_install
-
-	insinto "${VDR_PLUGIN_DIR}/${VDRPLUGIN}"
-	doins libupnp-*.so.*
 
 	insinto "/etc/vdr/plugins/${VDRPLUGIN}"
 	doins -r httpdocs

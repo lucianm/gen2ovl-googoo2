@@ -1,7 +1,7 @@
 diff -Naur upnp_orig/media/mediaManager.cpp upnp/media/mediaManager.cpp
---- upnp_orig/media/mediaManager.cpp	2012-10-26 01:12:44.000000000 +0200
-+++ upnp/media/mediaManager.cpp	2012-10-26 01:14:29.709719684 +0200
-@@ -474,7 +474,7 @@
+--- upnp_orig/media/mediaManager.cpp	2012-10-27 01:14:40.523000010 +0200
++++ upnp/media/mediaManager.cpp	2012-10-27 01:15:42.954000010 +0200
+@@ -475,7 +475,7 @@
  
      connection = tntdb::connect(ss.str());
  
@@ -10,7 +10,7 @@ diff -Naur upnp_orig/media/mediaManager.cpp upnp/media/mediaManager.cpp
  
      if(!CheckIntegrity()){
        connection.beginTransaction();
-@@ -584,7 +584,7 @@
+@@ -588,7 +588,7 @@
      return false;
    }
  
@@ -20,8 +20,8 @@ diff -Naur upnp_orig/media/mediaManager.cpp upnp/media/mediaManager.cpp
  
    if(!pluginManager->LoadPlugins(pluginDirectory)){
 diff -Naur upnp_orig/media/pluginManager.cpp upnp/media/pluginManager.cpp
---- upnp_orig/media/pluginManager.cpp	2012-10-26 01:12:44.000000000 +0200
-+++ upnp/media/pluginManager.cpp	2012-10-26 01:22:17.148719685 +0200
+--- upnp_orig/media/pluginManager.cpp	2012-10-27 01:14:40.524000010 +0200
++++ upnp/media/pluginManager.cpp	2012-10-27 01:15:42.955000010 +0200
 @@ -405,7 +405,8 @@
        return true;
      }
@@ -33,8 +33,8 @@ diff -Naur upnp_orig/media/pluginManager.cpp upnp/media/pluginManager.cpp
  
    return false;
 diff -Naur upnp_orig/server/server.cpp upnp/server/server.cpp
---- upnp_orig/server/server.cpp	2012-10-26 01:12:44.000000000 +0200
-+++ upnp/server/server.cpp	2012-10-26 01:21:07.199719689 +0200
+--- upnp_orig/server/server.cpp	2012-10-27 01:14:40.530000010 +0200
++++ upnp/server/server.cpp	2012-10-27 01:15:42.955000010 +0200
 @@ -270,7 +270,8 @@
  
  void cMediaServer::RegisterService(cUPnPService* service){
