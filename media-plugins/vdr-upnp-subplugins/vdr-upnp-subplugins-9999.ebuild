@@ -10,7 +10,7 @@ inherit vdr-plugin eutils git-2
 
 MAIN_VDRPLUGIN=upnp
 
-DESCRIPTION="Video Disk Recorder - UPnP/DLNA support Plugin"
+DESCRIPTION="Video Disk Recorder - Sub-plugins for the UPnP/DLNA support Plugin"
 HOMEPAGE="http://projects.vdr-developer.org/projects/show/plg-${MAIN_VDRPLUGIN}"
 EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-${MAIN_VDRPLUGIN}.git"
 S="${WORKDIR}/${MAIN_VDRPLUGIN}"
