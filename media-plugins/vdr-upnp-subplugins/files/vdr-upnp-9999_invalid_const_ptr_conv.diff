@@ -1,0 +1,14 @@
+diff -Naur upnp_orig/plugins/profiler/vdrDVBProfiler/dvbProfiler.cpp upnp/plugins/profiler/vdrDVBProfiler/dvbProfiler.cpp
+--- upnp_orig/plugins/profiler/vdrDVBProfiler/dvbProfiler.cpp	2012-10-28 21:28:34.000000000 +0100
++++ upnp/plugins/profiler/vdrDVBProfiler/dvbProfiler.cpp	2012-10-28 21:30:05.824380990 +0100
+@@ -150,8 +150,8 @@
+     resource.SetProtocolInfo(ProtocolInfo("video/mpeg", fourthfield).ToString());
+ 
+     int duration = 0;
+-    cEvent* event = NULL;
+-    if((event = info->GetEvent()) && event->Duration() > 0){
++    const cEvent* event = info->GetEvent();
++    if(event && event->Duration() > 0){
+       duration = event->Duration();
+     }
+ #if VDRVERSNUM > 10723

@@ -25,7 +25,8 @@ DEPEND="=media-plugins/vdr-upnp-${PV}"
 RDEPEND="${DEPEND}"
 
 PATCHES="${FILESDIR}/vdr-${MAIN_VDRPLUGIN}-${PV}_Makefile-plugins.diff
-	${FILESDIR}/vdr-${MAIN_VDRPLUGIN}-${PV}_logging.diff"
+	${FILESDIR}/vdr-${MAIN_VDRPLUGIN}-${PV}_logging.diff
+	${FILESDIR}/vdr-${MAIN_VDRPLUGIN}-${PV}_invalid_const_ptr_conv.diff"
 
 #src_prepare() {
 
@@ -46,7 +47,7 @@ src_compile() {
 
 src_install() {
 
-	insinto "${VDR_PLUGIN_DIR}/${MAIN_VDRPLUGIN}"
+	insinto "${VDR_PLUGIN_DIR}"
 	doins lib${MAIN_VDRPLUGIN}-*.so.*
 
 }

@@ -1,6 +1,6 @@
 diff -Naur upnp_orig/INSTALL upnp/INSTALL
 --- upnp_orig/INSTALL	1970-01-01 01:00:00.000000000 +0100
-+++ upnp/INSTALL	2012-10-27 02:47:47.118000010 +0200
++++ upnp/INSTALL	2012-10-28 21:16:27.719380990 +0100
 @@ -0,0 +1,14 @@
 +- unpack as usually inside the PLUGINS dir of the VDR version against you want to build
 +- building the subplugins requires the main plugin to be already installed on the target
@@ -19,8 +19,8 @@ diff -Naur upnp_orig/INSTALL upnp/INSTALL
 \ No newline at end of file
 diff -Naur upnp_orig/Make.config upnp/Make.config
 --- upnp_orig/Make.config	1970-01-01 01:00:00.000000000 +0100
-+++ upnp/Make.config	2012-10-27 02:39:53.906000010 +0200
-@@ -0,0 +1,57 @@
++++ upnp/Make.config	2012-10-28 21:18:34.425380989 +0100
+@@ -0,0 +1,56 @@
 +#
 +# Makefile for a Video Disk Recorder plugin
 +#
@@ -62,7 +62,6 @@ diff -Naur upnp_orig/Make.config upnp/Make.config
 +TMPDIR ?= /tmp
 +
 +PLUGINDIR= ./PLUGINS
-+SUBPLUGINLIBDIR ?= $(VDRPLUGINLIBDIR)/$(PLUGIN)
 +
 +### The version number of VDR's plugin API (taken from VDR's "config.h"):
 +
@@ -73,14 +72,14 @@ diff -Naur upnp_orig/Make.config upnp/Make.config
 +INCLUDES += -I$(VDRDIR)/include
 +
 +DEFINES += -D_GNU_SOURCE -DPLUGIN_NAME_I18N='"$(PLUGIN)"'
-+DEFINES += -DPLUGINDIR=\"$(SUBPLUGINLIBDIR)\"
++DEFINES += -DPLUGINDIR=\"$(VDRPLUGINLIBDIR)\"
 +
 +
 +# export to subplugins makefiles:
-+export PRESTRIP VERSION APIVERSION INCLUDES SHAREDDEFINES SHAREDLIBS CXX CXXFLAGS VDRDIR VDRINCDIR LIBDIR TMPDIR VDRPLUGINLIBDIR SUBPLUGINLIBDIR
++export PRESTRIP VERSION APIVERSION INCLUDES SHAREDDEFINES SHAREDLIBS CXX CXXFLAGS VDRDIR VDRINCDIR LIBDIR TMPDIR VDRPLUGINLIBDIR
 diff -Naur upnp_orig/Makefile upnp/Makefile
---- upnp_orig/Makefile	2012-10-27 02:38:56.000000000 +0200
-+++ upnp/Makefile	2012-10-27 02:39:53.907000010 +0200
+--- upnp_orig/Makefile	2012-10-28 21:15:36.000000000 +0100
++++ upnp/Makefile	2012-10-28 21:16:27.720380990 +0100
 @@ -9,51 +9,26 @@
  # IMPORTANT: the presence of this macro is important for the Make.config
  # file. So it must be defined, even if it is not used here!
@@ -186,8 +185,8 @@ diff -Naur upnp_orig/Makefile upnp/Makefile
 +	@for i in `ls -A -I ".*" $(SUBPLUGDIR)`; do for j in `ls -A -I ".*" $(SUBPLUGDIR)/$$i`; do $(MAKE) -f ../../../Makefile.plugins -C "$(SUBPLUGDIR)/$$i/$$j" uninstall; done; done
 diff -Naur upnp_orig/Makefile.plugins upnp/Makefile.plugins
 --- upnp_orig/Makefile.plugins	1970-01-01 01:00:00.000000000 +0100
-+++ upnp/Makefile.plugins	2012-10-27 02:39:53.907000010 +0200
-@@ -0,0 +1,71 @@
++++ upnp/Makefile.plugins	2012-10-28 21:19:07.874380988 +0100
+@@ -0,0 +1,70 @@
 +#
 +# UPnP/DLNA subplugins Makefile
 +#
@@ -254,14 +253,13 @@ diff -Naur upnp_orig/Makefile.plugins upnp/Makefile.plugins
 +	@-rm -f $(OBJS) $(CLEAN_RM) $(DEPFILE) $(LIBUPNP) $(LIBDIR)/$(LIBUPNPVER) core* *~
 +
 +_install: all
-+	@mkdir -p $(SUBPLUGINLIBDIR)
-+	install -m 755 -o root -g root $(PRESTRIP) $(LIBDIR)/$(LIBUPNPVER) $(SUBPLUGINLIBDIR)
++	install -m 755 -o root -g root $(PRESTRIP) $(LIBDIR)/$(LIBUPNPVER) $(VDRPLUGINLIBDIR)
 +
 +_uninstall:
-+	rm $(SUBPLUGINLIBDIR)/$(LIBUPNPVER)
++	rm $(VDRPLUGINLIBDIR)/$(LIBUPNPVER)
 diff -Naur upnp_orig/plugins/profiler/vdrDVBProfiler/Makefile upnp/plugins/profiler/vdrDVBProfiler/Makefile
---- upnp_orig/plugins/profiler/vdrDVBProfiler/Makefile	2012-10-27 02:38:56.000000000 +0200
-+++ upnp/plugins/profiler/vdrDVBProfiler/Makefile	2012-10-27 02:39:53.908000010 +0200
+--- upnp_orig/plugins/profiler/vdrDVBProfiler/Makefile	2012-10-28 21:15:36.000000000 +0100
++++ upnp/plugins/profiler/vdrDVBProfiler/Makefile	2012-10-28 21:16:27.721380990 +0100
 @@ -1,59 +1,27 @@
  #
 -# Makefile for a UPnP profiler plugin
@@ -338,8 +336,8 @@ diff -Naur upnp_orig/plugins/profiler/vdrDVBProfiler/Makefile upnp/plugins/profi
 +uninstall:
 +	@$(MAKE) -f ../../../Makefile.plugins -C "$(shell pwd)" _uninstall
 diff -Naur upnp_orig/plugins/provider/recProvider/Makefile upnp/plugins/provider/recProvider/Makefile
---- upnp_orig/plugins/provider/recProvider/Makefile	2012-10-27 02:38:56.000000000 +0200
-+++ upnp/plugins/provider/recProvider/Makefile	2012-10-27 02:39:53.908000010 +0200
+--- upnp_orig/plugins/provider/recProvider/Makefile	2012-10-28 21:15:36.000000000 +0100
++++ upnp/plugins/provider/recProvider/Makefile	2012-10-28 21:16:27.722380990 +0100
 @@ -1,59 +1,27 @@
  #
 -# Makefile for a UPnP provider plugin
@@ -416,8 +414,8 @@ diff -Naur upnp_orig/plugins/provider/recProvider/Makefile upnp/plugins/provider
 +uninstall:
 +	@$(MAKE) -f ../../../Makefile.plugins -C "$(shell pwd)" _uninstall
 diff -Naur upnp_orig/plugins/provider/vdrProvider/Makefile upnp/plugins/provider/vdrProvider/Makefile
---- upnp_orig/plugins/provider/vdrProvider/Makefile	2012-10-27 02:38:56.000000000 +0200
-+++ upnp/plugins/provider/vdrProvider/Makefile	2012-10-27 02:39:53.909000010 +0200
+--- upnp_orig/plugins/provider/vdrProvider/Makefile	2012-10-28 21:15:36.000000000 +0100
++++ upnp/plugins/provider/vdrProvider/Makefile	2012-10-28 21:16:27.722380990 +0100
 @@ -1,59 +1,27 @@
  #
 -# Makefile for a UPnP provider plugin
