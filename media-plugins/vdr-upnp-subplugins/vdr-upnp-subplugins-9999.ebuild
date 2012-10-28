@@ -24,9 +24,7 @@ DEPEND="=media-plugins/vdr-upnp-${PV}"
 
 RDEPEND="${DEPEND}"
 
-PATCHES="${FILESDIR}/vdr-${MAIN_VDRPLUGIN}-${PV}_Makefile-plugins.diff
-	${FILESDIR}/vdr-${MAIN_VDRPLUGIN}-${PV}_logging.diff
-	${FILESDIR}/vdr-${MAIN_VDRPLUGIN}-${PV}_invalid_const_ptr_conv.diff"
+PATCHES="${FILESDIR}/vdr-${MAIN_VDRPLUGIN}-${PV}_Makefile-plugins.diff"
 
 #src_prepare() {
 
@@ -50,4 +48,14 @@ src_install() {
 	insinto "${VDR_PLUGIN_DIR}"
 	doins lib${MAIN_VDRPLUGIN}-*.so.*
 
+	# each subplugin has a README, they are grouped into categories ($i),
+	# so let's organize them in that directory structure
+	for i in $(ls -A -I ".*" "${S}/plugins"); do
+		for j in $(ls -A -I ".*" "${S}/plugins/$i"); do
+			cd "${S}/plugins/$i/$j"
+			mkdir -p "$i"
+			mv README "$i/README.$j"
+			dodoc -r "$i"
+		done
+	done
 }
