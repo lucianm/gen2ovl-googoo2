@@ -33,10 +33,11 @@ S="${WORKDIR}/webvideo-${PV}"
 
 src_prepare() {
 #	epatch "${FILESDIR}/${PN}-0.3.1_DESTDIR.diff"
-	sed -i src/libwebvi/Makefile -e "s:/sbin/ldconfig:#/sbin/ldconfig:"
+	sed -i src/libwebvi/Makefile -e "s:\$(CC):gcc:" || die "Failed to sed gcc call in libwebvi/MAkefile"
+	sed -i src/libwebvi/Makefile -e "s:/sbin/ldconfig:#/sbin/ldconfig:" || die "Failed to remove ldconfig call from libwebvi/MAkefile"
 	if ! use yle; then
 		rm -Rf templates/bin
-		rm -Rf templates/yleareena
+		rm -Rf templates/areena.yle.fi
 	fi
 }
 
