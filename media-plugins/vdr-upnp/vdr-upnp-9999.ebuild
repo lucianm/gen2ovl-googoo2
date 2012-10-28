@@ -30,7 +30,8 @@ RDEPEND="${DEPEND}"
 
 PDEPEND="=media-plugins/${PN}-subplugins-${PV}"
 
-PATCHES="${FILESDIR}/${P}_Makefile-plugins.diff"
+PATCHES="${FILESDIR}/${P}_Makefile-plugins.diff
+	${FILESDIR}/${P}_cli-help.diff"
 
 #src_prepare() {
 

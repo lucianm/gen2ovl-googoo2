@@ -1,0 +1,10 @@
+# upnp (1.0.0) - UPnP/DLNA compliant Media Server functionality for VDR
+#
+#  The UPnP/DLNA server is designed to detect everything automatically.
+#  Therefore the user is not required to change most of the settings.
+#  
+#  -d <DB directory>    --db-dir=<DB directory>  Specifies the directory
+#                                                where the the database
+#                                                file shall be located.
+
+_EXTRAOPTS="--db-dir=/var/vdr"
