@@ -1,0 +1,10 @@
+# /etc/conf.d/vdr.webwideo:
+
+# Global config file for vdr rc-scripts
+
+# -d dir, --downloaddir=dir  Save downloaded files to dir. The default
+#                            path is the VDR video directory.
+# -t dir, --templatedir=dir  Read video site templates from DIR (default
+#                            /usr/local/share/webvi/templates)
+
+_EXTRAOPTS="--templatedir=/usr/share/webvi/templates"
