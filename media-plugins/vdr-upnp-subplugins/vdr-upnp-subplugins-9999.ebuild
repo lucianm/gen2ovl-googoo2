@@ -24,13 +24,7 @@ DEPEND="=media-plugins/vdr-upnp-${PV}"
 
 RDEPEND="${DEPEND}"
 
-PATCHES="${FILESDIR}/vdr-${MAIN_VDRPLUGIN}-${PV}_Makefile-plugins.diff"
-
-#src_prepare() {
-
-#	vdr-plugin-2_src_prepare
-
-#}
+#PATCHES="${FILESDIR}/vdr-${MAIN_VDRPLUGIN}-${PV}_Makefile-plugins.diff"
 
 src_compile() {
 

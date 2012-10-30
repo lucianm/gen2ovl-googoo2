@@ -30,13 +30,7 @@ RDEPEND="${DEPEND}"
 
 PDEPEND="=media-plugins/${PN}-subplugins-${PV}"
 
-PATCHES="${FILESDIR}/${P}_Makefile-plugins.diff"
-
-#src_prepare() {
-
-#	vdr-plugin-2_src_prepare
-
-#}
+#PATCHES="${FILESDIR}/${P}_Makefile-plugins.diff"
 
 src_compile() {
 
