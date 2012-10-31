@@ -1,0 +1,22 @@
+#!/sbin/runscript
+# Copyright (c) 2012 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+
+description="Persistent tmpfs RamDisk mounter script"
+
+depend()
+{
+	need localmount
+	after localmount
+	before logger
+}
+
+start()
+{
+	/usr/bin/rdpersist start
+}
+
+stop()
+{
+	/usr/bin/rdpersist stop
+}
