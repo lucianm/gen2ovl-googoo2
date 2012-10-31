@@ -8,6 +8,8 @@ depend()
 {
 	need localmount
 	after localmount
+	after swap
+	after swapfiles
 	before logger
 }
 
