@@ -26,6 +26,6 @@ RDEPEND="${DEPEND}"
 src_install() {
 	vdr-plugin-2_src_install
 
-	insinto /etc/vdr
+	insinto /etc/vdr/plugins
 	doins -r "${VDRPLUGIN}"
 }
