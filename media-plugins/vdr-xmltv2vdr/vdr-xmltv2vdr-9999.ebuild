@@ -43,5 +43,6 @@ src_compile() {
 
 src_install() {
 	vdr-plugin-2_src_install
+	keepdir "/etc/vdr/plugins/${VDRPLUGIN}"
 	einstall DESTDIR="${D}" STRIP="" -C dist/epgdata2xmltv
 }
