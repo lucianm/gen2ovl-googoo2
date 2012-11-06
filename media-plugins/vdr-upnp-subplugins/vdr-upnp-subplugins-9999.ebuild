@@ -44,12 +44,17 @@ src_install() {
 
 	# each subplugin has a README, they are grouped into categories ($i),
 	# so let's organize them in that directory structure
+	# also, install any possible *.conf files in the main plugins
+	# config directory
 	for i in $(ls -A -I ".*" "${S}/plugins"); do
 		for j in $(ls -A -I ".*" "${S}/plugins/$i"); do
 			cd "${S}/plugins/$i/$j"
-			mkdir -p "$i"
-			mv README "$i/README.$j"
-			dodoc -r "$i"
+			for cfg in $(ls *.conf); do
+				insinto "/etc/vdr/plugins/${MAIN_VDRPLUGIN}"
+				doins $cfg;
+			done
+			docinto "$i"
+			newdoc README "README.$j"
 		done
 	done
 }
