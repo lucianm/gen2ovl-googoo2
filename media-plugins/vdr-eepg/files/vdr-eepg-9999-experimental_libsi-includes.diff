@@ -1,71 +1,12 @@
-diff -Naur eepg_orig/dish.c eepg/dish.c
---- eepg_orig/dish.c	2012-11-05 23:02:47.000000000 +0100
-+++ eepg/dish.c	2012-11-05 23:05:59.302273010 +0100
-@@ -11,8 +11,8 @@
-  ***************************************************************************/
+diff -Naur eepg_orig/Makefile eepg/Makefile
+--- eepg_orig/Makefile	2012-11-07 09:40:57.000000000 +0100
++++ eepg/Makefile	2012-11-07 10:26:33.978000123 +0100
+@@ -59,7 +59,7 @@
  
- #include "dish.h"
--#include <libsi/si.h>
--//#include <libsi/descriptor.h>
-+#include <vdr/libsi/si.h>
-+//#include <vdr/libsi/descriptor.h>
- #include <string.h>
- #include <string>
- #include <stdlib.h>
-diff -Naur eepg_orig/dish.h eepg/dish.h
---- eepg_orig/dish.h	2012-11-05 23:02:47.000000000 +0100
-+++ eepg/dish.h	2012-11-05 23:05:43.448471209 +0100
-@@ -10,8 +10,8 @@
- #ifndef LIBSI_DISH_H
- #define LIBSI_DISH_H
+ ### Includes and Defines (add further entries here):
  
--#include <libsi/util.h>
--#include <libsi/descriptor.h>
-+#include <vdr/libsi/util.h>
-+#include <vdr/libsi/descriptor.h>
- #include <time.h>
+-INCLUDES += -I$(VDRDIR)/include
++INCLUDES += -I$(VDRDIR)/include -I$(VDRINCDIR)/vdr
  
- namespace SI
-diff -Naur eepg_orig/eepg.c eepg/eepg.c
---- eepg_orig/eepg.c	2012-11-05 23:02:47.000000000 +0100
-+++ eepg/eepg.c	2012-11-05 23:05:32.351609939 +0100
-@@ -33,9 +33,9 @@
- #include <vdr/dvbdevice.h>
- #include <vdr/i18n.h>
- #include <vdr/config.h>
--#include <libsi/section.h>
--#include <libsi/descriptor.h>
--#include <libsi/si.h>
-+#include <vdr/libsi/section.h>
-+#include <vdr/libsi/descriptor.h>
-+#include <vdr/libsi/si.h>
- #include "eepg.h"
- #include "dish.h"
- #if APIVERSNUM > 10725
-diff -Naur eepg_orig/eit2.h eepg/eit2.h
---- eepg_orig/eit2.h	2012-11-05 23:02:47.000000000 +0100
-+++ eepg/eit2.h	2012-11-05 23:05:13.326847782 +0100
-@@ -1,8 +1,8 @@
- #ifndef CEIT2_H_
- #define CEIT2_H_
--#include <libsi/section.h>
--#include <libsi/descriptor.h>
--#include <libsi/si.h>
-+#include <vdr/libsi/section.h>
-+#include <vdr/libsi/descriptor.h>
-+#include <vdr/libsi/si.h>
- #include <vdr/epg.h>
- 
- namespace SI
-diff -Naur eepg_orig/epghandler.c eepg/epghandler.c
---- eepg_orig/epghandler.c	2012-11-05 23:02:47.000000000 +0100
-+++ eepg/epghandler.c	2012-11-05 23:04:54.958077422 +0100
-@@ -12,7 +12,7 @@
- #include "eit2.h"
- #include "util.h"
- #include <vdr/sources.h>
--#include <libsi/si.h>
-+#include <vdr/libsi/si.h>
- 
- using namespace util;
+ DEFINES += -D_GNU_SOURCE -DPLUGIN_NAME_I18N='"$(PLUGIN)"'
  
