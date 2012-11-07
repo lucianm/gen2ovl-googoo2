@@ -1,0 +1,21 @@
+#
+# /etc/conf.d/vdr.xmltv2vdr
+#
+
+#  -e DIR,   --episodes=DIR location of episode files: VDRSeriesTimer .episodes
+#                           or TheTVDB .xml (default is ~/.eplists/lists)
+#                           Add UTF-8 or ISO8859-15 to the path to specify the
+#                           charset used in the files, e.g. /vdr/myepisodes,UTF8
+#XMLTV2VDR_EPIDIR="/var/vdr/.eplists/lists"
+
+#  -E FILE,  --epgfile=FILE write the EPG data into the given FILE (default is
+#                           'epg.db' in the video directory) - best performance
+#                           if located on a ramdisk
+#XMLTV2VDR_EPGFILE="/var/vdr/video/epg.db"
+
+#  -i DIR    --images=DIR   location of epgimages
+#                           (default is /var/cache/vdr/epgimages)
+#XMLTV2VDR_IMGDIR="/var/cache/vdr/epgimages"
+
+#  -l FILE   --logfile=FILE write trace logs into the given FILE (default is no trace log)
+#XMLTV2VDR_LOGFILE=""
