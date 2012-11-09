@@ -30,7 +30,7 @@ src_install() {
 	dobin "${PN}"
 	insinto /etc
 	doins "${PN}.conf"
-	newinitd "${FILESDIR}/initd" "${PN}"
+	doinitd "${FILESDIR}/${PN}"
 	dodoc AUTHORS README.md HISTORY TODO
 }
 
