@@ -34,11 +34,11 @@ DEPEND=">=media-video/vdr-1.7.14"
 
 RDEPEND="${DEPEND}"
 
-PATCHES="${FILESDIR}/${P}-experimental_libsi-includes.diff"
+#PATCHES="${FILESDIR}/${P}-experimental_libsi-includes.diff"
 
 src_prepare() {
 	vdr-plugin-2_src_prepare
-	fix_vdr_libsi_include
+	fix_vdr_libsi_include dish.c dish.h eepg.c eit2.h epghandler.c
 	if use debug; then
 		sed -i Makefile -e 's@-O1@@' || die "Failed to remove compile flags from Makefile"
 	fi
