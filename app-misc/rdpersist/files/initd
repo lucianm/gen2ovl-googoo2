@@ -15,10 +15,10 @@ depend()
 
 start()
 {
-	/usr/bin/rdpersist start
+	/usr/bin/rdpersist --start
 }
 
 stop()
 {
-	/usr/bin/rdpersist stop
+	/usr/bin/rdpersist --stop
 }

@@ -4,15 +4,16 @@
 
 EAPI="4"
 
-inherit eutils git-2
+inherit eutils
+# git-2
 
 DESCRIPTION="Simple, persistent tmpfs ramdisk script"
 HOMEPAGE="https://github.com/lucianm/RdPersist/"
-#SRC_URI="https://github.com/downloads/lucianm/RdPersist/${P}.tar.bz2"
-EGIT_REPO_URI="git://github.com/lucianm/RdPersist.git"
+SRC_URI="https://github.com/downloads/lucianm/RdPersist/${P}.tar.bz2"
+#EGIT_REPO_URI="git://github.com/lucianm/RdPersist.git"
 
-#KEYWORDS="~amd64 ~x86"
-KEYWORDS=""
+KEYWORDS="~amd64 ~x86"
+#KEYWORDS=""
 
 SLOT="0"
 LICENSE="GPL-2"
