@@ -10,8 +10,8 @@ plugin_pre_vdr_start() {
 			add_plugin_param "-s ${LIVE_SSL_PORT}"
 		fi
 
-		add_plugin_param "--cert=/etc/vdr/plugins/live/live.crt"
-		add_plugin_param "--key=/etc/vdr/plugins/live/live.key"
+		add_plugin_param "--cert=/etc/vdr/plugins/live/live.pem"
+		add_plugin_param "--key=/etc/vdr/plugins/live/live-key.pem"
 
 	else
 		if [ -n "${LIVE_PORT}" ]; then
