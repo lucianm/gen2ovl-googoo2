@@ -40,6 +40,8 @@ src_prepare() {
 	epatch "${FILESDIR}/${P}_prestrip-optional.patch"
 	sed -i "s:PRESTRIP:#PRESTRIP:" Make.config || die "sed PRESTRIP failed"
 
+	epatch_user
+
 	if use !truetype; then
 		sed -i "s:HAVE_FREETYPE2:#HAVE_FREETYPE2:" Make.config || die "sed HAVE_FREETYPE2 failed"
 	fi
