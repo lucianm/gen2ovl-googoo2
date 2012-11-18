@@ -23,6 +23,9 @@ RRDEPEND="${DEPEND}
 	!x11-themes/skinenigmang-logos"
 
 src_install() {
+	dodoc README
+	rm README
+	rm COPYING
 	insinto "${CHANLOGOBASE}/${LOGOPACKNAME}"
 	cp -r -a "${S}"/* --target="${D}"${CHANLOGOBASE}/${LOGOPACKNAME}
 }
