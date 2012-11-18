@@ -1,0 +1,10 @@
+# /etc/conf.d/vdr.skinenigmang:
+
+#  -i <IMAGESDIR>, --epgimages=<IMAGESDIR> Set directory where epgimages are stored
+#SKINENIGMANG_EPGIMGDIR="/video/epg_image_cache"
+
+
+#  -l <LOGODIR>, --logodir=<LOGODIR>       Set directory where logos are stored.
+#SKINENIGMANG_LOGODIR="/usr/share/channel-logos/enigmang"
+
+# _EXTRAOPTS=""

@@ -19,7 +19,8 @@ IUSE="imagemagick"
 DEPEND=">=media-video/vdr-1.5.7"
 
 RDEPEND="${DEPEND}
-		x11-themes/skinenigmang-logos
+		x11-themes/channel-logos-enigmang
+		!x11-themes/skinenigmang-logos
 		imagemagick? ( media-gfx/imagemagick[cxx] )"
 
 S=${WORKDIR}/${VDRPLUGIN}
