@@ -31,9 +31,10 @@ DESCRIPTION="Channel logos "${LOGOPACKNAME}" to be used by vdr-skin* plugins and
 S="${WORKDIR}/${LOGOPACKNAME}"
 
 # on emerging, names will be converted to utf-8
-DEPEND="app-text/convmv"
+DEPEND="app-text/convmv
+	app-arch/unzip"
+
 channel-logos_src_prepare() {
 	epatch_user
 	convmv --notest --replace -f iso-8859-1 -t utf-8 -r "${S}"/
 }
-
