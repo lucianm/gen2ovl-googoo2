@@ -33,7 +33,7 @@ src_install() {
 
 	insinto /usr/share/vdr/${VDRPLUGIN}
 	rm ../icons/vdrlogo.png
-	doins -r icons symbols ../icons
+	doins -r icons ../icons
 
 	chown vdr:vdr -R "${D}"/etc/vdr
 }
