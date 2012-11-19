@@ -1,9 +1,9 @@
 # /etc/conf.d/vdr.skinnopacity:
 
-#SKINNOPACITY_EPGIMGDIR="/video/epg_image_cache"
+#SKINNOPACITY_EPGIMGDIR="/video/epg_image_cache/"
 
-#SKINNOPACITY_LOGODIR="/usr/share/channel-logos/dvbviewer"
+#SKINNOPACITY_LOGODIR="/usr/share/channel-logos/dvbviewer/"
 
-#SKINNOPACITY_ICONDIR="/usr/share/vdr/skinnopacity/icons"
+#SKINNOPACITY_ICONDIR="/usr/share/vdr/skinnopacity/icons/"
 
 # _EXTRAOPTS=""

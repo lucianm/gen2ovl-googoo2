@@ -39,6 +39,7 @@ src_install() {
 }
 
 pkg_postinst() {
-	einfo "Please check and ajust your settings in /etc/conf.d/vdr.${VDRPLUGIN},"
-	einfo "especially for the channel logos path"
+	einfo "Please check and ajust your settings in \"/etc/conf.d/vdr.${VDRPLUGIN}\","
+	einfo "especially for the channel logos path, and in general, make sure"
+	einfo "they end with an \"/\""
 }
