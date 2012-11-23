@@ -1,6 +1,6 @@
 diff -Naur softhddevice-9999_orig/Makefile softhddevice-9999/Makefile
---- softhddevice-9999_orig/Makefile	2012-11-23 22:39:47.000000000 +0100
-+++ softhddevice-9999/Makefile	2012-11-23 22:46:25.974799895 +0100
+--- softhddevice-9999_orig/Makefile	2012-11-23 23:01:02.000000000 +0100
++++ softhddevice-9999/Makefile	2012-11-23 23:03:04.602911450 +0100
 @@ -18,15 +18,19 @@
  
  ### Configuration (edit this for your needs)
@@ -16,10 +16,13 @@ diff -Naur softhddevice-9999_orig/Makefile softhddevice-9999/Makefile
 +CONFIG += -DHAVE_PTHREAD_NAME		# supports new pthread_setname_np
  #CONFIG += -DNO_TS_AUDIO		# disable ts audio parser
  #CONFIG += -DUSE_TS_VIDEO		# build new ts video parser
- CONFIG += $(shell pkg-config --exists vdpau && echo "-DUSE_VDPAU")
- CONFIG += $(shell pkg-config --exists libva && echo "-DUSE_VAAPI")
- CONFIG += $(shell pkg-config --exists alsa && echo "-DUSE_ALSA")
+-CONFIG += $(shell pkg-config --exists vdpau && echo "-DUSE_VDPAU")
+-CONFIG += $(shell pkg-config --exists libva && echo "-DUSE_VAAPI")
+-CONFIG += $(shell pkg-config --exists alsa && echo "-DUSE_ALSA")
 -CONFIG += -DUSE_OSS
++ALSA ?= 1
++VDPAU ?= 1
++VAAPI ?= 1
  
  ### The C++ compiler and options:
  
