@@ -24,27 +24,58 @@ DEPEND=">=media-video/vdr-1.7.27
 	>=dev-libs/tntnet-2.0[sdk]
 	>=dev-libs/cxxtools-2.0
 	>=net-libs/libupnp-1.6.14
-	dev-libs/boost"
+	dev-libs/boost
+	!media-plugins/${PN}-subplugins"
 
 RDEPEND="${DEPEND}"
 
-PDEPEND="=media-plugins/${PN}-subplugins-${PV}"
+#PDEPEND="=media-plugins/${PN}-subplugins-${PV}"
 
 #PATCHES="${FILESDIR}/${P}_Makefile-plugins.diff"
 
 src_compile() {
 
+	# build main plugin, normally
 	VDRDIR="${VDR_INCLUDE_DIR}" \
 		VDRINCDIR="${VDR_INCLUDE_DIR%/vdr}" \
+		vdr-plugin-2_src_compile
+
+	# build sub-plugins
+	VDRDIR="${VDR_INCLUDE_DIR}" \
+		VDRINCDIR="${VDR_INCLUDE_DIR%/vdr}" \
+		BUILD_TARGETS="subplugins" \
+		VDRPLUGINLIBDIR="${VDR_PLUGIN_DIR}" \
+		ROOTBUILDDIR="${S}" \
 		vdr-plugin-2_src_compile
 
 }
 
 src_install() {
 
+	# install main plugin, normally
 	vdr-plugin-2_src_install
 
 	insinto "/etc/vdr/plugins/${VDRPLUGIN}"
 	doins -r httpdocs
+
+	# install sub-plugins
+	insinto "${VDR_PLUGIN_DIR}"
+	doins lib${VDRPLUGIN}-*.so.*
+
+	# each subplugin has a README, they are grouped into categories ($i),
+	# so let's organize them in that directory structure
+	# also, install any possible *.conf files in the main plugins
+	# config directory
+	for i in $(ls -A -I ".*" "${S}/plugins"); do
+		for j in $(ls -A -I ".*" "${S}/plugins/$i"); do
+			cd "${S}/plugins/$i/$j"
+			for cfg in $(ls *.conf); do
+				insinto "/etc/vdr/plugins/${VDRPLUGIN}"
+				doins $cfg;
+			done
+			docinto "$i"
+			newdoc README "README.$j"
+		done
+	done
 
 }
