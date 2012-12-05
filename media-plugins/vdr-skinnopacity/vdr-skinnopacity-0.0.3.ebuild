@@ -49,24 +49,3 @@ pkg_postinst() {
 	einfo "especially for the channel logos path, and in general, make sure"
 	einfo "they end with an \"/\""
 }
-
-#src_compile() {
-#	local myconf
-
-#	myconf+=" ALSA=$(usex alsa 1 0)"
-#	myconf+=" JPEG=$(usex jpeg 1 0)"
-#	#myconf+=" GLX=$(usex opengl 1 0)"
-#	myconf+=" GLX=0"
-#	myconf+=" OSS=$(usex oss 1 0)"
-#	myconf+=" VAAPI=$(usex vaapi 1 0)"
-#	myconf+=" VDPAU=$(usex vdpau 1 0)"
-#	myconf+=" YAEPG=$(usex yaepg 1 0)"
-#	myconf+=" TS_VIDEO=$(usex ts_video 1 0)"
-#	myconf+=" SCREENSAVER=$(usex xscreensaver 1 0)" # FIXME: screensaver is currently always enabled
-
-#	append-cflags -DHAVE_PTHREAD_NAME
-#	append-cxxflags -DHAVE_PTHREAD_NAME
-#	tc-export CC CXX
-
-#	emake all LIBDIR="." $myconf || die "emake failed"
-#}
