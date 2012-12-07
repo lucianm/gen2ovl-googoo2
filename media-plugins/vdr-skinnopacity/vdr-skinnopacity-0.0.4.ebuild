@@ -32,7 +32,7 @@ RDEPEND="${DEPEND}
 #VDR_CONFD_FILE="${FILESDIR}/confd-${PV}"
 #VDR_RCADDON_FILE="${FILESDIR}/rc-addon-${PV}.sh"
 
-PATCHES="${FILESDIR}/${PN}_channelName-obsoleted.patch"
+PATCHES="${FILESDIR}/${PN}_Fixed-some-crashes.patch"
 
 src_install() {
 	vdr-plugin-2_src_install
