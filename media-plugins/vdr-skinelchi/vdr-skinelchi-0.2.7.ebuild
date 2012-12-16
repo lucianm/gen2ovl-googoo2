@@ -1,6 +1,6 @@
 # Copyright 1999-2012 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/media-plugins/vdr-skinelchi/vdr-skinelchi-0.2.7.ebuild,v 1.2 2012/07/28 13:51:48 hd_brummy Exp $
+# $Header: Exp $
 
 EAPI="4"
 
@@ -29,6 +29,8 @@ VDR_RCADDON_FILE="${FILESDIR}/rc-addon-0.1.1_pre2-r1.sh"
 
 src_prepare() {
 	vdr-plugin-2_src_prepare
+
+	has_version ">=media-video/vdr-1.7.33" && epatch "${FILESDIR}/${VDRPLUGIN}-vdr-1.7.33.diff"
 
 	if ! use imagemagick; then
 		einfo "Disabling imagemagick-support."
