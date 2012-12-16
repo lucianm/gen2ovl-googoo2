@@ -1,0 +1,52 @@
+From 9229a135bb1f176e784561b3596cfac9a7bec32f Mon Sep 17 00:00:00 2001
+From: Lucian Muresan <lucianm@users.sourceforge.net>
+Date: Sun, 9 Dec 2012 23:34:06 +0100
+Subject: [PATCH 3/4] yaepghd center text
+
+---
+ yaepghd.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/yaepghd.c b/yaepghd.c
+index 0affc46..b415cca 100644
+--- a/yaepghd.c
++++ b/yaepghd.c
+@@ -1916,7 +1916,7 @@ cYaepgHelpBar::cYaepgHelpBar(void) :
+       boxes[i].Font(GRID_EVENT_FONT);
+       boxes[i].FgColor(EVENT_TITLE_COLOR);
+       boxes[i].BgColor(clrTransparent);
+-      boxes[i].Flags((eTextFlags)(TBOX_VALIGN_LEFT | TBOX_HALIGN_CENTER));
++      boxes[i].Flags((eTextFlags)(TBOX_VALIGN_CENTER | TBOX_HALIGN_CENTER));
+       boxes[i].X(geom.x + (i * boxWidth) + dotDiam);
+       boxes[i].Y(geom.y);
+       boxes[i].W(boxWidth - dotDiam);
+@@ -2160,7 +2160,7 @@ cYaepgRecDlg::cYaepgRecDlg(void) :
+    startInput.Font(REC_DLG_FONT);
+    startInput.FgColor(REC_DLG_COLOR);
+    startInput.BgColor(clrTransparent);
+-   startInput.Flags((eTextFlags)(TBOX_VALIGN_RIGHT | TBOX_HALIGN_CENTER));
++   startInput.Flags((eTextFlags)(TBOX_VALIGN_CENTER | TBOX_HALIGN_CENTER));
+    startInput.X(REC_DLG_GEOM.x + REC_STINP_GEOM.x);
+    startInput.Y(REC_DLG_GEOM.y + REC_STINP_GEOM.y);
+    startInput.W(REC_STINP_GEOM.w);
+@@ -2170,7 +2170,7 @@ cYaepgRecDlg::cYaepgRecDlg(void) :
+    endInput.Font(REC_DLG_FONT);
+    endInput.FgColor(REC_DLG_COLOR);
+    endInput.BgColor(clrTransparent);
+-   endInput.Flags((eTextFlags)(TBOX_VALIGN_RIGHT | TBOX_HALIGN_CENTER));
++   endInput.Flags((eTextFlags)(TBOX_VALIGN_CENTER | TBOX_HALIGN_CENTER));
+    endInput.X(REC_DLG_GEOM.x + REC_ENINP_GEOM.x);
+    endInput.Y(REC_DLG_GEOM.y + REC_ENINP_GEOM.y);
+    endInput.W(REC_ENINP_GEOM.w);
+@@ -2180,7 +2180,7 @@ cYaepgRecDlg::cYaepgRecDlg(void) :
+    freqInput.Font(REC_DLG_FONT);
+    freqInput.FgColor(REC_DLG_COLOR);
+    freqInput.BgColor(clrTransparent);
+-   freqInput.Flags((eTextFlags)(TBOX_VALIGN_RIGHT | TBOX_HALIGN_CENTER));
++   freqInput.Flags((eTextFlags)(TBOX_VALIGN_CENTER | TBOX_HALIGN_CENTER));
+    freqInput.X(REC_DLG_GEOM.x + REC_FRINP_GEOM.x);
+    freqInput.Y(REC_DLG_GEOM.y + REC_FRINP_GEOM.y);
+    freqInput.W(REC_FRINP_GEOM.w);
+-- 
+1.8.0
+

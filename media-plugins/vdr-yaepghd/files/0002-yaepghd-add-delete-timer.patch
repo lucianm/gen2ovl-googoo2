@@ -1,0 +1,517 @@
+From 45cda92334be90d8e34770451ba0369ef9cc1b37 Mon Sep 17 00:00:00 2001
+From: Lucian Muresan <lucianm@users.sourceforge.net>
+Date: Sun, 9 Dec 2012 23:33:04 +0100
+Subject: [PATCH 2/4] yaepghd add delete timer
+
+---
+ po/de_DE.po |  22 +++++----
+ po/fi_FI.po |  14 ++++--
+ yaepghd.c   | 159 ++++++++++++++++++++++++++++++++++++++++++++++++++++++------
+ 3 files changed, 169 insertions(+), 26 deletions(-)
+
+diff --git a/po/de_DE.po b/po/de_DE.po
+index fc7b16a..e43f0ee 100644
+--- a/po/de_DE.po
++++ b/po/de_DE.po
+@@ -6,9 +6,9 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: Yaepghd 0.0.1\n"
+ "Report-Msgid-Bugs-To: <see README>\n"
+-"POT-Creation-Date: 2009-01-30 20:42+0200\n"
+-"PO-Revision-Date: 2009-01-28 10:51+0200\n"
+-"Last-Translator: Klaus Schmidinger <kls@cadsoft.de>\n"
++"POT-Creation-Date: 2009-10-18 22:24+0200\n"
++"PO-Revision-Date: 2009-10-15 22:58+0100\n"
++"Last-Translator: Tomas Saxer <tsaxer@gmx.de>\n"
+ "Language-Team: <vdr@linuxtv.org>\n"
+ "MIME-Version: 1.0\n"
+ "Content-Type: text/plain; charset=ISO-8859-15\n"
+@@ -17,14 +17,15 @@ msgstr ""
+ msgid "No Info"
+ msgstr "Keine Daten verf�gbar."
+ 
+-msgid "Screenshot"
+-msgstr ""
++#, fuzzy
++msgid "Timer"
++msgstr "Zeit-Format"
+ 
+ msgid "Page up"
+-msgstr ""
++msgstr "Seite hoch"
+ 
+ msgid "Page down"
+-msgstr ""
++msgstr "Seite runter"
+ 
+ msgid "Once"
+ msgstr "Sobald"
+@@ -54,10 +55,10 @@ msgid "12h"
+ msgstr ""
+ 
+ msgid "Up"
+-msgstr ""
++msgstr "Hoch"
+ 
+ msgid "Down"
+-msgstr ""
++msgstr "Runter"
+ 
+ msgid "Manual"
+ msgstr ""
+@@ -83,6 +84,9 @@ msgstr "Zeit-Format"
+ msgid "Channel order"
+ msgstr ""
+ 
++msgid "Channel number"
++msgstr ""
++
+ msgid "Yet another EPG in HD"
+ msgstr ""
+ 
+diff --git a/po/fi_FI.po b/po/fi_FI.po
+index 2e78659..5dda4e5 100644
+--- a/po/fi_FI.po
++++ b/po/fi_FI.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: Yaepghd 0.0.1\n"
+ "Report-Msgid-Bugs-To: <see README>\n"
+-"POT-Creation-Date: 2009-01-30 20:42+0200\n"
++"POT-Creation-Date: 2009-10-18 22:24+0200\n"
+ "PO-Revision-Date: 2009-01-28 10:51+0200\n"
+ "Last-Translator: Rolf Ahrenberg <rahrenbe@cc.hut.fi>\n"
+ "Language-Team: <vdr@linuxtv.org>\n"
+@@ -18,8 +18,9 @@ msgstr ""
+ msgid "No Info"
+ msgstr "Ei tietoja"
+ 
+-msgid "Screenshot"
+-msgstr "Ota kuva"
++#, fuzzy
++msgid "Timer"
++msgstr "Kellonajan esitysmuoto"
+ 
+ msgid "Page up"
+ msgstr "Sivu ylös"
+@@ -84,8 +85,15 @@ msgstr "Kellonajan esitysmuoto"
+ msgid "Channel order"
+ msgstr "Kanavajärjetys"
+ 
++#, fuzzy
++msgid "Channel number"
++msgstr "Kanavajärjetys"
++
+ msgid "Yet another EPG in HD"
+ msgstr "Vaihtoehtoinen ohjelmaopas"
+ 
+ msgid "YaepgHD"
+ msgstr "Ohjelmaopas (YaepgHD)"
++
++#~ msgid "Screenshot"
++#~ msgstr "Ota kuva"
+diff --git a/yaepghd.c b/yaepghd.c
+index 92adb19..0affc46 100644
+--- a/yaepghd.c
++++ b/yaepghd.c
+@@ -24,6 +24,8 @@
+ #include <vdr/osd.h>
+ #include <vdr/device.h>
+ #include <vdr/thread.h>
++#include <vdr/player.h>
++#include <vdr/timers.h>
+ 
+ 
+ #if defined(APIVERSNUM) && APIVERSNUM < 10600
+@@ -33,6 +35,7 @@
+ /**
+  * Macros
+  */
++#define WO__MSG_RECDLG
+ 
+ #ifdef DEBUG
+ #define ASSERT                   assert
+@@ -67,6 +70,7 @@
+ #define GRID_TIME_FONT           THEME_FONT("gridTimeFont")
+ #define GRID_DATE_FONT           THEME_FONT("gridDateFont")
+ #define EVENT_TITLE_FONT         THEME_FONT("eventTitleFont")
++#define EVENT_INFO_FONT          THEME_FONT("eventInfoFont")
+ #define EVENT_TIME_FONT          THEME_FONT("eventTimeFont")
+ #define EVENT_DESC_FONT          THEME_FONT("eventDescFont")
+ #define EVENT_DATE_FONT          THEME_FONT("eventDateFont")
+@@ -78,6 +82,7 @@
+ #define GRID_DATE_COLOR          THEME_COLOR("gridDateColor")
+ #define GRID_SEP_COLOR           THEME_COLOR("gridSepColor")
+ #define EVENT_TITLE_COLOR        THEME_COLOR("eventTitleColor")
++#define EVENT_INFO_COLOR         THEME_COLOR("eventInfoColor")
+ #define EVENT_TIME_COLOR         THEME_COLOR("eventTimeColor")
+ #define EVENT_DESC_COLOR         THEME_COLOR("eventDescColor")
+ #define EVENT_DATE_COLOR         THEME_COLOR("eventDateColor")
+@@ -87,6 +92,7 @@
+ #define GRID_TIME_GEOM           THEME_GEOM("gridTimeGeom")
+ #define GRID_DATE_GEOM           THEME_GEOM("gridDateGeom")
+ #define EVENT_TITLE_GEOM         THEME_GEOM("eventTitleGeom")
++#define EVENT_INFO_GEOM          THEME_GEOM("eventInfoGeom")
+ #define EVENT_TIME_GEOM          THEME_GEOM("eventTimeGeom")
+ #define EVENT_DESC_GEOM          THEME_GEOM("eventDescGeom")
+ #define EVENT_DATE_GEOM          THEME_GEOM("eventDateGeom")
+@@ -153,6 +159,7 @@ static int         iReplaceOrgSchedule      = false;
+ static int         iChannelChange           = CHANNEL_CHANGE_MANUAL;
+ static int         iTimeFormat              = TIME_FORMAT_12H;
+ static int         iChannelOrder            = CHANNEL_ORDER_DOWN;
++static int         iChannelNumber           = false;
+ static std::string sThemeName               = "default";
+ static std::string sThemeDir                = "";
+ 
+@@ -269,6 +276,7 @@ cYaepgTheme::cYaepgTheme(void)
+    AddElement("gridTimeFont", THEME_FONT);
+    AddElement("gridDateFont", THEME_FONT);
+    AddElement("eventTitleFont", THEME_FONT);
++   AddElement("eventInfoFont", THEME_FONT);
+    AddElement("eventTimeFont", THEME_FONT);
+    AddElement("eventDescFont", THEME_FONT);
+    AddElement("eventDateFont", THEME_FONT);
+@@ -280,6 +288,7 @@ cYaepgTheme::cYaepgTheme(void)
+    AddElement("gridTimeColor", THEME_COLOR);
+    AddElement("gridDateColor", THEME_COLOR);
+    AddElement("eventTitleColor", THEME_COLOR);
++   AddElement("eventInfoColor", THEME_COLOR);
+    AddElement("eventTimeColor", THEME_COLOR);
+    AddElement("eventDescColor", THEME_COLOR);
+    AddElement("eventDateColor", THEME_COLOR);
+@@ -289,6 +298,7 @@ cYaepgTheme::cYaepgTheme(void)
+    AddElement("gridTimeGeom", THEME_GEOM);
+    AddElement("gridDateGeom", THEME_GEOM);
+    AddElement("eventTitleGeom", THEME_GEOM);
++   AddElement("eventInfoGeom", THEME_GEOM);
+    AddElement("eventTimeGeom", THEME_GEOM);
+    AddElement("eventDescGeom", THEME_GEOM);
+    AddElement("eventDateGeom", THEME_GEOM);
+@@ -762,6 +772,12 @@ cYaepgTextBox::Generate(void)
+       *s-- = '\0';
+    }
+ 
++      /* Remove newlines in descriptions */
++   char *newlineText = tokText;
++   strreplace(newlineText, '\n', ' ');
++   
++   
++
+    /* Break text up into lines */
+    char *line, *nextLine = tokText;
+ 
+@@ -1331,9 +1347,9 @@ cYaepgGridChans::Generate(void)
+       chanInfo[i].nameBox.FgColor(GRID_CHAN_COLOR);
+       chanInfo[i].nameBox.BgColor(clrTransparent);
+       chanInfo[i].nameBox.Flags((eTextFlags)(TBOX_VALIGN_LEFT | TBOX_HALIGN_CENTER));
+-      chanInfo[i].nameBox.X(geom.x + (geom.w / 2));
++      chanInfo[i].nameBox.X(geom.x); // + (geom.w / 2));
+       chanInfo[i].nameBox.Y(geom.y + ROUND((float)i * (chanRowHeight + (float)horizSpace)));
+-      chanInfo[i].nameBox.W(geom.w / 2);
++      chanInfo[i].nameBox.W(geom.w); // / 2);
+       chanInfo[i].nameBox.H(ROUND(chanRowHeight));
+       chanInfo[i].nameBox.Generate();
+ 
+@@ -1351,7 +1367,7 @@ cYaepgGridChans::Draw(cBitmap *bmp)
+    YAEPG_INFO("Drawing grid channels at (%d %d)", geom.x, geom.y);
+ 
+    for (int i = 0; i < (int)chanInfo.size(); i++) {
+-      chanInfo[i].numBox.Draw(bmp);
++      //chanInfo[i].numBox.Draw(bmp);
+       chanInfo[i].nameBox.Draw(bmp);
+    }
+ }
+@@ -1457,12 +1473,8 @@ cYaepgGridDate::cYaepgGridDate(time_t _t)
+ void
+ cYaepgGridDate::UpdateTime(time_t _t)
+ {
+-   struct tm locTime;
+-
++   sprintf(dateStr,"%s", *DateString(_t));
+    t = _t;
+-   localtime_r(&t, &locTime);
+-   snprintf(dateStr, sizeof(dateStr), "%s %d/%d",
+-            *WeekDayName((locTime.tm_wday + 6) % 6), locTime.tm_mon, locTime.tm_mday);
+    Generate();
+ }
+ 
+@@ -1548,6 +1560,68 @@ cYaepgEventTitle::Draw(cBitmap *bmp)
+    box.Draw(bmp);
+ }
+ 
++
++
++
++
++/*
++ *****************************************************************************
++ * cYaepgEventInfo
++ *****************************************************************************
++ */
++class cYaepgEventInfo {
++private:
++   tGeom geom;
++   const cEvent *event;
++   cYaepgTextBox box;
++
++public:
++   cYaepgEventInfo(const cEvent *_event);
++   void UpdateEvent(const cEvent *_event) { event = _event; Generate(); }
++   void Generate(void);
++   void Draw(cBitmap *bmp);
++};
++
++cYaepgEventInfo::cYaepgEventInfo(const cEvent *_event) :
++   event(_event)
++{
++   geom = EVENT_INFO_GEOM;
++   Generate();
++}
++
++static const char *TimerMatchChars = " tT"; 
++
++void
++cYaepgEventInfo::Generate(void)
++{
++   eTimerMatch timerMatch=tmNone; 
++   Timers.GetMatch(event, &timerMatch);
++   char t = TimerMatchChars[timerMatch];
++   char v = event->Vps() && (event->Vps() - event->StartTime()) ? 'V' : ' ';
++   char r = event->SeenWithin(30) && event->IsRunning() ? '*' : ' '; 
++   cString buffer;
++   buffer = cString::sprintf("%c %c %c", t, v, r);
++   
++   box.Text(buffer);
++   box.Font(EVENT_INFO_FONT);
++   box.FgColor(EVENT_INFO_COLOR);
++   box.BgColor(clrTransparent);
++   box.Flags((eTextFlags)(TBOX_VALIGN_LEFT | TBOX_HALIGN_BOTTOM | TBOX_WRAP));
++   box.X(geom.x);
++   box.Y(geom.y);
++   box.W(geom.w);
++   box.H(geom.h);
++   box.Generate();
++}
++
++void
++cYaepgEventInfo::Draw(cBitmap *bmp)
++{
++   YAEPG_INFO("Drawing event info at (%d %d)", geom.x, geom.y);
++
++   box.Draw(bmp);
++}
++
+ /*
+  *****************************************************************************
+  * cYaepgEventTime
+@@ -1819,7 +1893,7 @@ public:
+ };
+ 
+ const char *cYaepgHelpBar::helpStrs[4] = {
+-   trNOOP("Screenshot"),
++   trNOOP("Timer"),
+    trNOOP("Page up"),
+    trNOOP("Page down"),
+    trVDR("Button$Switch")
+@@ -1840,7 +1914,7 @@ cYaepgHelpBar::cYaepgHelpBar(void) :
+    for (int i = 0; i < 4; i++) {
+       boxes[i].Text(tr(helpStrs[i]));
+       boxes[i].Font(GRID_EVENT_FONT);
+-      boxes[i].FgColor(GRID_EVENT_COLOR);
++      boxes[i].FgColor(EVENT_TITLE_COLOR);
+       boxes[i].BgColor(clrTransparent);
+       boxes[i].Flags((eTextFlags)(TBOX_VALIGN_LEFT | TBOX_HALIGN_CENTER));
+       boxes[i].X(geom.x + (i * boxWidth) + dotDiam);
+@@ -1865,9 +1939,6 @@ cYaepgHelpBar::Draw(cBitmap *bmp)
+    }
+    
+    for (int i = 0; i < 4; i++) {
+-      bmp->DrawEllipse(dots[i].x1, dots[i].y1,
+-                       dots[i].x2, dots[i].y2,
+-                       dots[i].color);
+       boxes[i].Draw(bmp);
+    }
+ }
+@@ -2485,11 +2556,15 @@ private:
+    cYaepgGridTime *gridTime;
+    cYaepgGridDate *gridDate;
+    cYaepgEventTitle *eventTitle;
++   cYaepgEventInfo *eventInfo;
+    cYaepgEventTime *eventTime;
+    cYaepgEventDesc *eventDesc;
+    cYaepgEventDate *eventDate;
+    cYaepgTimeLine *timeLine;
+    cYaepgHelpBar *helpBar;
++   #ifndef WO__MSG_RECDLG
++   cYaepgHelpBar *helpBar;
++   #endif
+ 
+ public:
+    cYaepghd(void);
+@@ -2503,6 +2578,7 @@ public:
+    void UpdateEvent(const cEvent *newEvent);
+    void MoveCursor(eCursorDir dir);
+    void SwitchToCurrentChannel(bool closeVidWin = false);
++   void AddDelTimer(void);
+    void Draw(void);
+ };
+ 
+@@ -2520,11 +2596,20 @@ cYaepghd::cYaepghd(void) :
+    gridTime(NULL),
+    gridDate(NULL),
+    eventTitle(NULL),
++   eventInfo(NULL),
+    eventTime(NULL),
+    eventDesc(NULL),
+    eventDate(NULL),
+    timeLine(NULL),
++   #ifndef  WO__MSG_RECDLG
++   helpBar(NULL),
++   recDlg(NULL)
++#else
+    helpBar(NULL)
++#endif
++   
++   
++   
+ {
+    memset(&mainWin, 0, sizeof(mainWin));
+    chanVec.clear();
+@@ -2540,6 +2625,7 @@ cYaepghd::~cYaepghd()
+    delete gridDate;
+    delete timeLine;
+    delete eventTitle;
++   delete eventInfo;
+    delete eventTime;
+    delete eventDesc;
+    delete eventDate;
+@@ -2606,6 +2692,7 @@ cYaepghd::Show(void)
+    timeLine = new cYaepgTimeLine(t);
+    const cEvent *e = gridEvents->Event();
+    eventTitle = new cYaepgEventTitle(e);
++   eventInfo = new cYaepgEventInfo(e);
+    eventTime = new cYaepgEventTime(e);
+    eventDesc = new cYaepgEventDesc(e);
+    eventDate = new cYaepgEventDate();
+@@ -2614,6 +2701,35 @@ cYaepghd::Show(void)
+    Draw();
+ }
+ 
++void
++cYaepghd::AddDelTimer(void)
++ {
++      const cEvent *event=gridEvents->Event();
++	  eTimerMatch timerMatch;
++	  cTimer *ti;
++	  ti=Timers.GetMatch(event, &timerMatch);
++	  if (timerMatch==tmFull)
++	  {
++         if (ti) 
++		 {
++		    isyslog("deleting timer %s", *ti->ToDescr());
++			Timers.Del(ti);
++		    Timers.SetModified();
++		    eventInfo->UpdateEvent(event);      
++		 }   
++      }
++	  else
++	  {
++         cTimer *timer = new cTimer(event);
++         Timers.Add(timer);
++	     Timers.SetModified();
++	     isyslog("timer %s added (active)", *timer->ToDescr());
++	     eventInfo->UpdateEvent(event);
++      }
++ }
++
++
++
+ eOSState
+ cYaepghd::ProcessKey(eKeys key)
+ {
+@@ -2658,8 +2774,12 @@ cYaepghd::ProcessKey(eKeys key)
+          else
+             state = osEnd;
+          break;
++	 
++	 
++
+       case kRed:
+-         cDevice::PrimaryDevice()->GrabImageFile("yaepghd.jpg", true, 256, -1, -1);
++	     AddDelTimer(); 
++		 needsRedraw = true;
+          state = osContinue;
+          break;
+       case kGreen:
+@@ -2684,6 +2804,9 @@ cYaepghd::ProcessKey(eKeys key)
+          state = osContinue;
+          // -12 hours
+          break;
++	 
++	 
++	 
+       case k0 ... k9:
+          if (directChan || (key != k0)) {
+             directChan = ((directChan * 10) + ((key & ~k_Repeat) - k0)) % 100000;
+@@ -2853,8 +2976,10 @@ cYaepghd::UpdateEvent(const cEvent *newEvent)
+    }
+    event = newEvent;
+    eventTitle->UpdateEvent(event);
++   eventInfo->UpdateEvent(event);
+    eventTime->UpdateEvent(event);
+    eventDesc->UpdateEvent(event);
++   
+ }
+ 
+ void
+@@ -2926,6 +3051,7 @@ cYaepghd::Draw(void)
+    gridDate->Draw(mainBmp);
+    timeLine->Draw(mainBmp);
+    eventTitle->Draw(mainBmp);
++   eventInfo->Draw(mainBmp);
+    eventTime->Draw(mainBmp);
+    eventDesc->Draw(mainBmp);
+    eventDate->Draw(mainBmp);
+@@ -2947,6 +3073,7 @@ private:
+    int iNewChannelChange;
+    int iNewTimeFormat;
+    int iNewChannelOrder;
++   int iNewChannelNumber;
+    int iNewThemeIndex;
+    char **themes;
+    int numThemes;
+@@ -2970,6 +3097,7 @@ void cMenuSetupYaepg::Store(void)
+    iChannelChange      = iNewChannelChange;
+    iTimeFormat         = iNewTimeFormat;
+    iChannelOrder       = iNewChannelOrder;
++   iChannelNumber      = iNewChannelNumber;
+    sThemeName          = themes[iNewThemeIndex];
+ 
+    SetupStore("HideMenuEntry",      iHideMenuEntry);
+@@ -2977,6 +3105,7 @@ void cMenuSetupYaepg::Store(void)
+    SetupStore("ChannelChange",      iChannelChange);
+    SetupStore("TimeFormat",         iTimeFormat);
+    SetupStore("ChannelOrder",       iChannelOrder);
++   SetupStore("ChannelNumber",      iChannelNumber);
+    SetupStore("Theme",              sThemeName.c_str());
+ }
+ 
+@@ -3015,6 +3144,7 @@ cMenuSetupYaepg::cMenuSetupYaepg(void)
+    Add(new cMenuEditStraItem (tr("Channel change"), &iNewChannelChange, CHANNEL_CHANGE_COUNT, CH_CHANGE_MODES));
+    Add(new cMenuEditStraItem (tr("Time format"), &iNewTimeFormat, TIME_FORMAT_COUNT, TIME_FORMATS));
+    Add(new cMenuEditStraItem (tr("Channel order"), &iNewChannelOrder, CHANNEL_ORDER_COUNT, CH_ORDER_FORMATS));
++   Add(new cMenuEditBoolItem (tr("Channel number"), &iNewChannelNumber));
+    Add(new cMenuEditStraItem (trVDR("Setup.OSD$Theme"), &iNewThemeIndex, numThemes, themes));
+ }
+ 
+@@ -3165,6 +3295,7 @@ cPluginYaepghd::SetupParse(const char *Name, const char *Value)
+    else if (!strcasecmp(Name, "ChannelChange")) { iChannelChange = atoi(Value); }
+    else if (!strcasecmp(Name, "TimeFormat"))    { iTimeFormat = atoi(Value); }
+    else if (!strcasecmp(Name, "ChannelOrder"))  { iChannelOrder = atoi(Value); }
++    else if (!strcasecmp(Name, "ChannelNumber")) { iChannelNumber = atoi(Value); }
+    else if (!strcasecmp(Name, "Theme"))         { Utf8Strn0Cpy(themeName, Value, sizeof(themeName)); sThemeName = themeName; }
+    else                                         { return false; }
+ 
+-- 
+1.8.0
+

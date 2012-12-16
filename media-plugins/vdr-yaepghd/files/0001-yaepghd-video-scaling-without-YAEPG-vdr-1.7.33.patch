@@ -1,0 +1,80 @@
+From 9fc380b2b02fa8578d2e754cfc9ab61133dcc238 Mon Sep 17 00:00:00 2001
+From: Lucian Muresan <lucianm@users.sourceforge.net>
+Date: Sun, 9 Dec 2012 23:24:12 +0100
+Subject: [PATCH 1/4] yaepghd video scaling without YAEPG vdr-1.7.33
+
+---
+ yaepghd.c | 31 ++++++++++++-------------------
+ 1 file changed, 12 insertions(+), 19 deletions(-)
+
+diff --git a/yaepghd.c b/yaepghd.c
+index 868f999..92adb19 100644
+--- a/yaepghd.c
++++ b/yaepghd.c
+@@ -25,9 +25,6 @@
+ #include <vdr/device.h>
+ #include <vdr/thread.h>
+ 
+-#ifndef YAEPGHDVERSNUM
+-#error "You must apply the yaepghd patch for VDR!"
+-#endif
+ 
+ #if defined(APIVERSNUM) && APIVERSNUM < 10600
+ #error "VDR-1.6.0 API version or greater is required!"
+@@ -2582,13 +2579,17 @@ cYaepghd::Show(void)
+    osd->SetAreas(&mainWin, 1);
+ 
+    /* Set up the video window parameters */
++#if APIVERSNUM >= 10733 || defined(_BACKPORT_SCALEVIDEO)
+    if (VID_WIN_GEOM.w != 0 && VID_WIN_GEOM.h != 0) {
+-      osd->vidWin.x1 = VID_WIN_GEOM.x;
+-      osd->vidWin.y1 = VID_WIN_GEOM.y;
+-      osd->vidWin.x2 = VID_WIN_GEOM.x + VID_WIN_GEOM.w;
+-      osd->vidWin.y2 = VID_WIN_GEOM.y + VID_WIN_GEOM.h;
+-      osd->vidWin.bpp = 12;
++      // try to scale if the output device supports it
++      cRect vidWinRect(
++         VID_WIN_GEOM.x,
++         VID_WIN_GEOM.y,
++         VID_WIN_GEOM.w,
++         VID_WIN_GEOM.h);
++      cDevice::PrimaryDevice()->ScaleVideo(cDevice::PrimaryDevice()->CanScaleVideo(vidWinRect));
+    }
++#endif
+ 
+ #ifdef YAEPGHD_REEL_EHD
+    reelVidWin->Open(VID_WIN_GEOM);
+@@ -2862,17 +2863,10 @@ cYaepghd::SwitchToCurrentChannel(bool closeVidWin)
+    const cChannel *gridChan = chanVec[gridEvents->Row()];
+ 
+    if (gridChan && (gridChan->Number() != cDevice::CurrentChannel())) {
+-      /*
+-       * The "Channel not availaible message" will cause vdr to crash. Do a
+-       * "lower level" channel switch to avoid the error message.
+-       *
+-       * XXX Is this still true ? XXX
+-       */
+-      eSetChannelResult ret;
+ 
+       /*
+        * The eHD card doesn't seem to like changing channels while the video
+-       * plane is sacled down.  To get around this problem we close/reopen the
++       * plane is scaled down.  To get around this problem we close/reopen the
+        * video window across channel changes.
+        */
+ #ifdef YAEPGHD_REEL_EHD
+@@ -2880,9 +2874,8 @@ cYaepghd::SwitchToCurrentChannel(bool closeVidWin)
+       cCondWait::SleepMs(100);
+ #endif
+ 
+-      ret = cDevice::PrimaryDevice()->SetChannel(gridChan, true);
+-      if (ret != scrOk) {
+-         fprintf(stderr, "SetChannel(): %d\n", ret);
++      if (!cDevice::PrimaryDevice()->SwitchChannel(gridChan, true)) {
++         fprintf(stderr, "SwitchChannel(): failed\n");
+       }
+ 
+ #ifdef YAEPGHD_REEL_EHD
+-- 
+1.8.0
+

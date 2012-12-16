@@ -1,0 +1,13 @@
+diff --git a/yaepghd.c b/yaepghd.c
+index 868f999..4afb1d8 100644
+--- a/yaepghd.c
++++ b/yaepghd.c
+@@ -566,7 +566,7 @@ cYaepgTheme::LoadImage(char *Filename)
+             tColor col = (~(int)(pix->opacity * 255 / MaxRGB) << 24) |
+                           ((int)(pix->red * 255 / MaxRGB) << 16) |
+                           ((int)(pix->green * 255 / MaxRGB) << 8) |
+-                           (pix->blue * 255 / MaxRGB);
++                           (int)(pix->blue * 255 / MaxRGB);
+             bmp->DrawPixel(ix, iy, col);
+             ++pix;
+          }
