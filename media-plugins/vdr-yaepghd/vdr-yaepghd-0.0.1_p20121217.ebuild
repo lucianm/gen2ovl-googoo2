@@ -10,6 +10,7 @@ DESCRIPTION="yaepghd plugin for nice epg"
 HOMEPAGE="http://projects.vdr-developer.org/projects/show/plg-yaepghd"
 SRC_URI=""
 EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-yaepghd.git"
+EGIT_COMMIT="ac9f1b88b38a254b981e8b30f182779c8112aa6f"
 
 LICENSE="GPL-2"
 SLOT="0"
@@ -26,7 +27,6 @@ PATCHES="
 	${FILESDIR}/0003-yaepghd-center-text.patch
 	${FILESDIR}/0004-yaepghd-anthra_1920-theme.patch
 "
-
 src_install() {
 	vdr-plugin-2_src_install
 
