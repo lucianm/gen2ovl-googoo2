@@ -35,13 +35,13 @@ index 868f999..1054616 100644
 -      osd->vidWin.x2 = VID_WIN_GEOM.x + VID_WIN_GEOM.w;
 -      osd->vidWin.y2 = VID_WIN_GEOM.y + VID_WIN_GEOM.h;
 -      osd->vidWin.bpp = 12;
-+      // try to scale if the output device supports it
++      // ask the output device to scale the video when next flushing the OSD, if it supports this
 +      cRect vidWinRect(
 +         VID_WIN_GEOM.x,
 +         VID_WIN_GEOM.y,
 +         VID_WIN_GEOM.w,
 +         VID_WIN_GEOM.h);
-+      cDevice::PrimaryDevice()->ScaleVideo(cDevice::PrimaryDevice()->CanScaleVideo(vidWinRect));
++      cDevice::PrimaryDevice()->CanScaleVideo(vidWinRect);
     }
  
  #ifdef YAEPGHD_REEL_EHD
