@@ -1,0 +1,7 @@
+# /etc/conf.d/vdr.tvguide:
+
+#TVGUIDE_EPGIMGDIR="/video/epg_image_cache/"
+
+#TVGUIDE_LOGODIR="/usr/share/channel-logos/dvbviewer/"
+
+# _EXTRAOPTS=""
