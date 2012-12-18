@@ -24,7 +24,7 @@ SLOT="0"
 LICENSE="GPL-2"
 IUSE=""
 
-DEPEND=">=media-video/vdr-1.7.28
+DEPEND=">=media-video/vdr-1.7.33
 	media-gfx/imagemagick"
 RDEPEND="${DEPEND}
 	virtual/channel-logos-hq"
