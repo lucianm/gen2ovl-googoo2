@@ -1,6 +1,6 @@
-# Copyright 1999-2011 Gentoo Foundation
+# Copyright 1999-2012 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/media-plugins/vdr-fritzbox/vdr-fritzbox-1.3.9.ebuild,v 1.1 2011/03/26 12:57:36 hd_brummy Exp $
+# $Header: /var/cvsroot/gentoo-x86/media-plugins/vdr-fritzbox/vdr-fritzbox-1.4.3.ebuild,v 1.2 2012/07/01 12:41:32 hd_brummy Exp $
 
 EAPI="4"
 
@@ -12,10 +12,10 @@ SRC_URI="http://joachim-wilke.de/vdr-fritz/${P}.tgz"
 
 SLOT="0"
 LICENSE="GPL-2"
-KEYWORDS="~amd64 ~x86"
+KEYWORDS="amd64 x86"
 IUSE=""
 
-DEPEND=">=media-video/vdr-1.4.6
+DEPEND=">=media-video/vdr-1.6.0
 		dev-libs/libgcrypt
 		dev-cpp/commoncpp2"
 RDEPEND="${DEPEND}"
