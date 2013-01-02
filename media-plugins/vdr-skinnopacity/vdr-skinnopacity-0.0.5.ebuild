@@ -6,7 +6,7 @@ EAPI="4"
 
 inherit vdr-plugin-2
 
-VERSION="1145" # every bump, new version
+VERSION="1181" # every bump, new version
 
 if [ "${PV}" = "9999" ]; then
 	inherit git-2
@@ -24,7 +24,7 @@ SLOT="0"
 LICENSE="GPL-2"
 IUSE=""
 
-DEPEND=">=media-video/vdr-1.7.34
+DEPEND=">=media-video/vdr-1.7.35
 	media-gfx/imagemagick"
 RDEPEND="${DEPEND}
 	virtual/channel-logos-hq"
@@ -32,16 +32,16 @@ RDEPEND="${DEPEND}
 #VDR_CONFD_FILE="${FILESDIR}/confd-${PV}"
 #VDR_RCADDON_FILE="${FILESDIR}/rc-addon-${PV}.sh"
 
-#PATCHES="${FILESDIR}/${PN}_channelName-obsoleted.patch"
+#PATCHES="${FILESDIR}/${PN}_Fixed-some-crashes.patch"
 
 src_install() {
 	vdr-plugin-2_src_install
 
-#	insinto /etc/vdr/themes
-#	doins "${S}"/themes/*.theme
+	insinto /etc/vdr/themes
+	doins "${S}"/themes/*.theme
 
-#	insinto /usr/share/vdr/${VDRPLUGIN}
-#	doins -r icons
+	insinto /usr/share/vdr/${VDRPLUGIN}
+	doins -r icons
 
 	chown vdr:vdr -R "${D}"/etc/vdr
 }
