@@ -4,6 +4,6 @@
 
 #SKINNOPACITY_LOGODIR="/usr/share/channel-logos/dvbviewer/"
 
-#SKINNOPACITY_ICONDIR="/usr/share/vdr/skinnopacity/icons/"
+#SKINNOPACITY_ICONDIR="/usr/share/vdr/plugins/skinnopacity/icons/"
 
 # _EXTRAOPTS=""
