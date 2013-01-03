@@ -25,7 +25,7 @@ DEPEND=">=media-video/vdr-1.7.27
 	>=dev-libs/cxxtools-2.0
 	>=net-libs/libupnp-1.6.14
 	dev-libs/boost
-	!media-plugins/${PN}-subplugins"
+	>=media-plugins/vdr-streamdev[server,upnp]"
 
 RDEPEND="${DEPEND}"
 
