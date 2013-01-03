@@ -1,14 +1,14 @@
-From eb06d2d43bc9a36880c69cd1ef533448685a4111 Mon Sep 17 00:00:00 2001
+From 1ea38578205535ecca0e76ae24fe4e1da56bb8d9 Mon Sep 17 00:00:00 2001
 From: Lucian Muresan <lucianm@users.sourceforge.net>
-Date: Thu, 3 Jan 2013 10:18:02 +0100
-Subject: [PATCH] yaepghd video scaling without YAEPG vdr-1.7.33 v2
+Date: Thu, 3 Jan 2013 22:10:00 +0100
+Subject: [PATCH] yaepghd video scaling without YAEPG vdr-1.7.33 v3
 
 ---
  yaepghd.c | 36 +++++++++++++++---------------------
  1 file changed, 15 insertions(+), 21 deletions(-)
 
 diff --git a/yaepghd.c b/yaepghd.c
-index 868f999..a052bb6 100644
+index 868f999..def53f4 100644
 --- a/yaepghd.c
 +++ b/yaepghd.c
 @@ -25,12 +25,9 @@
@@ -92,14 +92,14 @@ index 868f999..a052bb6 100644
        }
  
  #ifdef YAEPGHD_REEL_EHD
-@@ -2940,6 +2933,7 @@ cYaepghd::Draw(void)
+@@ -2939,6 +2932,7 @@ cYaepghd::Draw(void)
+    helpBar->Draw(mainBmp);
  
     osd->DrawBitmap(0, 0, *mainBmp);
-    osd->Flush();
 +   cDevice::PrimaryDevice()->ScaleVideo(videoWindowRect); // scale to our desired video window size if supported
+    osd->Flush();
  }
  
- /*
 -- 
 1.8.0.2
 
