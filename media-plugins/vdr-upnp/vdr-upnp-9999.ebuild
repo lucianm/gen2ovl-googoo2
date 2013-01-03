@@ -24,14 +24,10 @@ DEPEND=">=media-video/vdr-1.7.27
 	>=dev-libs/tntnet-2.0[sdk]
 	>=dev-libs/cxxtools-2.0
 	>=net-libs/libupnp-1.6.14
-	dev-libs/boost
-	>=media-plugins/vdr-streamdev[server,upnp]"
+	dev-libs/boost"
 
-RDEPEND="${DEPEND}"
-
-#PDEPEND="=media-plugins/${PN}-subplugins-${PV}"
-
-#PATCHES="${FILESDIR}/${P}_Makefile-plugins.diff"
+RDEPEND="${DEPEND}
+	>=media-plugins/vdr-streamdev-0.6.0[server,upnp]"
 
 src_compile() {
 
