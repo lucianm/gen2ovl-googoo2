@@ -26,7 +26,7 @@ IUSE=""
 
 DEPEND=">=media-video/vdr-1.7.28
 	<=media-video/vdr-1.7.33
-	media-gfx/imagemagick"
+	media-gfx/imagemagick[png]"
 RDEPEND="${DEPEND}
 	virtual/channel-logos-hq"
 

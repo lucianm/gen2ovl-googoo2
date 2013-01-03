@@ -25,7 +25,7 @@ LICENSE="GPL-2"
 IUSE=""
 
 DEPEND=">=media-video/vdr-1.7.35
-	media-gfx/imagemagick"
+	media-gfx/imagemagick[png]"
 RDEPEND="${DEPEND}
 	virtual/channel-logos-hq"
 
