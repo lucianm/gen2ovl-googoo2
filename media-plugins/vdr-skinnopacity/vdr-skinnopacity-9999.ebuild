@@ -37,12 +37,6 @@ RDEPEND="${DEPEND}
 src_install() {
 	vdr-plugin-2_src_install
 
-#	insinto /etc/vdr/themes
-#	doins "${S}"/themes/*.theme
-
-#	insinto /usr/share/vdr/${VDRPLUGIN}
-#	doins -r icons
-
 	chown vdr:vdr -R "${D}"/etc/vdr
 }
 
