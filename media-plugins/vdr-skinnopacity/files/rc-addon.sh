@@ -3,7 +3,7 @@
 # rc-addon-script for plugin skinnopacity
 #
 
-SKINNOPACITY_ICONDIR="/usr/share/vdr/skinnopacity/icons/"
+SKINNOPACITY_ICONDIR="/usr/share/vdr/plugins/skinnopacity/icons/"
 SKINNOPACITY_LOGODIR="/usr/share/channel-logos/dvbviewer/"
 SKINNOPACITY_EPGIMGDIR="/video/epg_image_cache/"
 
