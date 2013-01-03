@@ -22,7 +22,7 @@ DEPEND="${RDEPEND}"
 
 PATCHES="
 	${FILESDIR}/operands.patch
-	${FILESDIR}/0001-yaepghd-video-scaling-without-YAEPG-vdr-1.7.33.patch
+	${FILESDIR}/0001-yaepghd-video-scaling-without-YAEPG-vdr-1.7.33-v2.patch
 	${FILESDIR}/0002-yaepghd-add-delete-timer.patch
 	${FILESDIR}/0003-yaepghd-center-text.patch
 	${FILESDIR}/0004-yaepghd-anthra_1920-theme.patch

@@ -1,14 +1,14 @@
-From 78a4e9e8c79db7dc1ccadf18052cbdede82eec08 Mon Sep 17 00:00:00 2001
+From eb06d2d43bc9a36880c69cd1ef533448685a4111 Mon Sep 17 00:00:00 2001
 From: Lucian Muresan <lucianm@users.sourceforge.net>
-Date: Sun, 16 Dec 2012 17:50:59 +0100
-Subject: [PATCH] yaepghd-video-scaling-without-YAEPG-vdr-1.7.33
+Date: Thu, 3 Jan 2013 10:18:02 +0100
+Subject: [PATCH] yaepghd video scaling without YAEPG vdr-1.7.33 v2
 
 ---
- yaepghd.c | 33 ++++++++++++---------------------
- 1 file changed, 12 insertions(+), 21 deletions(-)
+ yaepghd.c | 36 +++++++++++++++---------------------
+ 1 file changed, 15 insertions(+), 21 deletions(-)
 
 diff --git a/yaepghd.c b/yaepghd.c
-index 868f999..1054616 100644
+index 868f999..a052bb6 100644
 --- a/yaepghd.c
 +++ b/yaepghd.c
 @@ -25,12 +25,9 @@
@@ -26,7 +26,23 @@ index 868f999..1054616 100644
  #endif
  
  /**
-@@ -2583,11 +2580,13 @@ cYaepghd::Show(void)
+@@ -2476,6 +2473,7 @@ private:
+    time_t startTime;
+    tArea mainWin;
+    cBitmap *mainBmp;
++   cRect videoWindowRect;
+ 
+    std::vector< cChannel * > chanVec;
+    const cEvent *event;
+@@ -2547,6 +2545,7 @@ cYaepghd::~cYaepghd()
+    delete eventDesc;
+    delete eventDate;
+    delete helpBar;
++   cDevice::PrimaryDevice()->ScaleVideo(); // rescale to full size
+ #ifdef YAEPGHD_REEL_EHD
+    reelVidWin->Close();
+ #endif
+@@ -2583,11 +2582,13 @@ cYaepghd::Show(void)
  
     /* Set up the video window parameters */
     if (VID_WIN_GEOM.w != 0 && VID_WIN_GEOM.h != 0) {
@@ -41,11 +57,11 @@ index 868f999..1054616 100644
 +         VID_WIN_GEOM.y,
 +         VID_WIN_GEOM.w,
 +         VID_WIN_GEOM.h);
-+      cDevice::PrimaryDevice()->CanScaleVideo(vidWinRect);
++      videoWindowRect = cDevice::PrimaryDevice()->CanScaleVideo(vidWinRect);
     }
  
  #ifdef YAEPGHD_REEL_EHD
-@@ -2862,17 +2861,10 @@ cYaepghd::SwitchToCurrentChannel(bool closeVidWin)
+@@ -2862,17 +2863,10 @@ cYaepghd::SwitchToCurrentChannel(bool closeVidWin)
     const cChannel *gridChan = chanVec[gridEvents->Row()];
  
     if (gridChan && (gridChan->Number() != cDevice::CurrentChannel())) {
@@ -64,7 +80,7 @@ index 868f999..1054616 100644
         * video window across channel changes.
         */
  #ifdef YAEPGHD_REEL_EHD
-@@ -2880,9 +2872,8 @@ cYaepghd::SwitchToCurrentChannel(bool closeVidWin)
+@@ -2880,9 +2874,8 @@ cYaepghd::SwitchToCurrentChannel(bool closeVidWin)
        cCondWait::SleepMs(100);
  #endif
  
@@ -76,6 +92,14 @@ index 868f999..1054616 100644
        }
  
  #ifdef YAEPGHD_REEL_EHD
+@@ -2940,6 +2933,7 @@ cYaepghd::Draw(void)
+ 
+    osd->DrawBitmap(0, 0, *mainBmp);
+    osd->Flush();
++   cDevice::PrimaryDevice()->ScaleVideo(videoWindowRect); // scale to our desired video window size if supported
+ }
+ 
+ /*
 -- 
-1.8.0
+1.8.0.2
 
