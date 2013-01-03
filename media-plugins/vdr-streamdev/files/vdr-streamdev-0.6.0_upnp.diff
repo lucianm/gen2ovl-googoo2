@@ -1,0 +1,94 @@
+diff -Naur streamdev-0.6.0_orig/remux/extern.c streamdev-0.6.0/remux/extern.c
+--- streamdev-0.6.0_orig/remux/extern.c	2012-05-12 13:01:37.000000000 +0200
++++ streamdev-0.6.0/remux/extern.c	2013-01-03 23:55:46.911253852 +0100
+@@ -295,7 +295,7 @@
+ }
+ 
+ cExternRemux::cExternRemux(const cServerConnection *Connection, const cChannel *Channel, const int *Apids, const int *Dpids):
+-		m_ResultBuffer(new cRingBufferLinear(WRITERBUFSIZE, TS_SIZE * 2)),
++		m_ResultBuffer(new cRingBufferLinear(WRITERBUFSIZE)),
+ 		m_Remux(new cTSExt(m_ResultBuffer, Connection, Channel, Apids, Dpids))
+ {
+ 	m_ResultBuffer->SetTimeouts(500, 100);
+diff -Naur streamdev-0.6.0_orig/server/connectionHTTP.c streamdev-0.6.0/server/connectionHTTP.c
+--- streamdev-0.6.0_orig/server/connectionHTTP.c	2012-05-12 13:01:37.000000000 +0200
++++ streamdev-0.6.0/server/connectionHTTP.c	2013-01-03 23:55:46.912253853 +0100
+@@ -188,34 +188,40 @@
+ 				&& Respond("");
+ 		}
+ 	} else if (it_method->second.compare("HEAD") == 0 && ProcessURI(it_pathinfo->second)) {
+-		DeferClose();
+-		if (m_ChannelList)
++		if (m_ChannelList) {
++			DeferClose();
+ 			return Respond("%s", true, m_ChannelList->HttpHeader().c_str());
++		}
+ 		else if (m_Channel != NULL) {
+-			if (ProvidesChannel(m_Channel, 0)) {
++			if (ProvidesChannel(m_Channel, StreamdevServerSetup.HTTPPriority)) {
+ 				if (m_StreamType == stEXT) {
+-					// TODO
+-					return Respond("HTTP/1.0 200 OK")
+-					    && Respond("");
++					m_LiveStreamer = new cStreamdevLiveStreamer(StreamdevServerSetup.HTTPPriority, this);
++					m_LiveStreamer->SetChannel(m_Channel, m_StreamType, m_Apid[0] ? m_Apid : NULL, m_Dpid[0] ? m_Dpid : NULL);
++					return Respond("HTTP/1.0 200 OK");
+ 				} else if (m_StreamType == stES && (m_Apid[0] || m_Dpid[0] || ISRADIO(m_Channel))) {
++					DeferClose();
+ 					return Respond("HTTP/1.0 200 OK")
+ 					    && Respond("Content-Type: audio/mpeg")
+ 					    && Respond("icy-name: %s", true, m_Channel->Name())
+ 					    && Respond("");
+ 				} else if (ISRADIO(m_Channel)) {
++					DeferClose();
+ 					return Respond("HTTP/1.0 200 OK")
+ 					    && Respond("Content-Type: audio/mpeg")
+ 					    && Respond("");
+ 				} else {
++					DeferClose();
+ 					return Respond("HTTP/1.0 200 OK")
+ 					    && Respond("Content-Type: video/mpeg")
+ 					    && Respond("");
+ 				}
+ 			}
++			DeferClose();
+ 			return Respond("HTTP/1.0 503 Service unavailable")
+ 				&& Respond("");
+ 		}
+ 		else {
++			DeferClose();
+ 			return Respond("HTTP/1.0 404 not found")
+ 				&& Respond("");
+ 		}
+diff -Naur streamdev-0.6.0_orig/server/streamer.c streamdev-0.6.0/server/streamer.c
+--- streamdev-0.6.0_orig/server/streamer.c	2012-05-12 13:01:37.000000000 +0200
++++ streamdev-0.6.0/server/streamer.c	2013-01-03 23:55:46.912253853 +0100
+@@ -128,6 +128,7 @@
+ {
+ 	Dprintf("start streamer\n");
+ 	m_Writer = new cStreamdevWriter(Socket, this);
++	m_Writer->Start();
+ 	Attach();
+ }
+ 
+@@ -135,7 +136,6 @@
+ {
+ 	if (On && !Active()) {
+ 		Dprintf("activate streamer\n");
+-		m_Writer->Start();
+ 		cThread::Start();
+ 	}
+ }
+diff -Naur streamdev-0.6.0_orig/streamdev-server/externremux.sh streamdev-0.6.0/streamdev-server/externremux.sh
+--- streamdev-0.6.0_orig/streamdev-server/externremux.sh	2011-05-02 23:17:46.000000000 +0200
++++ streamdev-0.6.0/streamdev-server/externremux.sh	2013-01-03 23:52:54.000000000 +0100
+@@ -102,6 +102,9 @@
+ 
+ function remux_cat
+ {
++	[ "$REMUX_PARAM_DLNA_contentFeatures" ] && HEADER[${#HEADER[*]}]="contentFeatures.dlna.org: ${REMUX_PARAM_DLNA_contentFeatures//+/;}" && HEADER[${#HEADER[*]}]='transferMode.dlna.org: streaming'
++	HEADER[${#HEADER[*]}]='Pragma: no-cache'
++	HEADER[${#HEADER[*]}]='Cache-control: no-cache'
+ 	startReply
+ 	exec 3<&0
+ 	cat 0<&3 >"$FIFO" &

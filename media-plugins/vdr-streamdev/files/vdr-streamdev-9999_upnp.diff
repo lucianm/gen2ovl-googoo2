@@ -1,0 +1,13 @@
+diff -Naur streamdev-9999_orig/streamdev-server/externremux.sh streamdev-9999/streamdev-server/externremux.sh
+--- streamdev-9999_orig/streamdev-server/externremux.sh	2011-05-02 23:17:46.000000000 +0200
++++ streamdev-9999/streamdev-server/externremux.sh	2013-01-03 23:52:54.000000000 +0100
+@@ -102,6 +102,9 @@
+ 
+ function remux_cat
+ {
++	[ "$REMUX_PARAM_DLNA_contentFeatures" ] && HEADER[${#HEADER[*]}]="contentFeatures.dlna.org: ${REMUX_PARAM_DLNA_contentFeatures//+/;}" && HEADER[${#HEADER[*]}]='transferMode.dlna.org: streaming'
++	HEADER[${#HEADER[*]}]='Pragma: no-cache'
++	HEADER[${#HEADER[*]}]='Cache-control: no-cache'
+ 	startReply
+ 	exec 3<&0
+ 	cat 0<&3 >"$FIFO" &
