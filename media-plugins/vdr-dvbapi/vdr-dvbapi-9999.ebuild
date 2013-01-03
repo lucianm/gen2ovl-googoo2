@@ -135,6 +135,6 @@ src_compile() {
 src_install() {
 	vdr-plugin-2_src_install
 
-	diropts -gvdr -ovdr
-	keepdir /etc/vdr/plugins/${VDRPLUGIN}
+#	diropts -gvdr -ovdr
+#	keepdir /etc/vdr/plugins/${VDRPLUGIN}
 }
