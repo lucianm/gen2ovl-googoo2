@@ -1,0 +1,5 @@
+# dvbapi (1.0.3) - DVBAPI type SOFTCAM
+#
+#  -B N,     --budget=N     forces DVB device N to budget mode (using FFdecsa)
+
+#_EXTRAOPTS="--budget=1"
