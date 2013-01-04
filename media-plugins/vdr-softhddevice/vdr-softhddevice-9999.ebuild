@@ -46,7 +46,7 @@ VDR_RCADDON_FILE="${FILESDIR}/rc-addon-${PV}.sh"
 src_prepare() {
 	vdr-plugin-2_src_prepare
 
-	epatch "${FILESDIR}/${P}_Makefile.patch"
+#	epatch "${FILESDIR}/${P}_Makefile.patch"
 }
 
 src_compile() {
