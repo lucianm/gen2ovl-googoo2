@@ -1,0 +1,260 @@
+diff -Naur graphlcd-9999_orig/Makefile graphlcd-9999/Makefile
+--- graphlcd-9999_orig/Makefile	2013-01-05 01:09:01.000000000 +0100
++++ graphlcd-9999/Makefile	2013-01-05 03:07:44.592596694 +0100
+@@ -6,53 +6,54 @@
+ # The official name of this plugin.
+ # This name will be used in the '-P...' option of VDR to load the plugin.
+ # By default the main source file also carries this name.
+-#
++
+ PLUGIN = graphlcd
+ 
+-# define this if you built graphlcd-base with freetype:
+-HAVE_FREETYPE2 = 1
++### The version number of this plugin (taken from the main source file):
+ 
+-# define this if femon-plugin <= 1.7.7 is used AND which has already been patched (see README)
+-# either define this setting here or in $VDRDIR/Make.config or in $VDRDIR/Make.global
+-# HAVE_VALID_FEMON = 1
++VERSION = $(shell grep 'static const char \*VERSION *=' plugin.c | awk '{ print $$6 }' | sed -e 's/[";]//g')
+ 
+-# defines the location of the graphlcd.conf file. if not defined, location = "/etc/graphlcd.conf"
+-#PLUGIN_GRAPHLCDCONF = "/usr/local/etc/graphlcd.conf"
++### The directory environment:
+ 
+-### The version number of this plugin (taken from the main source file):
++# Use package data if installed...otherwise assume we're under the VDR source directory:
++PKGCFG = $(if $(VDRDIR),$(shell pkg-config --variable=$(1) $(VDRDIR)/vdr.pc),$(shell pkg-config --variable=$(1) vdr || pkg-config --variable=$(1) ../../../vdr.pc))
++LIBDIR = $(DESTDIR)$(call PKGCFG,libdir)
++LOCDIR = $(DESTDIR)$(call PKGCFG,locdir)
++PLGCFG = $(call PKGCFG,plgcfg)
++#
++TMPDIR ?= /tmp
+ 
+-VERSION = $(shell grep 'static const char \*VERSION *=' plugin.c | awk '{ print $$6 }' | sed -e 's/[";]//g')
++### The compiler options:
+ 
+-### The C++ compiler and options:
++export CFLAGS   = $(call PKGCFG,cflags)
++export CXXFLAGS = $(call PKGCFG,cxxflags)
+ 
+-CXX      ?= g++
+-CXXFLAGS ?= -g -O2 -Wall -Woverloaded-virtual -Wno-parentheses 
++### The version number of VDR's plugin API:
+ 
+-### The directory environment:
++APIVERSION = $(call PKGCFG,apiversion)
+ 
+-DVBDIR = ../../../../DVB
+-VDRDIR = ../../..
+-LIBDIR = ../../lib
+-TMPDIR = /tmp
++### Allow user defined options to overwrite defaults:
+ 
+-export INSTALLPREFIX = /usr
+-export INSTALLDOCDIR = $(INSTALLPREFIX)/share/doc
++-include $(PLGCFG)
+ 
+-### Make sure that necessary options are included:
++# define this if you built graphlcd-base with freetype:
++HAVE_FREETYPE2 ?= 1
+ 
+--include $(VDRDIR)/Make.global
++# define this if femon-plugin <= 1.7.7 is used AND which has already been patched (see README)
++# either define this setting here or in $VDRDIR/Make.config or in $VDRDIR/Make.global
++HAVE_VALID_FEMON ?= 0
+ 
+-### Allow user defined options to overwrite defaults:
++# defines the path to the graphlcd.conf file. if not defined, path = "< plugin cfg dir >/graphlcd.conf"
++PLUGIN_GRAPHLCDCONF ?= "$(CONFDIR)/plugins/$(PLUGIN)/graphlcd.conf"
+ 
+--include $(VDRDIR)/Make.config
++# defines if installing of TTF should be omitted (default is to install)
++NOT_INSTALL_TTF ?= 0
+ 
+-### The version number of VDR (taken from VDR's "config.h"):
++# defines if installing of documentation should be omitted (default is to install)
++NOT_INSTALL_DOC ?= 0
+ 
+-VDRVERSION = $(shell grep 'define VDRVERSION ' $(VDRDIR)/config.h | awk '{ print $$3 }' | sed -e 's/"//g')
+-APIVERSION = $(shell grep 'define APIVERSION ' $(VDRDIR)/config.h | awk '{ print $$3 }' | sed -e 's/"//g')
+-ifeq ($(strip $(APIVERSION)),)
+-  APIVERSION = $(VDRVERSION)
+-endif
++# if we install the documentation ourselves, do it here:
++export INSTALLDOCDIR = $(DESTDIR)$(PREFIX)/share/doc/$(PLUGIN)-$(VERSION)
+ 
+ 
+ ### The name of the distribution archive:
+@@ -60,20 +61,23 @@
+ ARCHIVE = $(PLUGIN)-$(VERSION)
+ PACKAGE = vdr-$(ARCHIVE)
+ 
++### The name of the shared object file:
++
++SOFILE = libvdr-$(PLUGIN).so
+ 
+ ### Includes and Defines (add further entries here):
+ 
+-INCLUDES += -I./graphlcd-base/ -I$(VDRDIR)/include -I$(INSTALLPREFIX)/include
++INCLUDES += -I./graphlcd-base/ -I$(INCDIR)/include -I$(PREFIX)/include
+ 
+-DEFINES += -D_GNU_SOURCE -DPLUGIN_NAME_I18N='"$(PLUGIN)"'
++DEFINES += -DPLUGIN_NAME_I18N='"$(PLUGIN)"'
+ 
+-ifdef HAVE_FREETYPE2
+-    INCLUDES += -I$(INSTALLPREFIX)/include/freetype2
++ifneq (HAVE_FREETYPE2, 0)
++    INCLUDES += -I$(PREFIX)/include/freetype2
+     DEFINES += -DHAVE_FREETYPE2
+ endif
+ 
+ # if a valid and/or fixed femon-plugin is available
+-ifdef HAVE_VALID_FEMON
++ifneq (HAVE_VALID_FEMON, 0)
+     DEFINES += -DGRAPHLCD_SERVICE_FEMON_VALID
+ endif
+ 
+@@ -82,87 +86,108 @@
+     DEFINES += -DPLUGIN_GRAPHLCDCONF='${PLUGIN_GRAPHLCDCONF}'
+ endif
+ 
++# if we add TTF to additional install targets
++ifeq (NOT_INSTALL_TTF, 0)
++    INS_TARGET_TTF = ttf-fonts
++endif
++
++# if we add documentations to additional install targets
++ifeq (NOT_INSTALL_DOC, 0)
++    INS_TARGET_DOCS = docs
++endif
+ 
+ ### The object files (add further files here):
+ 
+-#OBJS = alias.o common.o display.o i18n.o menu.o plugin.o setup.o skinconfig.o state.o strfct.o
+ OBJS = alias.o common.o display.o menu.o plugin.o setup.o skinconfig.o state.o strfct.o service.o extdata.o
+ 
+-### The main target:
+-TARGETS = libvdr-$(PLUGIN).so
+-ifneq ($(shell grep -l 'Phrases' $(VDRDIR)/i18n.c),$(VDRDIR)/i18n.c)
+-TARGETS += i18n
++ifneq ($(shell grep -l 'Phrases' i18n.h),i18n.h)
++    I18NTARGET = i18n
+ else
+-OBJS += i18n.o
++    OBJS += i18n.o
+ endif
+ 
++### The main target:
+ 
+-all: $(TARGETS)
++all: $(SOFILE) $(I18NTARGET)
+ 
+ ### Implicit rules:
+ 
+ %.o: %.c
+ 	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) $<
+ 
++### Dependencies:
+ 
+-# Dependencies:
+-
+-MAKEDEP = g++ -MM -MG
++MAKEDEP = $(CXX) -MM -MG
+ DEPFILE = .dependencies
+ $(DEPFILE): Makefile
+ 	@$(MAKEDEP) $(DEFINES) $(INCLUDES) $(OBJS:%.o=%.c) > $@
+ 
+ -include $(DEPFILE)
+ 
+-
+ ### Internationalization (I18N):
+ 
+ PODIR     = po
+-LOCALEDIR = $(VDRDIR)/locale
+ I18Npo    = $(wildcard $(PODIR)/*.po)
+ I18Nmo    = $(addsuffix .mo, $(foreach file, $(I18Npo), $(basename $(file))))
+-I18Ndirs  = $(notdir $(foreach file, $(I18Npo), $(basename $(file))))
++I18Nmsgs  = $(addprefix $(LOCDIR)/, $(addsuffix /LC_MESSAGES/vdr-$(PLUGIN).mo, $(notdir $(foreach file, $(I18Npo), $(basename $(file))))))
+ I18Npot   = $(PODIR)/$(PLUGIN).pot
+ 
+-
+ %.mo: %.po
+ 	msgfmt -c -o $@ $<
+ 
+ $(I18Npot): $(wildcard *.c)
+-	xgettext -C -cTRANSLATORS --no-wrap --no-location -k -ktr -ktrNOOP --msgid-bugs-address='<nobody@domain.com>' -o $@ $^
++	xgettext -C -cTRANSLATORS --no-wrap --no-location -k -ktr -ktrNOOP --package-name=vdr-$(PLUGIN) --package-version=$(VERSION) --msgid-bugs-address='<see README>' -o $@ `ls $^`
+ 
+-$(I18Npo): $(I18Npot)
+-	msgmerge -U --no-wrap --no-location --backup=none -q $@ $<
++%.po: $(I18Npot)
++	msgmerge -U --no-wrap --no-location --backup=none -q -N $@ $<
+ 	@touch $@
+ 
+-i18n: $(I18Nmo)
+-	@mkdir -p $(LOCALEDIR)
+-	for i in $(I18Ndirs); do\
+-	    mkdir -p $(LOCALEDIR)/$$i/LC_MESSAGES;\
+-	    cp $(PODIR)/$$i.mo $(LOCALEDIR)/$$i/LC_MESSAGES/vdr-$(PLUGIN).mo;\
+-	    done
++$(I18Nmsgs): $(LOCDIR)/%/LC_MESSAGES/vdr-$(PLUGIN).mo: $(PODIR)/%.mo
++	install -D -m644 $< $@
++
++.PHONY: i18n
++i18n: $(I18Nmo) $(I18Npot)
++
++install-i18n: $(I18Nmsgs)
+ 
+ ### Targets:
+ 
+-libvdr-$(PLUGIN).so: $(OBJS)
+-	$(CXX) $(CXXFLAGS) -L$(INSTALLPREFIX)/lib -L./graphlcd-base/glcddrivers/ -L./graphlcd-base/glcdgraphics/ -L./graphlcd-base/glcdskin/ -shared $(OBJS) -lglcddrivers -lglcdgraphics -lglcdskin -lstdc++ -o $@
+-	@cp $@ $(LIBDIR)/$@.$(APIVERSION)
++$(SOFILE): $(OBJS)
++	$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared $(OBJS) -lglcddrivers -lglcdgraphics -lglcdskin -lstdc++ -o $@
++
++install-lib: $(SOFILE)
++	install -D $^ $(LIBDIR)/$^.$(APIVERSION)
+ 
+-dist: clean
++install: install-lib install-i18n resources $(INS_TARGET_TTF) $(INS_TARGET_DOCS)
++
++docs:
++	@install -d $(INSTALLDOCDIR)
++	@install -m 644 README $(INSTALLDOCDIR)
++	@install -m 644 HISTORY $(INSTALLDOCDIR)
++
++ttf-fonts:
++	@install -d $(DESTDIR)$(RESDIR)/plugins/$(PLUGIN)/fonts
++	@install -m 644 $(PLUGIN)/fonts/*.ttf $(DESTDIR)$(RESDIR)/plugins/$(PLUGIN)/fonts
++
++resources:
++	@install -d $(DESTDIR)$(RESDIR)/plugins/$(PLUGIN)/fonts
++	@install -m 644 $(PLUGIN)/channels.alias $(DESTDIR)$(RESDIR)/plugins/$(PLUGIN)
++	@cp -a $(PLUGIN)/logos $(DESTDIR)$(RESDIR)/plugins/$(PLUGIN)
++	@cp -a $(PLUGIN)/skins $(DESTDIR)$(RESDIR)/plugins/$(PLUGIN)
++	@install -m 644 $(PLUGIN)/fonts/*.fnt $(DESTDIR)$(RESDIR)/plugins/$(PLUGIN)/fonts
++
++dist: $(I18Npo) clean
+ 	@-rm -rf $(TMPDIR)/$(ARCHIVE)
+ 	@mkdir $(TMPDIR)/$(ARCHIVE)
+ 	@cp -a * $(TMPDIR)/$(ARCHIVE)
+-	@tar czf $(PACKAGE).tgz --exclude .svn --exclude *.cbp --exclude *.layout -C $(TMPDIR) $(ARCHIVE)
++	@tar czf $(PACKAGE).tgz --exclude .git --exclude *.cbp --exclude *.layout -C $(TMPDIR) $(ARCHIVE)
+ 	@-rm -rf $(TMPDIR)/$(ARCHIVE)
+ 	@echo Distribution package created as $(PACKAGE).tgz
+ 
+ clean:
+ 	@-rm -f $(PODIR)/*.mo $(PODIR)/*.pot
+-	@-rm -f *.o $(DEPFILE) *.so *.tgz core* *~
+-
+-install: all
+-	@install -d $(INSTALLDOCDIR)/$(PLUGIN)
+-	@install -m 644 README $(INSTALLDOCDIR)/$(PLUGIN)
++	@-rm -f $(OBJS) $(DEPFILE) *.so *.tgz core* *~
+ 
+ uninstall:
+-	@rm -rf $(INSTALLDOCDIR)/$(PLUGIN)
++	@rm -rf $(INSTALLDOCDIR)
++	@rm -rf $(DESTDIR)$(RESDIR)/plugins/$(PLUGIN)

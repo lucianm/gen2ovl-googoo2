@@ -23,7 +23,7 @@
 #
 # set the directory to search for skins
 #	allowed values: directory names
-#	default: /etc/vdr/plugins/graphlcd/skins
+#	default: /usr/share/vdr/plugins/graphlcd/skins
 #GRAPHLCD_SKINSPATH
 
 
