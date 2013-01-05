@@ -1,28 +1,39 @@
 diff -Naur graphlcd-9999_orig/Makefile graphlcd-9999/Makefile
---- graphlcd-9999_orig/Makefile	2013-01-05 12:30:54.000000000 +0100
-+++ graphlcd-9999/Makefile	2013-01-05 12:32:13.664341677 +0100
-@@ -6,53 +6,61 @@
+--- graphlcd-9999_orig/Makefile	2013-01-05 14:53:27.000000000 +0100
++++ graphlcd-9999/Makefile	2013-01-05 14:54:44.147445929 +0100
+@@ -6,74 +6,91 @@
  # The official name of this plugin.
  # This name will be used in the '-P...' option of VDR to load the plugin.
  # By default the main source file also carries this name.
 -#
-+
- PLUGIN = graphlcd
- 
+-PLUGIN = graphlcd
+-
 -# define this if you built graphlcd-base with freetype:
 -HAVE_FREETYPE2 = 1
-+### The version number of this plugin (taken from the main source file):
- 
+-
 -# define this if femon-plugin <= 1.7.7 is used AND which has already been patched (see README)
 -# either define this setting here or in $VDRDIR/Make.config or in $VDRDIR/Make.global
 -# HAVE_VALID_FEMON = 1
-+VERSION = $(shell grep 'static const char \*VERSION *=' plugin.c | awk '{ print $$6 }' | sed -e 's/[";]//g')
  
 -# defines the location of the graphlcd.conf file. if not defined, location = "/etc/graphlcd.conf"
 -#PLUGIN_GRAPHLCDCONF = "/usr/local/etc/graphlcd.conf"
-+### The directory environment:
++PLUGIN = graphlcd
  
--### The version number of this plugin (taken from the main source file):
+ ### The version number of this plugin (taken from the main source file):
+ 
+ VERSION = $(shell grep 'static const char \*VERSION *=' plugin.c | awk '{ print $$6 }' | sed -e 's/[";]//g')
+ 
+-### The C++ compiler and options:
+-
+-CXX      ?= g++
+-CXXFLAGS ?= -g -O2 -Wall -Woverloaded-virtual -Wno-parentheses 
+-
+ ### The directory environment:
+ 
+-DVBDIR = ../../../../DVB
+-VDRDIR = ../../..
+-LIBDIR = ../../lib
+-TMPDIR = /tmp
 +# Use package data if installed...otherwise assume we're under the VDR source directory:
 +PKGCFG = $(if $(VDRDIR),$(shell pkg-config --variable=$(1) $(VDRDIR)/vdr.pc),$(shell pkg-config --variable=$(1) vdr || pkg-config --variable=$(1) ../../../vdr.pc))
 +LIBDIR = $(DESTDIR)$(call PKGCFG,libdir)
@@ -30,70 +41,64 @@ diff -Naur graphlcd-9999_orig/Makefile graphlcd-9999/Makefile
 +PLGCFG = $(call PKGCFG,plgcfg)
 +#
 +TMPDIR ?= /tmp
- 
--VERSION = $(shell grep 'static const char \*VERSION *=' plugin.c | awk '{ print $$6 }' | sed -e 's/[";]//g')
++
 +### The compiler options:
- 
--### The C++ compiler and options:
-+export CFLAGS   = $(call PKGCFG,cflags)
-+export CXXFLAGS = $(call PKGCFG,cxxflags)
- 
--CXX      ?= g++
--CXXFLAGS ?= -g -O2 -Wall -Woverloaded-virtual -Wno-parentheses 
-+### The version number of VDR's plugin API:
- 
--### The directory environment:
-+APIVERSION = $(call PKGCFG,apiversion)
- 
--DVBDIR = ../../../../DVB
--VDRDIR = ../../..
--LIBDIR = ../../lib
--TMPDIR = /tmp
-+### Allow user defined options to overwrite defaults:
  
 -export INSTALLPREFIX = /usr
 -export INSTALLDOCDIR = $(INSTALLPREFIX)/share/doc
-+-include $(PLGCFG)
++export CFLAGS   = $(call PKGCFG,cflags)
++export CXXFLAGS = $(call PKGCFG,cxxflags)
  
 -### Make sure that necessary options are included:
++### The version number of VDR's plugin API:
+ 
+--include $(VDRDIR)/Make.global
++APIVERSION = $(call PKGCFG,apiversion)
+ 
+ ### Allow user defined options to overwrite defaults:
+ 
+--include $(VDRDIR)/Make.config
++-include $(PLGCFG)
+ 
+-### The version number of VDR (taken from VDR's "config.h"):
 +# make sure to have a correct RESDIR
 +MYRESDIR = $(call PKGCFG,resdir)
 +ifeq ($(MYRESDIR),)
 +    MYRESDIR = /usr/share/vdr
 +endif
-+RESDIR ?= $(DESTDIR)$(MYRESDIR)/plugins/$(PLUGIN)
- 
---include $(VDRDIR)/Make.global
-+# define this if you built graphlcd-base with freetype:
-+HAVE_FREETYPE2 ?= 1
- 
--### Allow user defined options to overwrite defaults:
-+# define this if femon-plugin <= 1.7.7 is used AND which has already been patched (see README)
-+# either define this setting here or in $VDRDIR/Make.config or in $VDRDIR/Make.global
-+HAVE_VALID_FEMON ?= 0
- 
---include $(VDRDIR)/Make.config
-+# defines the path to the graphlcd.conf file. if not defined, path = "< plugin cfg dir >/graphlcd.conf"
-+PLUGIN_GRAPHLCDCONF ?= "$(CONFDIR)/plugins/$(PLUGIN)/graphlcd.conf"
- 
--### The version number of VDR (taken from VDR's "config.h"):
-+# defines if installing of TTF should be omitted (default is to install)
-+SKIP_INSTALL_TTF ?= 0
++RESDIR := $(DESTDIR)$(MYRESDIR)/plugins/$(PLUGIN)
  
 -VDRVERSION = $(shell grep 'define VDRVERSION ' $(VDRDIR)/config.h | awk '{ print $$3 }' | sed -e 's/"//g')
 -APIVERSION = $(shell grep 'define APIVERSION ' $(VDRDIR)/config.h | awk '{ print $$3 }' | sed -e 's/"//g')
--ifeq ($(strip $(APIVERSION)),)
++# make sure to always have a correct APIVERSION
++VDRDIR ?= ../../..
+ ifeq ($(strip $(APIVERSION)),)
 -  APIVERSION = $(VDRVERSION)
--endif
++  APIVERSION = $(shell grep 'define APIVERSION ' $(VDRDIR)/config.h | awk '{ print $$3 }' | sed -e 's/"//g')
+ endif
+ 
++# define this if you built graphlcd-base with freetype:
++HAVE_FREETYPE2 ?= 1
++
++# define this if femon-plugin <= 1.7.7 is used AND which has already been patched (see README)
++# either define this setting here or in $VDRDIR/Make.config or in $VDRDIR/Make.global
++HAVE_VALID_FEMON ?= 0
++
++# defines the path to the graphlcd.conf file. if not defined, path = "< plugin cfg dir >/graphlcd.conf"
++PLUGIN_GRAPHLCDCONF ?= "$(CONFDIR)/plugins/$(PLUGIN)/graphlcd.conf"
++
++# defines if installing of TTF should be omitted (default is to install)
++SKIP_INSTALL_TTF ?= 0
++
 +# defines if installing of documentation should be omitted (default is to install)
 +SKIP_INSTALL_DOC ?= 0
 +
 +# if we install the documentation ourselves, do it here:
 +export INSTALLDOCDIR = $(DESTDIR)$(PREFIX)/share/doc/vdr-$(PLUGIN)-$(VERSION)
- 
++
  
  ### The name of the distribution archive:
-@@ -60,20 +68,23 @@
+ 
  ARCHIVE = $(PLUGIN)-$(VERSION)
  PACKAGE = vdr-$(ARCHIVE)
  
@@ -122,7 +127,7 @@ diff -Naur graphlcd-9999_orig/Makefile graphlcd-9999/Makefile
      DEFINES += -DGRAPHLCD_SERVICE_FEMON_VALID
  endif
  
-@@ -82,87 +93,108 @@
+@@ -82,87 +99,108 @@
      DEFINES += -DPLUGIN_GRAPHLCDCONF='${PLUGIN_GRAPHLCDCONF}'
  endif
  

@@ -22,9 +22,11 @@ SLOT="0"
 LICENSE="GPL-2"
 IUSE="debug"
 
-DEPEND=">=media-video/vdr-1.7.23
+DEPEND=">=media-video/vdr-1.6
 	>=app-misc/graphlcd-base-9999"
 RDEPEND="${DEPEND}"
+
+PATCHES="${FILESDIR}/graphlcd-9999_Makefile-vdr-1.7.34.diff"
 
 pkg_setup() {
 	vdr-plugin-2_pkg_setup
@@ -45,27 +47,26 @@ pkg_setup() {
 	fi
 }
 
-src_prepare() {
-	epatch "${FILESDIR}/graphlcd-9999_Makefile-vdr-1.7.34.diff"
-
-	vdr-plugin-2_src_prepare
-}
-
 src_install() {
 	# let the Makefile install everything but TTF and docs by itself
 	SKIP_INSTALL_TTF=1 SKIP_INSTALL_DOC=1 vdr-plugin-2_src_install
 
 	insopts -m0644 -ovdr -gvdr
 
+	# some vdr versions, like 1.7.33 have resdir=/etc/vdr set in vdr.pc...
+	local myresdir="$(pkg-config --variable=resdir vdr)"
+	# while others do not set it at all, for those we will hard-code to /usr/share/vdr
+	[[ -z "${myresdir}" ]] && myresdir="/usr/share/vdr"
+
 	# symlink our own TTF, since we skipped installing them from the package
 	for font in /usr/share/fonts/corefonts/*.ttf; do
 		elog ${font}
-		dosym ${font} /usr/share/vdr/plugins/${VDRPLUGIN}/fonts
+		dosym ${font} ${myresdir}/plugins/${VDRPLUGIN}/fonts
 	done
 
-	dosym /usr/share/fonts/ttf-bitstream-vera/VeraBd.ttf /usr/share/vdr/plugins/${VDRPLUGIN}/fonts/VeraBd.ttf
-	dosym /usr/share/fonts/ttf-bitstream-vera/Vera.ttf /usr/share/vdr/plugins/${VDRPLUGIN}/fonts/Vera.ttf
-	dosym /usr/share/fonts/dejavu/DejaVuSansCondensed.ttf /usr/share/vdr/plugins/${VDRPLUGIN}/fonts/DejaVuSansCondensed.ttf
+	dosym /usr/share/fonts/ttf-bitstream-vera/VeraBd.ttf ${myresdir}/plugins/${VDRPLUGIN}/fonts/VeraBd.ttf
+	dosym /usr/share/fonts/ttf-bitstream-vera/Vera.ttf ${myresdir}/plugins/${VDRPLUGIN}/fonts/Vera.ttf
+	dosym /usr/share/fonts/dejavu/DejaVuSansCondensed.ttf ${myresdir}/plugins/${VDRPLUGIN}/fonts/DejaVuSansCondensed.ttf
 
 	# symlink default hardware config file
 	insinto /etc/vdr/plugins/${VDRPLUGIN}
@@ -87,5 +88,4 @@ pkg_postinst() {
 	vdr-plugin-2_pkg_postinst
 
 	elog "Add additional options in /etc/conf.d/vdr.graphlcd"
-	elog
 }
