@@ -1,4 +1,4 @@
-# Copyright 1999-2012 Gentoo Foundation
+# Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
@@ -49,52 +49,30 @@ src_prepare() {
 	epatch "${FILESDIR}/graphlcd-9999_Makefile-vdr-1.7.34.diff"
 
 	vdr-plugin-2_src_prepare
-
-	#sed -i "s:/usr/local:/usr:" Makefile
-
-	#sed -i "s:i18n.c:i18n.h:g" Makefile
-
-#	if ! has_version ">=media-video/vdr-1.7.13"; then
-#		sed -i "s:include \$(VDRDIR)/Make.global:#include \$(VDRDIR)/Make.global:" Makefile
-#	fi
 }
 
 src_install() {
-
-	vdr-plugin-2_src_install
+	# let the Makefile install everything but TTF and docs by itself
+	SKIP_INSTALL_TTF=1 SKIP_INSTALL_DOC=1 vdr-plugin-2_src_install
 
 	insopts -m0644 -ovdr -gvdr
 
-#	insinto /usr/share/vdr/${VDRPLUGIN}/logos
-#	doins -r ${VDRPLUGIN}/logos/*
-
-#	insinto /usr/share/vdr/${VDRPLUGIN}/skins
-#	doins -r ${VDRPLUGIN}/skins/*
-
-#	insinto /usr/share/vdr/${VDRPLUGIN}/fonts
-#	doins ${VDRPLUGIN}/fonts/*.fnt
-
+	# symlink our own TTF, since we skipped installing them from the package
 	for font in /usr/share/fonts/corefonts/*.ttf; do
 		elog ${font}
 		dosym ${font} /usr/share/vdr/plugins/${VDRPLUGIN}/fonts
 	done
 
-	insinto /etc/vdr/plugins/${VDRPLUGIN}
-#	doins ${VDRPLUGIN}/channels.alias*
-	#doins ${VDRPLUGIN}/fonts.conf.*
-
-#	dosym /usr/share/vdr/${VDRPLUGIN}/fonts /etc/vdr/plugins/${VDRPLUGIN}/fonts
-#	dosym /usr/share/vdr/${VDRPLUGIN}/logos /etc/vdr/plugins/${VDRPLUGIN}/logos
-	dosym /etc/graphlcd.conf /etc/vdr/plugins/${VDRPLUGIN}/graphlcd.conf
-
 	dosym /usr/share/fonts/ttf-bitstream-vera/VeraBd.ttf /usr/share/vdr/plugins/${VDRPLUGIN}/fonts/VeraBd.ttf
 	dosym /usr/share/fonts/ttf-bitstream-vera/Vera.ttf /usr/share/vdr/plugins/${VDRPLUGIN}/fonts/Vera.ttf
 	dosym /usr/share/fonts/dejavu/DejaVuSansCondensed.ttf /usr/share/vdr/plugins/${VDRPLUGIN}/fonts/DejaVuSansCondensed.ttf
-	
+
+	# symlink default hardware config file
+	insinto /etc/vdr/plugins/${VDRPLUGIN}
+	dosym /etc/graphlcd.conf /etc/vdr/plugins/${VDRPLUGIN}/graphlcd.conf
 }
 
 pkg_preinst() {
-
 	if [[ -e /etc/vdr/plugins/graphlcd/fonts ]] && [[ ! -L /etc/vdr/plugins/graphlcd/fonts ]] \
 	|| [[ -e /etc/vdr/plugins/graphlcd/logos ]] && [[ ! -L /etc/vdr/plugins/graphlcd/logos ]] ;then
 
@@ -109,12 +87,5 @@ pkg_postinst() {
 	vdr-plugin-2_pkg_postinst
 
 	elog "Add additional options in /etc/conf.d/vdr.graphlcd"
-#	elog
-#	elog "Please copy or link one of the supplied fonts.conf.*"
-#	elog "files in /etc/vdr/plugins/graphlcd/ to"
-#	elog "/etc/vdr/plugins/graphlcd/fonts.conf"
-#	elog
-#	elog "Please do the same with channels.alias"
 	elog
 }
-

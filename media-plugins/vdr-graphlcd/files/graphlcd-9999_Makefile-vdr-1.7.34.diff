@@ -70,11 +70,11 @@ diff -Naur graphlcd-9999_orig/Makefile graphlcd-9999/Makefile
  
 --include $(VDRDIR)/Make.config
 +# defines if installing of TTF should be omitted (default is to install)
-+NOT_INSTALL_TTF ?= 0
++SKIP_INSTALL_TTF ?= 0
  
 -### The version number of VDR (taken from VDR's "config.h"):
 +# defines if installing of documentation should be omitted (default is to install)
-+NOT_INSTALL_DOC ?= 0
++SKIP_INSTALL_DOC ?= 0
  
 -VDRVERSION = $(shell grep 'define VDRVERSION ' $(VDRDIR)/config.h | awk '{ print $$3 }' | sed -e 's/"//g')
 -APIVERSION = $(shell grep 'define APIVERSION ' $(VDRDIR)/config.h | awk '{ print $$3 }' | sed -e 's/"//g')
@@ -82,7 +82,7 @@ diff -Naur graphlcd-9999_orig/Makefile graphlcd-9999/Makefile
 -  APIVERSION = $(VDRVERSION)
 -endif
 +# if we install the documentation ourselves, do it here:
-+export INSTALLDOCDIR = $(DESTDIR)$(PREFIX)/share/doc/$(PLUGIN)-$(VERSION)
++export INSTALLDOCDIR = $(DESTDIR)$(PREFIX)/share/doc/vdr-$(PLUGIN)-$(VERSION)
  
  
  ### The name of the distribution archive:
@@ -104,14 +104,14 @@ diff -Naur graphlcd-9999_orig/Makefile graphlcd-9999/Makefile
  
 -ifdef HAVE_FREETYPE2
 -    INCLUDES += -I$(INSTALLPREFIX)/include/freetype2
-+ifneq (HAVE_FREETYPE2, 0)
++ifneq ($(HAVE_FREETYPE2), 0)
 +    INCLUDES += -I$(PREFIX)/include/freetype2
      DEFINES += -DHAVE_FREETYPE2
  endif
  
  # if a valid and/or fixed femon-plugin is available
 -ifdef HAVE_VALID_FEMON
-+ifneq (HAVE_VALID_FEMON, 0)
++ifneq ($(HAVE_VALID_FEMON), 0)
      DEFINES += -DGRAPHLCD_SERVICE_FEMON_VALID
  endif
  
@@ -120,12 +120,12 @@ diff -Naur graphlcd-9999_orig/Makefile graphlcd-9999/Makefile
  endif
  
 +# if we add TTF to additional install targets
-+ifeq (NOT_INSTALL_TTF, 0)
++ifeq ($(SKIP_INSTALL_TTF), 0)
 +    INS_TARGET_TTF = ttf-fonts
 +endif
 +
 +# if we add documentations to additional install targets
-+ifeq (NOT_INSTALL_DOC, 0)
++ifeq ($(SKIP_INSTALL_DOC), 0)
 +    INS_TARGET_DOCS = docs
 +endif
  
