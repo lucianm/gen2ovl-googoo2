@@ -22,7 +22,7 @@ SLOT="0"
 LICENSE="GPL-2"
 IUSE="debug"
 
-DEPEND=">=media-video/vdr-1.6
+DEPEND=">=media-video/vdr-1.7.23
 	>=app-misc/graphlcd-base-9999"
 RDEPEND="${DEPEND}"
 

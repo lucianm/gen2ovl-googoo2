@@ -1,7 +1,7 @@
 diff -Naur graphlcd-9999_orig/Makefile graphlcd-9999/Makefile
---- graphlcd-9999_orig/Makefile	2013-01-05 01:09:01.000000000 +0100
-+++ graphlcd-9999/Makefile	2013-01-05 03:07:44.592596694 +0100
-@@ -6,53 +6,54 @@
+--- graphlcd-9999_orig/Makefile	2013-01-05 12:30:54.000000000 +0100
++++ graphlcd-9999/Makefile	2013-01-05 12:32:13.664341677 +0100
+@@ -6,53 +6,61 @@
  # The official name of this plugin.
  # This name will be used in the '-P...' option of VDR to load the plugin.
  # By default the main source file also carries this name.
@@ -56,37 +56,44 @@ diff -Naur graphlcd-9999_orig/Makefile graphlcd-9999/Makefile
 +-include $(PLGCFG)
  
 -### Make sure that necessary options are included:
++# make sure to have a correct RESDIR
++MYRESDIR = $(call PKGCFG,resdir)
++ifeq ($(MYRESDIR),)
++    MYRESDIR = /usr/share/vdr
++endif
++RESDIR ?= $(DESTDIR)$(MYRESDIR)/plugins/$(PLUGIN)
+ 
+--include $(VDRDIR)/Make.global
 +# define this if you built graphlcd-base with freetype:
 +HAVE_FREETYPE2 ?= 1
  
---include $(VDRDIR)/Make.global
+-### Allow user defined options to overwrite defaults:
 +# define this if femon-plugin <= 1.7.7 is used AND which has already been patched (see README)
 +# either define this setting here or in $VDRDIR/Make.config or in $VDRDIR/Make.global
 +HAVE_VALID_FEMON ?= 0
  
--### Allow user defined options to overwrite defaults:
+--include $(VDRDIR)/Make.config
 +# defines the path to the graphlcd.conf file. if not defined, path = "< plugin cfg dir >/graphlcd.conf"
 +PLUGIN_GRAPHLCDCONF ?= "$(CONFDIR)/plugins/$(PLUGIN)/graphlcd.conf"
  
---include $(VDRDIR)/Make.config
+-### The version number of VDR (taken from VDR's "config.h"):
 +# defines if installing of TTF should be omitted (default is to install)
 +SKIP_INSTALL_TTF ?= 0
- 
--### The version number of VDR (taken from VDR's "config.h"):
-+# defines if installing of documentation should be omitted (default is to install)
-+SKIP_INSTALL_DOC ?= 0
  
 -VDRVERSION = $(shell grep 'define VDRVERSION ' $(VDRDIR)/config.h | awk '{ print $$3 }' | sed -e 's/"//g')
 -APIVERSION = $(shell grep 'define APIVERSION ' $(VDRDIR)/config.h | awk '{ print $$3 }' | sed -e 's/"//g')
 -ifeq ($(strip $(APIVERSION)),)
 -  APIVERSION = $(VDRVERSION)
 -endif
++# defines if installing of documentation should be omitted (default is to install)
++SKIP_INSTALL_DOC ?= 0
++
 +# if we install the documentation ourselves, do it here:
 +export INSTALLDOCDIR = $(DESTDIR)$(PREFIX)/share/doc/vdr-$(PLUGIN)-$(VERSION)
  
  
  ### The name of the distribution archive:
-@@ -60,20 +61,23 @@
+@@ -60,20 +68,23 @@
  ARCHIVE = $(PLUGIN)-$(VERSION)
  PACKAGE = vdr-$(ARCHIVE)
  
@@ -115,7 +122,7 @@ diff -Naur graphlcd-9999_orig/Makefile graphlcd-9999/Makefile
      DEFINES += -DGRAPHLCD_SERVICE_FEMON_VALID
  endif
  
-@@ -82,87 +86,108 @@
+@@ -82,87 +93,108 @@
      DEFINES += -DPLUGIN_GRAPHLCDCONF='${PLUGIN_GRAPHLCDCONF}'
  endif
  
@@ -213,11 +220,11 @@ diff -Naur graphlcd-9999_orig/Makefile graphlcd-9999/Makefile
 -	@cp $@ $(LIBDIR)/$@.$(APIVERSION)
 +$(SOFILE): $(OBJS)
 +	$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared $(OBJS) -lglcddrivers -lglcdgraphics -lglcdskin -lstdc++ -o $@
-+
-+install-lib: $(SOFILE)
-+	install -D $^ $(LIBDIR)/$^.$(APIVERSION)
  
 -dist: clean
++install-lib: $(SOFILE)
++	install -D $^ $(LIBDIR)/$^.$(APIVERSION)
++
 +install: install-lib install-i18n resources $(INS_TARGET_TTF) $(INS_TARGET_DOCS)
 +
 +docs:
@@ -226,15 +233,15 @@ diff -Naur graphlcd-9999_orig/Makefile graphlcd-9999/Makefile
 +	@install -m 644 HISTORY $(INSTALLDOCDIR)
 +
 +ttf-fonts:
-+	@install -d $(DESTDIR)$(RESDIR)/plugins/$(PLUGIN)/fonts
-+	@install -m 644 $(PLUGIN)/fonts/*.ttf $(DESTDIR)$(RESDIR)/plugins/$(PLUGIN)/fonts
++	@install -d $(RESDIR)/fonts
++	@install -m 644 $(PLUGIN)/fonts/*.ttf $(RESDIR)/fonts
 +
 +resources:
-+	@install -d $(DESTDIR)$(RESDIR)/plugins/$(PLUGIN)/fonts
-+	@install -m 644 $(PLUGIN)/channels.alias $(DESTDIR)$(RESDIR)/plugins/$(PLUGIN)
-+	@cp -a $(PLUGIN)/logos $(DESTDIR)$(RESDIR)/plugins/$(PLUGIN)
-+	@cp -a $(PLUGIN)/skins $(DESTDIR)$(RESDIR)/plugins/$(PLUGIN)
-+	@install -m 644 $(PLUGIN)/fonts/*.fnt $(DESTDIR)$(RESDIR)/plugins/$(PLUGIN)/fonts
++	@install -d $(RESDIR)/fonts
++	@install -m 644 $(PLUGIN)/channels.alias $(RESDIR)
++	@cp -a $(PLUGIN)/logos $(RESDIR)
++	@cp -a $(PLUGIN)/skins $(RESDIR)
++	@install -m 644 $(PLUGIN)/fonts/*.fnt $(RESDIR)/fonts
 +
 +dist: $(I18Npo) clean
  	@-rm -rf $(TMPDIR)/$(ARCHIVE)
@@ -257,4 +264,4 @@ diff -Naur graphlcd-9999_orig/Makefile graphlcd-9999/Makefile
  uninstall:
 -	@rm -rf $(INSTALLDOCDIR)/$(PLUGIN)
 +	@rm -rf $(INSTALLDOCDIR)
-+	@rm -rf $(DESTDIR)$(RESDIR)/plugins/$(PLUGIN)
++	@rm -rf $(RESDIR)
