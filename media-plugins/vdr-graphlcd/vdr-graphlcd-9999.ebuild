@@ -26,7 +26,7 @@ DEPEND=">=media-video/vdr-1.6
 	>=app-misc/graphlcd-base-9999"
 RDEPEND="${DEPEND}"
 
-PATCHES="${FILESDIR}/graphlcd-9999_Makefile-vdr-1.7.34.diff"
+#PATCHES="${FILESDIR}/graphlcd-9999_Makefile-vdr-1.7.34.diff"
 
 pkg_setup() {
 	vdr-plugin-2_pkg_setup
