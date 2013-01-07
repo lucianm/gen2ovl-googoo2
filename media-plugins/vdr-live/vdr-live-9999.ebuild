@@ -81,8 +81,6 @@ src_prepare() {
 	if ! has_version ">=media-video/vdr-1.7.13"; then
 		sed -i "s:-include \$(VDRDIR)/Make.global:#-include \$(VDRDIR)/Make.global:" Makefile || die
 	fi
-
-	epatch "${FILESDIR}/vdr-live_pcre.patch"
 }
 
 src_install() {
