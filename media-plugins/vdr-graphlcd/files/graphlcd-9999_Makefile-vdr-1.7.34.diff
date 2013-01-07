@@ -1,7 +1,17 @@
-diff -Naur graphlcd-9999_orig/Makefile graphlcd-9999/Makefile
---- graphlcd-9999_orig/Makefile	2013-01-05 14:53:27.000000000 +0100
-+++ graphlcd-9999/Makefile	2013-01-05 14:54:44.147445929 +0100
-@@ -6,74 +6,91 @@
+From 5dd523093775adbf86a2500b11606d11ac6b2280 Mon Sep 17 00:00:00 2001
+From: Lucian Muresan <lucianm@users.sourceforge.net>
+Date: Mon, 7 Jan 2013 01:34:55 +0100
+Subject: [PATCH] graphlcd Makefile for vdr >= 1.7.34
+
+---
+ Makefile | 182 +++++++++++++++++++++++++++++++++++++++------------------------
+ 1 file changed, 112 insertions(+), 70 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 132fff5..337ec2f 100644
+--- a/Makefile
++++ b/Makefile
+@@ -6,74 +6,94 @@
  # The official name of this plugin.
  # This name will be used in the '-P...' option of VDR to load the plugin.
  # By default the main source file also carries this name.
@@ -10,11 +20,11 @@ diff -Naur graphlcd-9999_orig/Makefile graphlcd-9999/Makefile
 -
 -# define this if you built graphlcd-base with freetype:
 -HAVE_FREETYPE2 = 1
--
+ 
 -# define this if femon-plugin <= 1.7.7 is used AND which has already been patched (see README)
 -# either define this setting here or in $VDRDIR/Make.config or in $VDRDIR/Make.global
 -# HAVE_VALID_FEMON = 1
- 
+-
 -# defines the location of the graphlcd.conf file. if not defined, location = "/etc/graphlcd.conf"
 -#PLUGIN_GRAPHLCDCONF = "/usr/local/etc/graphlcd.conf"
 +PLUGIN = graphlcd
@@ -41,23 +51,27 @@ diff -Naur graphlcd-9999_orig/Makefile graphlcd-9999/Makefile
 +PLGCFG = $(call PKGCFG,plgcfg)
 +#
 +TMPDIR ?= /tmp
-+
-+### The compiler options:
  
 -export INSTALLPREFIX = /usr
 -export INSTALLDOCDIR = $(INSTALLPREFIX)/share/doc
++### The compiler options:
+ 
+-### Make sure that necessary options are included:
 +export CFLAGS   = $(call PKGCFG,cflags)
 +export CXXFLAGS = $(call PKGCFG,cxxflags)
  
--### Make sure that necessary options are included:
-+### The version number of VDR's plugin API:
- 
 --include $(VDRDIR)/Make.global
++### The version number of VDR's plugin API:
++
 +APIVERSION = $(call PKGCFG,apiversion)
  
  ### Allow user defined options to overwrite defaults:
  
 --include $(VDRDIR)/Make.config
++ifeq ($(PLGCFG),)
++    VDRDIR ?= ../../..
++    PLGCFG = $(VDRDIR)/Make.config
++endif
 +-include $(PLGCFG)
  
 -### The version number of VDR (taken from VDR's "config.h"):
@@ -71,7 +85,6 @@ diff -Naur graphlcd-9999_orig/Makefile graphlcd-9999/Makefile
 -VDRVERSION = $(shell grep 'define VDRVERSION ' $(VDRDIR)/config.h | awk '{ print $$3 }' | sed -e 's/"//g')
 -APIVERSION = $(shell grep 'define APIVERSION ' $(VDRDIR)/config.h | awk '{ print $$3 }' | sed -e 's/"//g')
 +# make sure to always have a correct APIVERSION
-+VDRDIR ?= ../../..
  ifeq ($(strip $(APIVERSION)),)
 -  APIVERSION = $(VDRVERSION)
 +  APIVERSION = $(shell grep 'define APIVERSION ' $(VDRDIR)/config.h | awk '{ print $$3 }' | sed -e 's/"//g')
@@ -127,7 +140,7 @@ diff -Naur graphlcd-9999_orig/Makefile graphlcd-9999/Makefile
      DEFINES += -DGRAPHLCD_SERVICE_FEMON_VALID
  endif
  
-@@ -82,87 +99,108 @@
+@@ -82,87 +102,109 @@ ifdef PLUGIN_GRAPHLCDCONF
      DEFINES += -DPLUGIN_GRAPHLCDCONF='${PLUGIN_GRAPHLCDCONF}'
  endif
  
@@ -150,12 +163,15 @@ diff -Naur graphlcd-9999_orig/Makefile graphlcd-9999/Makefile
 -TARGETS = libvdr-$(PLUGIN).so
 -ifneq ($(shell grep -l 'Phrases' $(VDRDIR)/i18n.c),$(VDRDIR)/i18n.c)
 -TARGETS += i18n
-+ifneq ($(shell grep -l 'Phrases' i18n.h),i18n.h)
-+    I18NTARGET = i18n
- else
+-else
 -OBJS += i18n.o
-+    OBJS += i18n.o
- endif
+-endif
++GETTEXTSUPPORT := $(shell if [ "$(APIVERSION)" \< "1.6.0" ]; then echo true; fi)
++#ifdef GETTEXTSUPPORT
++    I18NTARGET = i18n
++#else
++#    OBJS += i18n.o
++#endif
  
 +### The main target:
  
@@ -225,11 +241,11 @@ diff -Naur graphlcd-9999_orig/Makefile graphlcd-9999/Makefile
 -	@cp $@ $(LIBDIR)/$@.$(APIVERSION)
 +$(SOFILE): $(OBJS)
 +	$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared $(OBJS) -lglcddrivers -lglcdgraphics -lglcdskin -lstdc++ -o $@
- 
--dist: clean
++
 +install-lib: $(SOFILE)
 +	install -D $^ $(LIBDIR)/$^.$(APIVERSION)
-+
+ 
+-dist: clean
 +install: install-lib install-i18n resources $(INS_TARGET_TTF) $(INS_TARGET_DOCS)
 +
 +docs:
@@ -270,3 +286,6 @@ diff -Naur graphlcd-9999_orig/Makefile graphlcd-9999/Makefile
 -	@rm -rf $(INSTALLDOCDIR)/$(PLUGIN)
 +	@rm -rf $(INSTALLDOCDIR)
 +	@rm -rf $(RESDIR)
+-- 
+1.8.0.2
+
