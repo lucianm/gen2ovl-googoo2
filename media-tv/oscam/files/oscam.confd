@@ -1,0 +1,42 @@
+# Usage: oscam [-a] [-b] [-c <config dir>] [-d <level>] [-g <mode>] [-h]
+#              [-p <num>] [-S] [-s] [-t <tmp dir>] [-w <secs>] [-V]
+#              [-r <level>] [-u]
+
+# Options:
+#  -a         : Write oscam.crash file on segfault. This option needs GDB to
+#               be installed and OSCam executable to contain the debug
+#               information (run oscam-XXXX.debug binary).
+#  -b         : Start in the background as daemon.
+#  -c <dir>   : Read configuration files from <dir>:
+#  -d <level> : Set debug level mask used for logging:
+#                     0 = No debugging (default).
+#                     1 = Detailed error messages.
+#                     2 = ATR parsing info, ECM, EMM and CW dumps.
+#                     4 = Traffic from/to the reader.
+#                     8 = Traffic from/to the clients.
+#                    16 = Traffic to the reader-device on IFD layer.
+#                    32 = Traffic to the reader-device on I/O layer.
+#                    64 = EMM logging.
+#                   128 = DVBAPI logging.
+#                   256 = Loadbalancer logging.
+#                   512 = CACHEEX logging.
+#                  1024 = Client ECM logging.
+#                 65535 = Debug all.
+#  -g <mode>  : Garbage collector debug mode (DEBUG ONLY OPTION!):
+#                 1 = Immediate free.
+#                 2 = Check for double frees.
+#  -p <num>   : Maximum number of pending ECM packets. Default: 32 Max: 255
+#  -r <level> : Set restart level:
+#                 0 = Restart disabled (request sets exit status 99).
+#                 1 = Restart activated (webif can restart oscam (default)).
+#                 2 = Like 1, but also restart on segmentation faults.
+#  -u         : Enable output of web interface in UTF-8 charset.
+#  -S         : Do not filter sensitive info (card serials, boxids) in logs.
+#  -s         : Capture segmentation faults.
+#  -t <dir>   : Set temporary directory to <dir>:
+#                 Default = /tmp/.oscam
+#  -w <secs>  : Wait <secs> seconds for the system time to be set correctly.
+#  -h         : Show this help text.
+#  -V         : Show OSCam binary configuration and version.
+
+_OSCAM_OPTS="-c /etc/oscam -d 128"

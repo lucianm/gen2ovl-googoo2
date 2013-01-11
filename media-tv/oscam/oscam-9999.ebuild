@@ -1,14 +1,12 @@
-# Copyright 1999-2012 Gentoo Foundation
+# Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-EAPI=4
+EAPI=5
 
-#ESVN_REPO_URI="http://streamboard.gmc.to/svn/oscam/trunk"
 EGIT_REPO_URI="git://github.com/gfto/oscam.git"
 
-#inherit eutils subversion
-inherit eutils git
+inherit eutils git-2
 
 DESCRIPTION="OSCam is an Open Source Conditional Access Module software"
 HOMEPAGE="http://streamboard.gmc.to:8001/"
@@ -16,7 +14,7 @@ SRC_URI=""
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="~amd64 ~x86"
+KEYWORDS="~amd64 ~x86 ~arm"
 
 PROTOCOL="camd33 camd35 camd35_tcp newcamd cccam gbox radegast serial constcw pandora"
 for share in ${PROTOCOL}; do
@@ -28,7 +26,12 @@ for card in ${READER}; do
 	IUSE_READER+=" reader_${card}"
 done
 
-IUSE="${IUSE_PROTOCOL} ${IUSE_READER}
+CARDREADER="db2com internal mp35 phoenix sc8in1 smargo stapi"
+for cardreader in ${CARDREADER}; do
+	IUSE_CARDREADER+=" cardreader_${cardreader}"
+done
+
+IUSE="${IUSE_PROTOCOL} ${IUSE_READER} ${IUSE_CARDREADER}
 	ac csp debug doc dvb gbox ipv6 irdeto lb lcd led monitor pcsc +reader +ssl touch usb +www"
 
 REQUIRED_USE="
@@ -43,6 +46,13 @@ REQUIRED_USE="
 	reader_dre?		( reader )
 	reader_tongfang?	( reader )
 	reader_bulcrypt?	( reader )
+	cardreader_db2com?	( reader )
+	cardreader_internal?	( reader )
+	cardreader_mp35?	( reader usb )
+	cardreader_phoenix?	( reader usb )
+	cardreader_sc8in1?	( reader usb )
+	cardreader_smargo?	( reader usb )
+	cardreader_stapi?	( reader )
 "
 
 DEPEND="dev-util/cmake"
@@ -54,6 +64,10 @@ RDEPEND="${DEPEND}
 RESTRICT="nomirror"
 
 S="${WORKDIR}/${PN}"
+
+src_prepare() {
+	sed -i "s:svnversion -n .:git describe --always:" config.sh || die "Failed to patch the GIT commit as build string"
+}
 
 src_defs() {
 	myconf=""
@@ -160,6 +174,28 @@ src_defs() {
 		myconf="${myconf} READER_BULCRYPT"
 	fi
 
+	if use cardreader_db2com; then
+		myconf="${myconf} CARDREADER_DB2COM"
+	fi
+	if use cardreader_internal; then
+		myconf="${myconf} CARDREADER_INTERNAL"
+	fi
+	if use cardreader_mp35; then
+		myconf="${myconf} CARDREADER_MP35"
+	fi
+	if use cardreader_phoenix; then
+		myconf="${myconf} CARDREADER_PHOENIX"
+	fi
+	if use cardreader_sc8in1; then
+		myconf="${myconf} CARDREADER_SC8IN1"
+	fi
+	if use cardreader_smargo; then
+		myconf="${myconf} CARDREADER_SMARGO"
+	fi
+	if use cardreader_stapi; then
+		myconf="${myconf} CARDREADER_STAPI"
+	fi
+
 	export myconf
 }
 
@@ -199,7 +235,8 @@ src_install() {
 
 	insinto "/etc/${PN}"
 	doins -r Distribution/doc/example
-	doinitd "${FILESDIR}/${PN}"
+	newinitd "${FILESDIR}/${PN}.initd" oscam
+	newconfd "${FILESDIR}/${PN}.confd" oscam
 
 	if use doc; then
 		doman Distribution/doc/man/*
