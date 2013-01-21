@@ -1,8 +1,8 @@
-# Copyright 1999-2012 Gentoo Foundation
+# Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/media-plugins/vdr-xvdr/vdr-xvdr-9999.ebuild,v 1.5 2012/05/01 11:44:37 hd_brummy Exp $
+# $Header: Exp $
 
-EAPI="4"
+EAPI="5"
 
 inherit vdr-plugin-2 git-2
 
@@ -24,12 +24,17 @@ S=${WORKDIR}/${PN}-plugin
 src_prepare() {
 	vdr-plugin-2_src_prepare
 
-	fix_vdr_libsi_include recplayer.c
-	fix_vdr_libsi_include receiver.c
+	fix_vdr_libsi_include src/live/livepatfilter.h
+}
+
+src_compile() {
+	vdr-plugin-2_src_compile
+	emake -C tools
 }
 
 src_install() {
 	vdr-plugin-2_src_install
+	dobin tools/serviceref
 
 	insinto /etc/vdr/plugins/xvdr
 	doins xvdr/allowed_hosts.conf
