@@ -1,8 +1,8 @@
-# Copyright 1999-2012 Gentoo Foundation
+# Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/media-plugins/vdr-fritzbox/vdr-fritzbox-1.4.3.ebuild,v 1.2 2012/07/01 12:41:32 hd_brummy Exp $
+# $Header: /var/cvsroot/gentoo-x86/media-plugins/vdr-fritzbox/vdr-fritzbox-1.5.2.ebuild,v 1.1 2013/01/06 12:05:37 hd_brummy Exp $
 
-EAPI="4"
+EAPI="5"
 
 inherit vdr-plugin-2
 
@@ -12,13 +12,20 @@ SRC_URI="http://joachim-wilke.de/vdr-fritz/${P}.tgz"
 
 SLOT="0"
 LICENSE="GPL-2"
-KEYWORDS="amd64 x86"
+KEYWORDS="~amd64 ~x86"
 IUSE=""
 
 DEPEND=">=media-video/vdr-1.6.0
 		dev-libs/libgcrypt
 		dev-cpp/commoncpp2"
 RDEPEND="${DEPEND}"
+
+src_prepare() {
+	# use the makefile, to get vdr-1.6 support
+	mv "${S}"/Makefile.pre.1.7.34 "${S}"/Makefile
+
+	vdr-plugin-2_src_prepare
+}
 
 pkg_postinst() {
 	echo
