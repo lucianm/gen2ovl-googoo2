@@ -67,6 +67,7 @@ S="${WORKDIR}/${PN}"
 
 src_prepare() {
 	sed -i "s:svnversion -n .:git describe --always:" config.sh || die "Failed to patch the GIT commit as build string"
+	epatch_user
 }
 
 src_defs() {
