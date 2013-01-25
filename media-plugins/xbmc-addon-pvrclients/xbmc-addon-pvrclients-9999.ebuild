@@ -56,7 +56,10 @@ src_prepare() {
 }
 
 src_configure() {
-	econf --prefix=/usr/$(get_libdir)/xbmc $(use_enable pvrclient_mythtv addons-with-dependencies)
+	econf --prefix=/usr \
+		--libdir=/usr/$(get_libdir)/xbmc/addons \
+		--datadir=/usr/share/xbmc/addons \
+		$(use_enable pvrclient_mythtv addons-with-dependencies)
 }
 
 src_install() {
@@ -64,8 +67,10 @@ src_install() {
 }
 
 pkg_info() {
-	einfo "This add-on requires the installed "media-lugins/vdr-vnsiserver" plugin on the VDR server."
+	einfo "The VNSI PVR client requires "media-lugins/vdr-vnsiserver" plugin on the VDR server."
+	einfo "(or similar, depending on the distribution used on the VDR server machine)."
 	einfo "VDR itself doesn't need any patches or modification to use all the current features."
 	einfo "IMPORTANT:"
 	einfo "Please disable *all* PVR addons *before* running the VNSI addon!"
+	einfo "Of course, if using another PVR client than VNSI, another TV backend than VDR is required"
 }
