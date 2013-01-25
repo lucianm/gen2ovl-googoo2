@@ -4,7 +4,7 @@
 
 EAPI="5"
 
-inherit git-2 autotools multilib
+inherit git-2 autotools multilib eutils
 
 EGIT_REPO_URI="${PVRADDONS_EGIT_REPO_URI:-git://github.com/FernetMenta/xbmc-pvr-addons.git}"
 EGIT_PROJECT="xbmc-pvr-addons${PVRADDONS_EGIT_PROJECT:-}.git"
@@ -33,6 +33,8 @@ DEPEND="${RDEPEND}
 S=${WORKDIR}/${PN}
 
 src_prepare() {
+	epatch_user
+
 	use pvrclient_argustv || sed -i "s:pvr.argustv::" addons/Makefile.am
 	use pvrclient_demo || sed -i "s:pvr.demo::" addons/Makefile.am
 	use pvrclient_dvbviewer || sed -i "s:pvr.dvbviewer::" addons/Makefile.am
