@@ -32,7 +32,7 @@ RDEPEND="${DEPEND}
 #VDR_CONFD_FILE="${FILESDIR}/confd-${PV}"
 #VDR_RCADDON_FILE="${FILESDIR}/rc-addon-${PV}.sh"
 
-PATCHES="${FILESDIR}/vdr-tvguide-Makefile-VDRCONFDIR.patch"
+PATCHES="${FILESDIR}/vdr-tvguide-Makefile-vdr-1.7.36.patch"
 
 src_install() {
 	vdr-plugin-2_src_install
