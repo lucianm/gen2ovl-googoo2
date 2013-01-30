@@ -1,0 +1,24 @@
+# /etc/conf.d/vdr.cdplayer
+
+### cdplayer (1.1.6) - CD-Player
+
+# -d  --device  <device>    CD-Rom device : /dev/cdrom
+_EXTRAOPTS="--device /dev/cdrom"
+
+# -s  --stillpic <file>     Still-Picture : cd.mpg
+_EXTRAOPTS="${_EXTRAOPTS} --stillpic cd.mpg"
+
+# -c  --configdir <dir>     Directory for config files : cdplayer
+_EXTRAOPTS="${_EXTRAOPTS} --configdir cdplayer"
+
+# -S  --cddbserver <server> CDDB server name : freedb.freedb.org
+_EXTRAOPTS="${_EXTRAOPTS} --cddbserver freedb.freedb.org"
+
+# -C  --cddbcache <dir>     CDDB cache directory
+_EXTRAOPTS="${_EXTRAOPTS} --cddbcache /etc/vdr/plugins/cdplayer/cddbcache"
+
+# -N  --disablecddbcache    Disable CDDB cache
+#_EXTRAOPTS="${_EXTRAOPTS} --disablecddbcache"
+
+# -n  --disablecddb         Disable CDDB query
+#_EXTRAOPTS="${_EXTRAOPTS} --disablecddb"
