@@ -10,7 +10,7 @@ EGIT_REPO_URI="${PVRADDONS_EGIT_REPO_URI:-git://github.com/FernetMenta/xbmc-pvr-
 EGIT_PROJECT="xbmc-pvr-addons${PVRADDONS_EGIT_PROJECT:-}.git"
 EGIT_BRANCH="${PVRADDONS_EGIT_BRANCH:-master}"
 
-DESCRIPTION="XBMC addon: add VDR (http://www.cadsoft.de/vdr) as a TV/PVR Backend"
+DESCRIPTION="XBMC Frodo PVR Addons"
 HOMEPAGE="https://github.com/FernetMenta/xbmc-pvr-addons"
 SRC_URI=""
 KEYWORDS=""
