@@ -38,7 +38,7 @@ HOMEPAGE="http://xbmc.org/"
 
 LICENSE="GPL-2"
 SLOT="0"
-IUSE="airplay alsa altivec avahi bluetooth bluray cec css debug goom java joystick midi mysql nfs profile +projectm pulseaudio pvr +rsxs rtmp +samba sse sse2 sftp udev upnp vaapi vdpau webserver +xrandr"
+IUSE="airplay alsa altivec avahi bluetooth bluray cec css debug goom java joystick midi mysql nfs profile +projectm pulseaudio pvr +rsxs rtmp +samba sse sse2 sftp udev upnp vaapi vdpau webserver +xrandr ffmpeg"
 REQUIRED_USE="pvr? ( mysql )"
 
 COMMON_DEPEND="virtual/glu
@@ -58,6 +58,8 @@ COMMON_DEPEND="virtual/glu
 	dev-libs/tinyxml[stl]
 	dev-libs/yajl
 	dev-python/simplejson
+	media-fonts/corefonts
+	media-fonts/roboto
 	media-libs/alsa-lib
 	media-libs/flac
 	media-libs/fontconfig
@@ -86,8 +88,8 @@ COMMON_DEPEND="virtual/glu
 	media-libs/tiff
 	pulseaudio? ( media-sound/pulseaudio )
 	media-sound/wavpack
-	|| ( media-libs/libpostproc <media-video/libav-0.8.2-r1 media-video/ffmpeg )
-	>=virtual/ffmpeg-0.6[encode]
+	ffmpeg? ( || ( media-libs/libpostproc <media-video/libav-0.8.2-r1 media-video/ffmpeg ) )
+	ffmpeg? ( >=virtual/ffmpeg-0.6[encode] )
 	rtmp? ( media-video/rtmpdump )
 	avahi? ( net-dns/avahi )
 	nfs? ( net-fs/libnfs )
@@ -105,7 +107,7 @@ COMMON_DEPEND="virtual/glu
 	vaapi? ( x11-libs/libva[opengl] )
 	vdpau? (
 		|| ( x11-libs/libvdpau >=x11-drivers/nvidia-drivers-180.51 )
-		virtual/ffmpeg[vdpau]
+		ffmpeg? ( virtual/ffmpeg[vdpau] )
 	)
 	x11-libs/libXinerama
 	xrandr? ( x11-libs/libXrandr )
@@ -194,8 +196,8 @@ src_configure() {
 		--disable-ccache \
 		--disable-optimizations \
 		--enable-external-libraries \
-		--enable-external-ffmpeg \
 		--enable-gl \
+		$(use_enable ffmpeg external-ffmpeg) \
 		$(use_enable airplay) \
 		$(use_enable avahi) \
 		$(use_enable bluray libbluray) \
@@ -232,6 +234,22 @@ src_install() {
 
 	# punt simplejson bundle, we use the system one anyway
 	rm -rf "${ED}"/usr/share/xbmc/addons/script.module.simplejson/lib
+	# Remove fonconfig settings that are used only on MacOSX.
+	# Can't be patched upstream because they just find all files and install
+	# them into same structure like they have in git.
+	rm -rf "${ED}"/usr/share/xbmc/system/players/dvdplayer/etc
+
+	# Replace bundled fonts with system ones
+	# corefonts: arial ; unknown source teletext.ttf
+	rm -rf "${ED}"/usr/share/xbmc/media/Fonts/arial.ttf
+	dosym /usr/share/fonts/corefonts/arial.ttf \
+		/usr/share/xbmc/media/Fonts/arial.ttf
+	# roboto: roboto-bold, roboto-regular ; unknown source: bold-caps
+	rm -rf "${ED}"/usr/share/xbmc/addons/skin.confluence/fonts/Roboto-*
+	dosym /usr/share/fonts/roboto/Roboto-Regular.ttf \
+		/usr/share/xbmc/addons/skin.confluence/fonts/Roboto-Regular.ttf
+	dosym /usr/share/fonts/roboto/Roboto-Bold.ttf \
+		/usr/share/xbmc/addons/skin.confluence/fonts/Roboto-Bold.ttf
 
 	insinto "$(python_get_sitedir)" #309885
 	doins tools/EventClients/lib/python/xbmcclient.py || die
