@@ -5,7 +5,7 @@
 # Joerg Bornkessel hd_brummy@gentoo.org
 
 SKINENIGMANG_LOGODIR="/usr/share/channel-logos/enigmang"
-SKINENIGMANG_EPGIMGDIR="/video/epg_image_cache"
+SKINENIGMANG_EPGIMGDIR="/var/cache/vdr/epgimages"
 
 plugin_pre_vdr_start() {
   add_plugin_param "--logodir=${SKINENIGMANG_LOGODIR}"
