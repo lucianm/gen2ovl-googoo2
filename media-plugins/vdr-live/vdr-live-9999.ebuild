@@ -1,8 +1,8 @@
-# Copyright 1999-2012 Gentoo Foundation
+# Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
-EAPI="4"
+EAPI="5"
 
 inherit vdr-plugin-2 ssl-cert toolchain-funcs
 
@@ -11,7 +11,8 @@ HOMEPAGE="http://live.vdr-developer.org"
 if [[ "${PV}" = "9999" ]]; then
 	SRC_URI=""
 	KEYWORDS=""
-	EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-${VDRPLUGIN}.git"
+	#EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-${VDRPLUGIN}.git"
+	EGIT_REPO_URI="git://github.com/CReimer/vdr-plugin-${VDRPLUGIN}.git"
 	inherit git
 else
 	SRC_URI="mirror://gentoo/${P}.tar.bz2
@@ -77,17 +78,17 @@ src_prepare() {
 	if ! use pcre; then
 		sed -i "s:^HAVE_LIBPCRECPP:#HAVE_LIBPCRECPP:" Makefile || die
 	fi
+}
 
-	if ! has_version ">=media-video/vdr-1.7.13"; then
-		sed -i "s:-include \$(VDRDIR)/Make.global:#-include \$(VDRDIR)/Make.global:" Makefile || die
-	fi
+src_compile() {
+	BUILD_PARAMS="-j1"
+	vdr-plugin-2_src_compile
 }
 
 src_install() {
 	vdr-plugin-2_src_install
 
 	insinto /etc/vdr/plugins/live
-	doins -r live/*
 
 	fowners -R vdr:vdr /etc/vdr/plugins/live
 }
