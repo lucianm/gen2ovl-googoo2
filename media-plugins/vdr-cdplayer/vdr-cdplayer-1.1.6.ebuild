@@ -17,8 +17,10 @@ LICENSE="GPL-2"
 IUSE=""
 
 DEPEND=">=media-video/vdr-1.6.0
-	>=dev-libs/libcdio-0.8.0
+	>=dev-libs/libcdio-paranoia-0.90
 	>=media-libs/libcddb-1.3.0"
+
+PATCHES="${FILESDIR}/${VDRPLUGIN}-${PV}_libcdio-paranoia-0.90.diff"
 
 src_compile() {
 	append-ldflags $(no-as-needed)
@@ -35,3 +37,4 @@ src_install() {
 	dodoc "${S}"/contrib/convert.sh
 	fowners -R vdr:vdr /etc/vdr/plugins/${VDRPLUGIN}
 }
+
