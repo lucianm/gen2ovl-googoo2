@@ -8,6 +8,8 @@ To install it, just get the overlay description file [overlay_gen2ovl-googoo2.xm
 
 <pre>file://%(storage)s/overlay_gen2ovl-googoo2.xml</pre>
 
+Alternatively, on newer layman versions, you can just place it in the <b>/etc/layman/overlays</b> directory (but then do not reference it in the config file).
+
 Then you can effectively add the overlay by issuing the command:
 
 <pre>layman -f -a gen2ovl-googoo2</pre>
