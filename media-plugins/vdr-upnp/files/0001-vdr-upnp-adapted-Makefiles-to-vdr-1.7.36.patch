@@ -1,0 +1,338 @@
+From a2a2180c84b36c9d54e69a7b2a688277d3429885 Mon Sep 17 00:00:00 2001
+From: Lucian Muresan <lucianm@users.sourceforge.net>
+Date: Sun, 10 Feb 2013 10:32:18 +0100
+Subject: [PATCH] vdr-upnp-adapted-Makefiles-to-vdr-1.7.36
+
+---
+ Make.config                              | 52 +++++++++++-----------
+ Makefile                                 | 76 ++++++++++++++++++--------------
+ Makefile.plugins                         | 21 ++++++---
+ plugins/profiler/vdrDVBProfiler/Makefile |  4 +-
+ plugins/provider/fileProvider/Makefile   |  1 +
+ plugins/provider/recProvider/Makefile    |  1 +
+ plugins/provider/vdrProvider/Makefile    |  1 +
+ 7 files changed, 89 insertions(+), 67 deletions(-)
+
+diff --git a/Make.config b/Make.config
+index b8b635e..9b3507d 100644
+--- a/Make.config
++++ b/Make.config
+@@ -1,4 +1,3 @@
+-#
+ # Makefile for a Video Disk Recorder plugin
+ #
+ # $Id$
+@@ -6,13 +5,10 @@
+ # The official name of this plugin.
+ # This name will be used in the '-P...' option of VDR to load the plugin.
+ # By default the main source file also carries this name.
+-# IMPORTANT: the presence of this macro is important for the Make.config
+-# file. So it must be defined, even if it is not used here!
+-#
+-PLUGIN = upnp
+ 
+-### The sources root build directory as seen by the called (to be overrideable by it)
++PLUGIN = upnp
+ 
++# we need this one when building the subplugins
+ ROOTBUILDDIR ?= $(shell pwd)
+ 
+ ### The version number of this plugin (taken from the main source file):
+@@ -22,38 +18,44 @@ VERSION = $(shell grep 'static const char \*VERSION *=' $(ROOTBUILDDIR)/$(PLUGIN
+ ### If you do not want to strip binaries on installing, you may comment this:
+ #PRESTRIP = -s
+ 
+-### The C++ compiler and options:
+-
+-CXX      ?= g++
+-ECPPC	 ?= ecppc
+-CXXFLAGS ?= -g -O3 -Wall -Werror=overloaded-virtual -Wno-parentheses -fPIC
+-
+ ### The directory environment:
+ 
+-VDRDIR ?= $(ROOTBUILDDIR)/../../..
+-VDRINCDIR ?= $(VDRDIR)
+-VDRPLUGINLIBDIR ?= /usr/lib/vdr/plugins
+-VDRCFGDIR ?= /etc/vdr/plugins/$(PLUGIN)
+-VDRRESDIR ?= /usr/share/vdr/$(PLUGIN)
+-LIBDIR ?= $(ROOTBUILDDIR)/../../lib
++# Use package data if installed...otherwise assume we're under the VDR source directory:
++PKGCFG = $(if $(VDRDIR),$(shell pkg-config --variable=$(1) $(VDRDIR)/vdr.pc),$(shell pkg-config --variable=$(1) vdr || pkg-config --variable=$(1) ../../../vdr.pc))
++LIBDIR ?= $(call PKGCFG,libdir)
++LOCDIR ?= $(call PKGCFG,locdir)
++VDRCFGDIR ?= $(call PKGCFG,configdir)/plugins/$(PLUGIN)
++VDRRESDIR ?= $(call PKGCFG,resdir)/plugins/$(PLUGIN)
++PLGCFG = $(call PKGCFG,plgcfg)
++PREFIX ?= /usr
++INSDOCDIR ?= $(PREFIX)/share/doc/vdr-$(PLUGIN)-$(VERSION)
++
++#
+ TMPDIR ?= /tmp
+ 
+-PLUGINDIR= ./PLUGINS
++### The compiler options:
+ 
+-### The version number of VDR's plugin API (taken from VDR's "config.h"):
++ECPPC ?= ecppc
++export CFLAGS   = $(call PKGCFG,cflags)
++export CXXFLAGS = $(call PKGCFG,cxxflags)
+ 
+-APIVERSION = $(shell sed -ne '/define APIVERSION/s/^.*"\(.*\)".*$$/\1/p' $(VDRDIR)/config.h)
++### The version number of VDR's plugin API:
+ 
+-### Includes and Defines (add further entries here):
++APIVERSION = $(call PKGCFG,apiversion)
++
++### Allow user defined options to overwrite defaults:
+ 
+-INCLUDES += -I$(VDRDIR)/include
++-include $(PLGCFG)
+ 
+ ifdef DEBUG
+ DEFINES = -DDEBUG
+ endif
+ 
++### Includes and Defines (add further entries here):
++
++INCLUDES +=
++
+ DEFINES += -D_GNU_SOURCE -DPLUGIN_NAME_I18N='"$(PLUGIN)"'
+-DEFINES += -DPLUGINDIR=\"$(VDRPLUGINLIBDIR)\"
+ 
+ # export to subplugins makefiles:
+-export PRESTRIP VERSION APIVERSION INCLUDES SHAREDDEFINES SHAREDLIBS CXX CXXFLAGS VDRDIR VDRINCDIR LIBDIR TMPDIR VDRPLUGINLIBDIR
++export PRESTRIP VERSION APIVERSION INCLUDES CXXFLAGS VDRDIR VDRINCDIR LIBDIR TMPDIR LOCDIR DEFINES SHAREDDEFINES SHAREDLIBS ROOTBUILDDIR PREFIX INSDOCDIR
+diff --git a/Makefile b/Makefile
+index 247d22b..de2f20e 100644
+--- a/Makefile
++++ b/Makefile
+@@ -14,13 +14,7 @@
+ 
+ -include Make.config
+ 
+-### Make sure that necessary options are included:
+-
+--include $(VDRDIR)/Make.global
+-
+-### Allow user defined VDR options to overwrite defaults:
+-
+--include $(VDRDIR)/Make.config
++### this plugin has subplugins:
+ 
+ SUBPLUGDIR ?= ./plugins
+ 
+@@ -29,6 +23,10 @@ SUBPLUGDIR ?= ./plugins
+ ARCHIVE = $(PLUGIN)-$(VERSION)
+ PACKAGE = vdr-$(ARCHIVE)
+ 
++### The name of the shared object file:
++
++SOFILE = libvdr-$(PLUGIN).so
++
+ ### The object files (add further files here):
+ 
+ TNTOBJ =	httptnt/deviceDescription.o \
+@@ -54,10 +52,9 @@ OBJS = 	$(PLUGIN).o \
+ 		
+ LIBS += -lupnp -lcxxtools -ltntnet -ltntdb -ldl
+ 
+-
+ ### The main target:
+ 
+-all: plugin subplugins
++all: $(SOFILE) subplugins i18n
+ 
+ ### Implicit rules:
+ 
+@@ -72,53 +69,64 @@ all: plugin subplugins
+ MAKEDEP = $(CXX) -MM -MG
+ DEPFILE = .dependencies
+ $(DEPFILE): Makefile
+-	@$(MAKEDEP) $(DEFINES) $(INCLUDES) $(OBJS:%.o=%.cpp) $(TNTOBJ:%.o=%.cpp) > $@
++	@$(MAKEDEP) $(CXXFLAGS) $(DEFINES) $(INCLUDES) $(OBJS:%.o=%.cpp) $(TNTOBJ:%.o=%.cpp) > $@
+ 
+ -include $(DEPFILE)
+ 
+ ### Internationalization (I18N):
+ 
+ PODIR     = po
+-LOCALEDIR = $(VDRDIR)/locale
+ I18Npo    = $(wildcard $(PODIR)/*.po)
+-I18Nmsgs  = $(addprefix $(LOCALEDIR)/, $(addsuffix /LC_MESSAGES/vdr-$(PLUGIN).mo, $(notdir $(foreach file, $(I18Npo), $(basename $(file))))))
++I18Nmo    = $(addsuffix .mo, $(foreach file, $(I18Npo), $(basename $(file))))
++I18Nmsgs  = $(addprefix $(DESTDIR)$(LOCDIR)/, $(addsuffix /LC_MESSAGES/vdr-$(PLUGIN).mo, $(notdir $(foreach file, $(I18Npo), $(basename $(file))))))
+ I18Npot   = $(PODIR)/$(PLUGIN).pot
+ 
+ %.mo: %.po
+ 	msgfmt -c -o $@ $<
+ 
+-$(I18Npot): $(PLUGIN).h $(OBJS:%.o=%.cpp)  $(TNTOBJ:%.o=%.cpp)
+-	xgettext -C -cTRANSLATORS --no-wrap --no-location -k -ktr -ktrNOOP --package-name=vdr-$(PLUGIN) --package-version=$(VERSION) --msgid-bugs-address='<see README>' -o $@ $^
++$(I18Npot): $(wildcard *.cpp)
++	xgettext -C -cTRANSLATORS --no-wrap --no-location -k -ktr -ktrNOOP --package-name=vdr-$(PLUGIN) --package-version=$(VERSION) --msgid-bugs-address='<see README>' -o $@ `ls $^`
+ 
+ %.po: $(I18Npot)
+-	msgmerge -U --no-wrap --no-location --backup=none -q $@ $<
++	msgmerge -U --no-wrap --no-location --backup=none -q -N $@ $<
+ 	@touch $@
+ 
+-$(I18Nmsgs): $(LOCALEDIR)/%/LC_MESSAGES/vdr-$(PLUGIN).mo: $(PODIR)/%.mo
+-	@mkdir -p $(dir $@)
+-	cp $< $@
++$(I18Nmsgs): $(DESTDIR)$(LOCDIR)/%/LC_MESSAGES/vdr-$(PLUGIN).mo: $(PODIR)/%.mo
++	install -D -m644 $< $@
+ 
+ .PHONY: i18n
+-i18n: $(I18Nmsgs) $(I18Npot)
++i18n: $(I18Nmo) $(I18Npot)
+ 
+-### Targets:
++install-i18n: $(I18Nmsgs)
+ 
+-plugin: libvdr-$(PLUGIN).so i18n
++### Targets:
+ 
+-libvdr-$(PLUGIN).so: $(OBJS) $(TNTOBJ)
++$(SOFILE): $(OBJS) $(TNTOBJ)
+ 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -rdynamic -shared $(OBJS) $(TNTOBJ) $(LIBS) -o $@
+-	@cp --remove-destination $@ $(LIBDIR)/$@.$(APIVERSION)
+-
+-install: all
+-	@mkdir -p $(VDRPLUGINLIBDIR)
+-	@mkdir -p $(VDRCFGDIR)
+-#	@mkdir -p $(VDRRESDIR)
+-	install -m 755 -o root -g root $(PRESTRIP) $(LIBDIR)/libvdr-$(PLUGIN).so.$(APIVERSION) $(VDRPLUGINLIBDIR)
+-	cp --remove-destination --recursive httpdocs $(VDRCFGDIR)
+-
+-uninstall:
+-	rm --recursive $(VDRPLUGINLIBDIR)/libvdr-$(PLUGIN).so.$(APIVERSION)
+-#	rm --recursive $(VDRCFGDIR)/httpdocs
++
++install-lib: $(SOFILE)
++	install -m 755 -o root -g root $(PRESTRIP) -D $^ $(DESTDIR)$(LIBDIR)/$^.$(APIVERSION)
++
++install-htdocs:
++	@mkdir -p $(DESTDIR)$(VDRRESDIR)
++	@cp --remove-destination --recursive httpdocs $(DESTDIR)$(VDRRESDIR)
++
++uninstall-htdocs:
++	rm --recursive $(DESTDIR)$(VDRRESDIR)/httpdocs
++
++install: install-lib install-htdocs install-subplugins install-i18n install-docs
++
++uninstall: uninstall-htdocs uninstall-subplugins uninstall-docs
++	rm --recursive $(DESTDIR)$(LIBDIR)/$(SOFILE).$(APIVERSION)
++
++install-docs:
++	@mkdir -p $(DESTDIR)$(INSDOCDIR)
++	@for doc in COPYING HISTORY INSTALL README; do cp $$doc $(DESTDIR)$(INSDOCDIR); done
++
++uninstall-docs:
++	rm --recursive $(DESTDIR)$(INSDOCDIR)
++
++uninstall-docs:
+ 
+ dist: $(I18Npo) clean
+ 	@-rm -rf $(TMPDIR)/$(ARCHIVE)
+diff --git a/Makefile.plugins b/Makefile.plugins
+index 595acfc..3b814e9 100644
+--- a/Makefile.plugins
++++ b/Makefile.plugins
+@@ -44,7 +44,7 @@ $(DEPFILE): $(OBJS:%.o=%.cpp) $(wildcard *.h)
+ LIBUPNP    = libupnp-$(shell echo $(TARGET) | awk '{print tolower($$0)}').so
+ LIBUPNPVER = $(LIBUPNP).$(UPNPAPIVERSION)-$(APIVERSION)
+ 
+-BUILDTARGETS = $(LIBDIR)/$(LIBUPNPVER)
++BUILDTARGETS = $(ROOTBUILDDIR)/$(LIBUPNPVER)
+ 
+ _all: $(BUILDTARGETS)
+ .PHONY: clean dist
+@@ -55,14 +55,21 @@ _all: $(BUILDTARGETS)
+ $(LIBUPNP): $(OBJS)
+ 	$(CXX) $(CXXFLAGS) -shared $(OBJS) $(LIBS) $(SHAREDLIBS) -o $@
+ 
+-$(LIBDIR)/$(LIBUPNPVER): $(LIBUPNP)
++$(ROOTBUILDDIR)/$(LIBUPNPVER): $(LIBUPNP)
+ 	@cp -p $< $@
+ 
+ _clean:
+-	@-rm -f $(OBJS) $(CLEAN_RM) $(DEPFILE) $(LIBUPNP) $(LIBDIR)/$(LIBUPNPVER) core* *~
++	@-rm -f $(OBJS) $(CLEAN_RM) $(DEPFILE) $(LIBUPNP) $(ROOTBUILDDIR)/$(LIBUPNPVER) core* *~
+ 
+-_install: all
+-	install -m 755 -o root -g root $(PRESTRIP) $(LIBDIR)/$(LIBUPNPVER) $(VDRPLUGINLIBDIR)
++_install: all install-docs
++	install -m 755 -o root -g root $(PRESTRIP) $(ROOTBUILDDIR)/$(LIBUPNPVER) $(DESTDIR)$(LIBDIR)
+ 
+-_uninstall:
+-	rm $(VDRPLUGINLIBDIR)/$(LIBUPNPVER)
++_uninstall: uninstall-docs
++	rm $(DESTDIR)$(LIBDIR)/$(LIBUPNPVER)
++
++install-docs:
++	@mkdir -p $(DESTDIR)$(INSDOCDIR)
++	@for doc in $(DOCS); do cp $$doc $(DESTDIR)$(INSDOCDIR)/$$doc.$(TARGET); done
++
++uninstall-docs:
++	@for doc in $(DOCS); do rm $(DESTDIR)$(INSDOCDIR)/$$doc.$(TARGET); done
+diff --git a/plugins/profiler/vdrDVBProfiler/Makefile b/plugins/profiler/vdrDVBProfiler/Makefile
+index bfc8011..a1d5c7e 100644
+--- a/plugins/profiler/vdrDVBProfiler/Makefile
++++ b/plugins/profiler/vdrDVBProfiler/Makefile
+@@ -9,6 +9,7 @@ CATEGORY  = Profiler
+ TARGET    = $(SUBPLUGIN)-$(CATEGORY)
+ 
+ OBJS      = $(SUBPLUGIN)$(CATEGORY).o
++DOCS      = README
+ 
+ 
+ ROOTBUILDDIR = ../../..
+@@ -22,7 +23,8 @@ clean:
+ 
+ install:
+ 	@$(MAKE) -f ../../../Makefile.plugins -C "$(shell pwd)" _install
+-	cp --remove-destination channelTitle.conf $(VDRCFGDIR)
++	@mkdir -p $(DESTDIR)$(VDRCFGDIR)
++	cp --remove-destination channelTitle.conf $(DESTDIR)$(VDRCFGDIR)
+ 
+ uninstall:
+ 	@$(MAKE) -f ../../../Makefile.plugins -C "$(shell pwd)" _uninstall
+diff --git a/plugins/provider/fileProvider/Makefile b/plugins/provider/fileProvider/Makefile
+index c16064a..4d8f213 100644
+--- a/plugins/provider/fileProvider/Makefile
++++ b/plugins/provider/fileProvider/Makefile
+@@ -9,6 +9,7 @@ CATEGORY  = Provider
+ TARGET    = $(SUBPLUGIN)-$(CATEGORY)
+ 
+ OBJS      = $(SUBPLUGIN)$(CATEGORY).o
++DOCS      = README
+ 
+ 
+ ROOTBUILDDIR = ../../..
+diff --git a/plugins/provider/recProvider/Makefile b/plugins/provider/recProvider/Makefile
+index ffef840..05a7029 100644
+--- a/plugins/provider/recProvider/Makefile
++++ b/plugins/provider/recProvider/Makefile
+@@ -9,6 +9,7 @@ CATEGORY  = Provider
+ TARGET    = $(SUBPLUGIN)-$(CATEGORY)
+ 
+ OBJS      = $(SUBPLUGIN)$(CATEGORY).o
++DOCS      = README
+ 
+ 
+ ROOTBUILDDIR = ../../..
+diff --git a/plugins/provider/vdrProvider/Makefile b/plugins/provider/vdrProvider/Makefile
+index 2e47793..f1fdf37 100644
+--- a/plugins/provider/vdrProvider/Makefile
++++ b/plugins/provider/vdrProvider/Makefile
+@@ -9,6 +9,7 @@ CATEGORY  = Provider
+ TARGET    = $(SUBPLUGIN)-$(CATEGORY)
+ 
+ OBJS      = $(SUBPLUGIN)$(CATEGORY).o
++DOCS      = README
+ 
+ 
+ ROOTBUILDDIR = ../../..
+-- 
+1.8.1.1
+
