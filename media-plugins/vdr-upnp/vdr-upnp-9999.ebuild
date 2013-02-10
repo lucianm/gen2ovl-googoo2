@@ -34,13 +34,14 @@ PATCHES="${FILESDIR}/0001-vdr-upnp-adapted-Makefiles-to-vdr-1.7.36.patch"
 src_prepare() {
 
 	vdr-plugin-2_src_prepare
+	# no need to install the license file on gentoo
 	sed -i Makefile -e "s: COPYING::"
 
 }
 
 src_install() {
 
-	# install main plugin, normally
+	# install main plugin, normally, just adjust the doc dir to match our versioning
 	INSDOCDIR="/usr/share/doc/${P}" \
 	vdr-plugin-2_src_install
 

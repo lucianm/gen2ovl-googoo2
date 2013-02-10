@@ -1,17 +1,17 @@
-From a2a2180c84b36c9d54e69a7b2a688277d3429885 Mon Sep 17 00:00:00 2001
+From 3da7d343bfac905792ca783e266353fcc349f5ca Mon Sep 17 00:00:00 2001
 From: Lucian Muresan <lucianm@users.sourceforge.net>
-Date: Sun, 10 Feb 2013 10:32:18 +0100
-Subject: [PATCH] vdr-upnp-adapted-Makefiles-to-vdr-1.7.36
+Date: Sun, 10 Feb 2013 20:13:19 +0100
+Subject: [PATCH] vdr-upnp adapted Makefiles to vdr-1.7.36
 
 ---
- Make.config                              | 52 +++++++++++-----------
- Makefile                                 | 76 ++++++++++++++++++--------------
- Makefile.plugins                         | 21 ++++++---
+ Make.config                              | 52 +++++++++++----------
+ Makefile                                 | 78 ++++++++++++++++++--------------
+ Makefile.plugins                         | 30 +++++++++---
  plugins/profiler/vdrDVBProfiler/Makefile |  4 +-
  plugins/provider/fileProvider/Makefile   |  1 +
  plugins/provider/recProvider/Makefile    |  1 +
  plugins/provider/vdrProvider/Makefile    |  1 +
- 7 files changed, 89 insertions(+), 67 deletions(-)
+ 7 files changed, 101 insertions(+), 66 deletions(-)
 
 diff --git a/Make.config b/Make.config
 index b8b635e..9b3507d 100644
@@ -103,15 +103,17 @@ index b8b635e..9b3507d 100644
 -export PRESTRIP VERSION APIVERSION INCLUDES SHAREDDEFINES SHAREDLIBS CXX CXXFLAGS VDRDIR VDRINCDIR LIBDIR TMPDIR VDRPLUGINLIBDIR
 +export PRESTRIP VERSION APIVERSION INCLUDES CXXFLAGS VDRDIR VDRINCDIR LIBDIR TMPDIR LOCDIR DEFINES SHAREDDEFINES SHAREDLIBS ROOTBUILDDIR PREFIX INSDOCDIR
 diff --git a/Makefile b/Makefile
-index 247d22b..de2f20e 100644
+index 247d22b..2ff0b40 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -14,13 +14,7 @@
+@@ -14,13 +14,10 @@
  
  -include Make.config
  
 -### Make sure that necessary options are included:
--
++### dummy entry to silence the vdr >= 1.7.34 Makefile about old Makefile architecture
++# PKGCFG
+ 
 --include $(VDRDIR)/Make.global
 -
 -### Allow user defined VDR options to overwrite defaults:
@@ -121,7 +123,7 @@ index 247d22b..de2f20e 100644
  
  SUBPLUGDIR ?= ./plugins
  
-@@ -29,6 +23,10 @@ SUBPLUGDIR ?= ./plugins
+@@ -29,6 +26,10 @@ SUBPLUGDIR ?= ./plugins
  ARCHIVE = $(PLUGIN)-$(VERSION)
  PACKAGE = vdr-$(ARCHIVE)
  
@@ -132,7 +134,7 @@ index 247d22b..de2f20e 100644
  ### The object files (add further files here):
  
  TNTOBJ =	httptnt/deviceDescription.o \
-@@ -54,10 +52,9 @@ OBJS = 	$(PLUGIN).o \
+@@ -54,10 +55,9 @@ OBJS = 	$(PLUGIN).o \
  		
  LIBS += -lupnp -lcxxtools -ltntnet -ltntdb -ldl
  
@@ -144,7 +146,7 @@ index 247d22b..de2f20e 100644
  
  ### Implicit rules:
  
-@@ -72,53 +69,64 @@ all: plugin subplugins
+@@ -72,53 +72,65 @@ all: plugin subplugins
  MAKEDEP = $(CXX) -MM -MG
  DEPFILE = .dependencies
  $(DEPFILE): Makefile
@@ -190,6 +192,9 @@ index 247d22b..de2f20e 100644
 +install-i18n: $(I18Nmsgs)
  
 -plugin: libvdr-$(PLUGIN).so i18n
++uninstall-i18n:
++	for lang in $(shell basename --multiple --suffix=.po $(shell ls po/*.po)); do rm -v $(DESTDIR)$(LOCDIR)/$$lang/LC_MESSAGES/vdr-$(PLUGIN).mo; done
++
 +### Targets:
  
 -libvdr-$(PLUGIN).so: $(OBJS) $(TNTOBJ)
@@ -211,16 +216,16 @@ index 247d22b..de2f20e 100644
 +install-lib: $(SOFILE)
 +	install -m 755 -o root -g root $(PRESTRIP) -D $^ $(DESTDIR)$(LIBDIR)/$^.$(APIVERSION)
 +
-+install-htdocs:
++install-resources:
 +	@mkdir -p $(DESTDIR)$(VDRRESDIR)
 +	@cp --remove-destination --recursive httpdocs $(DESTDIR)$(VDRRESDIR)
 +
-+uninstall-htdocs:
-+	rm --recursive $(DESTDIR)$(VDRRESDIR)/httpdocs
++uninstall-resources:
++	rm --recursive $(DESTDIR)$(VDRRESDIR)
 +
-+install: install-lib install-htdocs install-subplugins install-i18n install-docs
++install: install-lib install-resources install-subplugins install-i18n install-docs
 +
-+uninstall: uninstall-htdocs uninstall-subplugins uninstall-docs
++uninstall: uninstall-resources uninstall-subplugins uninstall-docs uninstall-i18n
 +	rm --recursive $(DESTDIR)$(LIBDIR)/$(SOFILE).$(APIVERSION)
 +
 +install-docs:
@@ -229,51 +234,65 @@ index 247d22b..de2f20e 100644
 +
 +uninstall-docs:
 +	rm --recursive $(DESTDIR)$(INSDOCDIR)
-+
-+uninstall-docs:
  
  dist: $(I18Npo) clean
  	@-rm -rf $(TMPDIR)/$(ARCHIVE)
 diff --git a/Makefile.plugins b/Makefile.plugins
-index 595acfc..3b814e9 100644
+index 595acfc..5ccb46d 100644
 --- a/Makefile.plugins
 +++ b/Makefile.plugins
-@@ -44,7 +44,7 @@ $(DEPFILE): $(OBJS:%.o=%.cpp) $(wildcard *.h)
+@@ -16,6 +16,15 @@
+ # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ # Or, point your browser to http://www.gnu.org/copyleft/gpl.html
+ 
++#
++# when building locally in the VDR source tree ("LCLBLD=1 make plugins"),
++# we have to divert ROOTBUILDDIR for our subplugins
++ifdef LCLBLD
++SUBPLGDIR = $(LIBDIR)
++else
++SUBPLGDIR = $(ROOTBUILDDIR)
++endif
++
+ ### Includes and Defines
+ 
+ SINCLUDES += -I../../../include
+@@ -44,7 +53,7 @@ $(DEPFILE): $(OBJS:%.o=%.cpp) $(wildcard *.h)
  LIBUPNP    = libupnp-$(shell echo $(TARGET) | awk '{print tolower($$0)}').so
  LIBUPNPVER = $(LIBUPNP).$(UPNPAPIVERSION)-$(APIVERSION)
  
 -BUILDTARGETS = $(LIBDIR)/$(LIBUPNPVER)
-+BUILDTARGETS = $(ROOTBUILDDIR)/$(LIBUPNPVER)
++BUILDTARGETS = $(SUBPLGDIR)/$(LIBUPNPVER)
  
  _all: $(BUILDTARGETS)
  .PHONY: clean dist
-@@ -55,14 +55,21 @@ _all: $(BUILDTARGETS)
+@@ -55,14 +64,21 @@ _all: $(BUILDTARGETS)
  $(LIBUPNP): $(OBJS)
  	$(CXX) $(CXXFLAGS) -shared $(OBJS) $(LIBS) $(SHAREDLIBS) -o $@
  
 -$(LIBDIR)/$(LIBUPNPVER): $(LIBUPNP)
-+$(ROOTBUILDDIR)/$(LIBUPNPVER): $(LIBUPNP)
++$(SUBPLGDIR)/$(LIBUPNPVER): $(LIBUPNP)
  	@cp -p $< $@
  
  _clean:
 -	@-rm -f $(OBJS) $(CLEAN_RM) $(DEPFILE) $(LIBUPNP) $(LIBDIR)/$(LIBUPNPVER) core* *~
-+	@-rm -f $(OBJS) $(CLEAN_RM) $(DEPFILE) $(LIBUPNP) $(ROOTBUILDDIR)/$(LIBUPNPVER) core* *~
++	@-rm -f $(OBJS) $(CLEAN_RM) $(DEPFILE) $(LIBUPNP) $(SUBPLGDIR)/$(LIBUPNPVER) core* *~
++
++_install: all _install-docs
++	install -m 755 -o root -g root $(PRESTRIP) $(SUBPLGDIR)/$(LIBUPNPVER) $(DESTDIR)$(LIBDIR)
++
++_uninstall: _uninstall-docs
++	rm $(DESTDIR)$(LIBDIR)/$(LIBUPNPVER)
  
 -_install: all
 -	install -m 755 -o root -g root $(PRESTRIP) $(LIBDIR)/$(LIBUPNPVER) $(VDRPLUGINLIBDIR)
-+_install: all install-docs
-+	install -m 755 -o root -g root $(PRESTRIP) $(ROOTBUILDDIR)/$(LIBUPNPVER) $(DESTDIR)$(LIBDIR)
++_install-docs:
++	@mkdir -p $(DESTDIR)$(INSDOCDIR)
++	@for doc in $(DOCS); do cp $$doc $(DESTDIR)$(INSDOCDIR)/$$doc.$(TARGET); done
  
 -_uninstall:
 -	rm $(VDRPLUGINLIBDIR)/$(LIBUPNPVER)
-+_uninstall: uninstall-docs
-+	rm $(DESTDIR)$(LIBDIR)/$(LIBUPNPVER)
-+
-+install-docs:
-+	@mkdir -p $(DESTDIR)$(INSDOCDIR)
-+	@for doc in $(DOCS); do cp $$doc $(DESTDIR)$(INSDOCDIR)/$$doc.$(TARGET); done
-+
-+uninstall-docs:
++_uninstall-docs:
 +	@for doc in $(DOCS); do rm $(DESTDIR)$(INSDOCDIR)/$$doc.$(TARGET); done
 diff --git a/plugins/profiler/vdrDVBProfiler/Makefile b/plugins/profiler/vdrDVBProfiler/Makefile
 index bfc8011..a1d5c7e 100644
