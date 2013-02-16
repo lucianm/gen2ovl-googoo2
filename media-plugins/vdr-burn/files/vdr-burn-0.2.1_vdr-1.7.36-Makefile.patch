@@ -1,0 +1,27 @@
+diff -Naur burn-0.2.1_orig/Makefile burn-0.2.1/Makefile
+--- burn-0.2.1_orig/Makefile	2013-02-10 22:16:15.000000000 +0100
++++ burn-0.2.1/Makefile	2013-02-16 21:53:44.894867000 +0100
+@@ -18,9 +18,9 @@
+ 
+ # Use package data if installed...otherwise assume we're under the VDR source directory:
+ PKGCFG = $(if $(VDRDIR),$(shell pkg-config --variable=$(1) $(VDRDIR)/vdr.pc),$(shell pkg-config --variable=$(1) vdr || pkg-config --variable=$(1) ../../../vdr.pc))
+-LIBDIR = $(DESTDIR)$(call PKGCFG,libdir)
+-LOCDIR = $(DESTDIR)$(call PKGCFG,locdir)
+-PLGCFG = $(DESTDIR)$(call PKGCFG,plgcfg)
++LIBDIR = $(call PKGCFG,libdir)
++LOCDIR = $(call PKGCFG,locdir)
++PLGCFG = $(call PKGCFG,plgcfg)
+ #
+ TMPDIR ?= /tmp
+ 
+@@ -78,6 +78,10 @@
+ i18n install-i18n:
+ 
+ endif
++else
++### Allow user defined options to overwrite defaults:
++
++-include $(PLGCFG)
+ endif # compatibility section
+ 
+ ### The name of the distribution archive:
