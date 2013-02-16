@@ -22,7 +22,8 @@ DEPEND=">=media-video/vdr-1.6.0
 	>=media-libs/libcddb-1.3.0"
 
 PATCHES="${FILESDIR}/${VDRPLUGIN}-${PV}_libcdio-paranoia-0.90.diff
-	${FILESDIR}/${VDRPLUGIN}-${PV}_Makefile-vdr-1.7.36+.diff"
+	${FILESDIR}/${VDRPLUGIN}-${PV}_Makefile-vdr-1.7.36+.diff
+	${FILESDIR}/${VDRPLUGIN}-${PV}-ro_RO.diff"
 
 src_compile() {
 	append-ldflags $(no-as-needed)
