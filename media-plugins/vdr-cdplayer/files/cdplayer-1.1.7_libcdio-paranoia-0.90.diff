@@ -1,0 +1,22 @@
+diff -Naur cdplayer-1.1.7_orig/bufferedcdio.h cdplayer-1.1.7/bufferedcdio.h
+--- cdplayer-1.1.7_orig/bufferedcdio.h	2012-09-08 12:35:25.000000000 +0200
++++ cdplayer-1.1.7/bufferedcdio.h	2013-02-16 16:34:58.311867000 +0100
+@@ -19,9 +19,18 @@
+ #include <string>
+ #include <stdio.h>
+ #include <stdint.h>
++#include <cdio/version.h>
++#if LIBCDIO_VERSION_NUM < 90
+ #include <cdio/cdda.h>
++#else
++#include <cdio/paranoia/cdda.h>
++#endif
+ #include <cdio/cd_types.h>
++#if LIBCDIO_VERSION_NUM < 90
+ #include <cdio/paranoia.h>
++#else
++#include <cdio/paranoia/paranoia.h>
++#endif
+ #include <cdio/mmc.h>
+ #include "cdioringbuf.h"
+ #include "cdinfo.h"
