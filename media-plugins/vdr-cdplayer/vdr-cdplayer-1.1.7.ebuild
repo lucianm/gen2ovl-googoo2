@@ -22,15 +22,15 @@ DEPEND=">=media-video/vdr-1.6.0
 	>=media-libs/libcddb-1.3.0"
 
 PATCHES="${FILESDIR}/${VDRPLUGIN}-${PV}_libcdio-paranoia-0.90.diff
-	${FILESDIR}/${VDRPLUGIN}-${PV}_Makefile-vdr-1.7.36+.diff
-	${FILESDIR}/${VDRPLUGIN}-${PV}-ro_RO.diff"
+	${FILESDIR}/${VDRPLUGIN}-${PV}_Makefile-vdr-1.7.36+.diff"
 
-src_compile() {
-	append-ldflags $(no-as-needed)
-	vdr-plugin-2_src_compile
+src_prepare() {
+	patch -p1 < "${FILESDIR}/${VDRPLUGIN}-${PV}-ro_RO.diff" || die "Failed to patch romanian translation"
+	vdr-plugin-2_src_prepare
 }
 
 src_compile() {
+	append-ldflags $(no-as-needed)
 	use cdparanoia || BUILD_PARAMS="NOPARANOIA=1"
 	vdr-plugin-2_src_compile
 }
