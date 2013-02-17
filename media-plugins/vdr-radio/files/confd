@@ -1,0 +1,25 @@
+# $Header: Exp $
+#
+# /etc/conf.d/vdr.radio
+#
+
+
+# image directory
+RADIO_FILES_DIR="/usr/share/vdr/plugins/radio"
+
+# temp. data directory
+RADIO_DATA_DIR="/var/cache/vdr-radio"
+
+# default mpegfile in livemode
+RADIO_LIVE_FILE="radio.mpg"
+
+# default mpegfile in replaymode
+RADIO_REPLAY_FILE="replay.mpg"
+
+# use transfermode/backgroundimage @ encrypted radiochannels
+RADIO_ENCRYPTED="0"
+
+# set verbose level (default = 1, 0 = Off, 1 = RDS-Text+Tags,
+# 2 = +RDS-Telegram/Debug, 3 = +RawData 0xfd,
+# 16 = Rass-Info, +=32 = TMC-Info)
+RADIO_LOG_LEVEL="1"

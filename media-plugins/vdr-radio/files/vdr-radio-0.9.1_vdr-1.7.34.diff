@@ -1,0 +1,14 @@
+diff -Naur radio-0.9.1_orig/radio.c radio-0.9.1/radio.c
+--- radio-0.9.1_orig/radio.c	2013-02-10 16:23:03.000000000 +0100
++++ radio-0.9.1/radio.c	2013-02-10 23:46:42.854033000 +0100
+@@ -16,8 +16,8 @@
+ #include "radioepg.h"
+ #include "inforx.h"
+ 
+-#if VDRVERSNUM < 10737
+-    #error This version of radio-plugin requires vdr >= 1.7.37
++#if APIVERSNUM < 10734
++    #error This version of radio-plugin requires vdr >= 1.7.34
+ #endif
+ 
+ static const char *VERSION        = "0.9.1";
