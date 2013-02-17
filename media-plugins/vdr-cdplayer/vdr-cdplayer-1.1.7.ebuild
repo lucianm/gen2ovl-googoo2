@@ -26,6 +26,7 @@ PATCHES="${FILESDIR}/${VDRPLUGIN}-${PV}_libcdio-paranoia-0.90.diff
 
 src_prepare() {
 	patch -p1 < "${FILESDIR}/${VDRPLUGIN}-${PV}-ro_RO.diff" || die "Failed to patch romanian translation"
+	patch -p1 < "${FILESDIR}/${VDRPLUGIN}-${PV}-ro_RO-2.diff" || die "Failed to patch romanian translation"
 	vdr-plugin-2_src_prepare
 }
 
