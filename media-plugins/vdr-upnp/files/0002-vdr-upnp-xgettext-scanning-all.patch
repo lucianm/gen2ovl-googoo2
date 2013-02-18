@@ -1,0 +1,25 @@
+From 8e6a8bde67d1e9d02c83f9d42beafb124871a6be Mon Sep 17 00:00:00 2001
+From: Lucian Muresan <lucianm@users.sourceforge.net>
+Date: Mon, 18 Feb 2013 01:44:35 +0100
+Subject: [PATCH 2/2] vdr-upnp xgettext scanning all
+
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 2ff0b40..0b0f7f0 100644
+--- a/Makefile
++++ b/Makefile
+@@ -87,7 +87,7 @@ I18Npot   = $(PODIR)/$(PLUGIN).pot
+ %.mo: %.po
+ 	msgfmt -c -o $@ $<
+ 
+-$(I18Npot): $(wildcard *.cpp)
++$(I18Npot): $(shell find . -iname "*.h") $(shell find . -iname "*.*cpp")
+ 	xgettext -C -cTRANSLATORS --no-wrap --no-location -k -ktr -ktrNOOP --package-name=vdr-$(PLUGIN) --package-version=$(VERSION) --msgid-bugs-address='<see README>' -o $@ `ls $^`
+ 
+ %.po: $(I18Npot)
+-- 
+1.8.1.2
+
