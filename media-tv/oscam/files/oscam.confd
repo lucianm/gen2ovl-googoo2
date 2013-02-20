@@ -1,3 +1,14 @@
+NAME="OsCAM"
+DESCRIPTION="OsCAM Server"
+DAEMON="oscam"
+DAEMONPATH="/usr/bin/${DAEMON}"
+PIDFILE="/var/run/oscam.pid"
+
+#check-frequency of the watchdog in seconds
+CHECKTIME=15
+
+
+
 # Usage: oscam [-a] [-b] [-c <config dir>] [-d <level>] [-g <mode>] [-h]
 #              [-p <num>] [-S] [-s] [-t <tmp dir>] [-w <secs>] [-V]
 #              [-r <level>] [-u]
