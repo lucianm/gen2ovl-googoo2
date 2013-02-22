@@ -1,7 +1,7 @@
 # Copyright 1999-2012 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=4
+EAPI=5
 SRC_URI=""
 
 GRAPHLCD_BASE_GIT_BRANCH="touchcol" 
@@ -19,7 +19,7 @@ SRC_URI=""
 KEYWORDS=""
 SLOT="0"
 LICENSE="GPL-2"
-IUSE="driver_ax206_experimental +truetype g15 +imagemagick graphicsmagick serdisplib"
+IUSE="debug driver_ax206_experimental driver_picolcd_256x64_experimental +fontconfig g15 graphicsmagick +imagemagick serdisplib +truetype"
 REQUIRED_USE="imagemagick? ( !graphicsmagick )"
 
 DEPEND="truetype? ( media-libs/freetype )
@@ -28,22 +28,27 @@ DEPEND="truetype? ( media-libs/freetype )
 	dev-libs/libxml2
 	g15? ( app-misc/g15daemon )
 	serdisplib? ( dev-libs/serdisplib )
+	fontconfig? ( media-libs/fontconfig )
 "
 
 RDEPEND="truetype? ( media-fonts/corefonts )"
 
+REQUIRED_USE="imagemagick? ( !graphicsmagick )"
 
 src_prepare() {
 
 	sed -i Make.config -e "s:usr\/local:usr:" -e "s:FLAGS *=:FLAGS ?=:" || die "sed /usr/local path failed"
 
-	epatch "${FILESDIR}/${P}_prestrip-optional.patch"
 	sed -i "s:PRESTRIP:#PRESTRIP:" Make.config || die "sed PRESTRIP failed"
 
 	epatch_user
 
 	if use !truetype; then
-		sed -i "s:HAVE_FREETYPE2:#HAVE_FREETYPE2:" Make.config || die "sed HAVE_FREETYPE2 failed"
+		sed -i "s:HAVE_FREETYPE2:#HAVE_FREETYPE2:" Make.config || die "sed #HAVE_FREETYPE2 failed"
+	fi
+
+	if use !fontconfig; then
+		sed -i "s:HAVE_FONTCONFIG:#HAVE_FONTCONFIG:" Make.config || die "sed #HAVE_FONTCONFIG failed"
 	fi
 
 	if use imagemagick; then
@@ -59,8 +64,17 @@ src_prepare() {
 		sed -i "s:#HAVE_AX206DPF_EXPERIMENTAL:HAVE_AX206DPF_EXPERIMENTAL:" Make.config || die "sed HAVE_AX206DPF_EXPERIMENTAL failed"
 	fi
 
+	if use driver_picolcd_256x64_experimental; then
+		sed -i "s:#HAVE_picoLCD_256x64_EXPERIMENTAL:HAVE_picoLCD_256x64_EXPERIMENTAL:" Make.config || die "sed HAVE_picoLCD_256x64_EXPERIMENTAL failed"
+	fi
+
 }
 
+src_compile() {
+	local BUILD_PARAMS=""
+	use debug && BUILD_PARAMS="HAVE_DEBUG=1"
+	emake $BUILD_PARAMS || die "emake failed"
+}
 
 src_install() {
 
