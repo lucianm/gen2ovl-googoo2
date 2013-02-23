@@ -6,7 +6,7 @@ EAPI="5"
 
 inherit vdr-plugin-2
 
-VERSION="1245" # every bump, new version!
+VERSION="1252" # every bump, new version!
 
 DESCRIPTION="VDR Plugin: burn records on DVD"
 HOMEPAGE="http://projects.vdr-developer.org/projects/show/plg-burn"
@@ -40,9 +40,10 @@ src_prepare() {
 	vdr-plugin-2_src_prepare
 
 	epatch \
-		"${FILESDIR}"/${P}_gentoo-path.diff \
-		"${FILESDIR}"/${P}_setdefaults.diff \
-		"${FILESDIR}"/${P}_vdr-1.7.36-Makefile.patch
+		"${FILESDIR}"/${PN}_gentoo-path.diff \
+		"${FILESDIR}"/${PN}_setdefaults.diff
+# \
+#		"${FILESDIR}"/${P}_vdr-1.7.36-Makefile.patch
 
 	sed -i Makefile \
 		-e 's:^TMPDIR = .*$:TMPDIR = /tmp:' \
