@@ -1,4 +1,4 @@
-# Copyright 1999-2012 Gentoo Foundation
+# Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
@@ -6,7 +6,7 @@ EAPI="5"
 
 inherit vdr-plugin-2
 
-VERSION="1234" # every bump, new version
+VERSION="1287" # every bump, new version
 
 if [ "${PV}" = "9999" ]; then
 	inherit git-2
