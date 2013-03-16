@@ -6,9 +6,9 @@ EAPI="5"
 
 inherit vdr-plugin-2
 
-DESCRIPTION="VDR plugin: use the multifeed option of some Premiere channels - fork of vdr-director"
+DESCRIPTION="VDR plugin: use the multifeed option of some Sky Germany (former Premiere) channels - fork of vdr-arghdirector"
 HOMEPAGE="http://www.arghgra.de/arghdirector.html"
-SRC_URI="http://sourceforge.net/projects/arghdirector/files/${P}.tgz
+SRC_URI="http://sourceforge.net/projects/skyselectfeeds/files/0.2.8/${P}.tgz
 	mirror://vdrfiles/${P}/${P}.tgz"
 
 LICENSE="GPL-2"
@@ -17,5 +17,6 @@ KEYWORDS="x86 amd64"
 IUSE=""
 
 DEPEND=">media-video/vdr-1.7.27"
-RDEPEND="${DEPEND}"
-
+RDEPEND="${DEPEND}
+	!media-plugins/vdr-director
+	!media-plugins/vdr-arghdirector"

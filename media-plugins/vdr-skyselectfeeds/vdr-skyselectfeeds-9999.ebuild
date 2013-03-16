@@ -6,9 +6,9 @@ EAPI="5"
 
 inherit vdr-plugin-2 git-2
 
-DESCRIPTION="VDR plugin: use the multifeed option of some Premiere channels - fork of vdr-director"
+DESCRIPTION="VDR plugin: use the multifeed option of some Sky Germany (former Premiere) channels - fork of vdr-arghdirector"
 HOMEPAGE="http://www.arghgra.de/arghdirector.html"
-EGIT_REPO_URI="git@github.com:lucianm/vdr-plugin-arghdirector.git"
+EGIT_REPO_URI="git@github.com:lucianm/vdr-plugin-skyselectfeeds.git"
 
 LICENSE="GPL-2"
 SLOT="0"
@@ -16,5 +16,6 @@ KEYWORDS=""
 IUSE=""
 
 DEPEND=">media-video/vdr-1.7.27"
-RDEPEND="${DEPEND}"
-
+RDEPEND="${DEPEND}
+	!media-plugins/vdr-director
+	!media-plugins/vdr-arghdirector"
