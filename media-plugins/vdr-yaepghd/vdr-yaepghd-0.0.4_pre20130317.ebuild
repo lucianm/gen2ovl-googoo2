@@ -4,16 +4,17 @@
 
 EAPI=5
 
-inherit vdr-plugin-2 git-2
+inherit vdr-plugin-2
 
 DESCRIPTION="yaepghd plugin for nice epg"
 HOMEPAGE="http://projects.vdr-developer.org/projects/show/plg-yaepghd"
+#SRC_URI="http://sourceforge.net/projects/vdrplugins/files/${P}.tgz
+#	mirror://vdrfiles/${P}/${P}.tgz"
 SRC_URI=""
-EGIT_REPO_URI="git://github.com/lucianm/vdr-plugin-yaepghd.git"
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS=""
+KEYWORDS="x86 amd64"
 IUSE=""
 
 RDEPEND=">=media-video/vdr-1.7.33"
