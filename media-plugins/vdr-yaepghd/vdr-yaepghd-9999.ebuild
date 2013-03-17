@@ -7,7 +7,8 @@ EAPI=5
 inherit vdr-plugin-2 git-2
 
 DESCRIPTION="yaepghd plugin for nice epg"
-HOMEPAGE="http://projects.vdr-developer.org/projects/show/plg-yaepghd"
+HOMEPAGE="https://github.com/lucianm/vdr-plugin-yaepghd"
+#HOMEPAGE="http://projects.vdr-developer.org/projects/show/plg-yaepghd"
 SRC_URI=""
 EGIT_REPO_URI="git://github.com/lucianm/vdr-plugin-yaepghd.git"
 
@@ -16,8 +17,15 @@ SLOT="0"
 KEYWORDS=""
 IUSE=""
 
-RDEPEND=">=media-video/vdr-1.7.33"
+RDEPEND=">=media-video/vdr-1.7.33
+	media-gfx/imagemagick"
 DEPEND="${RDEPEND}"
+
+src_compile() {
+	LDFLAGS="${LDFLAGS/-Wl,/}" && LDFLAGS="${LDFLAGS/-Wl,/}" && LDFLAGS="${LDFLAGS/-Wl,/}"
+	LDFLAGS="${LDFLAGS/--as-needed /}"
+	vdr-plugin-2_src_compile
+}
 
 src_install() {
 	vdr-plugin-2_src_install
