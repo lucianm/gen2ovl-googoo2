@@ -40,6 +40,9 @@ REQUIRED_USE="pcre? ( !tre )
 	tre? ( !pcre )"
 
 src_prepare() {
+	# for our new Makefile detection to work:
+	sed -i Makefile -e 's:ALL:SOFILE:'
+
 	vdr-plugin-2_src_prepare
 
 	fix_vdr_libsi_include conflictcheck.c
@@ -65,20 +68,21 @@ src_prepare() {
 	sed -e '/^Menu/s:^:#:' -i conf/epgsearchmenu.conf
 
 	# Get a rid of the broken symlinks
-	rm -f README{,.DE} MANUAL
+	rm -f README
+	sed -i Makefile -e 's:ln -sf:cp -u:'
 }
 
 src_install() {
 	vdr-plugin-2_src_install
 
-	diropts "-m755 -o vdr -g vdr"
-	keepdir /etc/vdr/plugins/epgsearch
-	insinto /etc/vdr/plugins/epgsearch
+#	diropts "-m755 -o vdr -g vdr"
+#	keepdir /etc/vdr/plugins/epgsearch
+#	insinto /etc/vdr/plugins/epgsearch
 
-	doins conf/epgsearchmenu.conf
-	doins conf/epgsearchconflmail.templ conf/epgsearchupdmail.templ
+#	doins conf/epgsearchmenu.conf
+#	doins conf/epgsearchconflmail.templ conf/epgsearchupdmail.templ
 
-	dodoc conf/*.templ
+#	dodoc conf/*.templ
 }
 
 pkg_preinst() {
