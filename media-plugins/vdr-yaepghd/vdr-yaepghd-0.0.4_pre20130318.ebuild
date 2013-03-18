@@ -21,13 +21,6 @@ RDEPEND=">=media-video/vdr-1.7.33
 	media-gfx/imagemagick"
 DEPEND="${RDEPEND}"
 
-
-src_compile() {
-	LDFLAGS="${LDFLAGS/-Wl,/}" && LDFLAGS="${LDFLAGS/-Wl,/}" && LDFLAGS="${LDFLAGS/-Wl,/}"
-	LDFLAGS="${LDFLAGS/--as-needed /}"
-	vdr-plugin-2_src_compile
-}
-
 src_install() {
 	vdr-plugin-2_src_install
 
