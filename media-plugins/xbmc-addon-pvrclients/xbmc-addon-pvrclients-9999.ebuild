@@ -6,7 +6,7 @@ EAPI="5"
 
 inherit git-2 autotools multilib eutils
 
-EGIT_REPO_URI="${PVRADDONS_EGIT_REPO_URI:-git://github.com/FernetMenta/xbmc-pvr-addons.git}"
+EGIT_REPO_URI="${PVRADDONS_EGIT_REPO_URI:-git://github.com/opdenkamp/xbmc-pvr-addons.git}"
 EGIT_PROJECT="xbmc-pvr-addons${PVRADDONS_EGIT_PROJECT:-}.git"
 EGIT_BRANCH="${PVRADDONS_EGIT_BRANCH:-master}"
 
