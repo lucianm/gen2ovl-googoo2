@@ -61,6 +61,9 @@ SOFTHDDEVICE_VIDEO_DEVICE=vaapi
 #   let softhddevice plugin start the x11 server
 #SOFTHDDEVICE_VIDEO_START_X11SERVER=no
 #
+#   X11 server arguments (f.e. -nocursor)
+#SOFTHDDEVICE_VIDEO_X11SERVER_ARGS=""
+#
 #   x11 window geometry (default: autodetected)
 #   give Witdth/Height/X/Y as Wxh+x+y
 #     example: 1680x1050+0+0
@@ -77,11 +80,16 @@ SOFTHDDEVICE_VIDEO_DEVICE=vaapi
 #
 #   start plugin in suspended mode
 #SOFTHDDEVICE_START_SUSPENDED=no
+#
+#   start plugin in detached mode
+#SOFTHDDEVICE_START_DETACHED=no
 
 #  workarounds for misc. problems 
 #  give a space-separated list of workarounds
 #    no-hw-decoder           disable hw decoder, use software decoder only
 #    no-mpeg-hw-decoder      disable hw decoder for mpeg only
+#    still-hw-decoder        enable hardware decoder for still-pictures
+#    still-h264-hw-decoder   enable h264 hw decoder for still-pictures
 #    alsa-driver-broken      disable broken alsa driver message
 #    ignore-repeat-pict      disable repeat pict message
 #SOFTHDDEVICE_WORKAROUNDS=""

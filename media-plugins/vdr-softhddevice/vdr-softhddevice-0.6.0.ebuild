@@ -4,7 +4,7 @@
 
 EAPI="5"
 
-inherit flag-o-matic toolchain-funcs vdr-plugin-2 eutils
+inherit flag-o-matic toolchain-funcs vdr-plugin-2
 
 VERSION="1309" # every bump, new version
 
@@ -22,49 +22,40 @@ HOMEPAGE="http://projects.vdr-developer.org/projects/show/plg-softhddevice"
 
 LICENSE="AGPL-3"
 SLOT="0"
-IUSE="alsa debug oss vaapi vdpau yaepg xscreensaver"
-# opengl, not supported in sources yet
+IUSE="alsa oss vaapi vdpau +xscreensaver"
 
-RDEPEND=">=media-video/vdr-1.7
-	>=virtual/ffmpeg-0.7[vdpau?,vaapi?]
+RDEPEND=">=media-video/vdr-1.7.39
+	>=virtual/ffmpeg-0.7
 	x11-libs/libX11
 	>=x11-libs/libxcb-1.8
 	x11-libs/xcb-util-wm
+	x11-libs/xcb-util-keysyms
+	x11-libs/xcb-util-renderutil
 	alsa? ( media-libs/alsa-lib )
-	vdpau? ( x11-libs/libvdpau )
-	vaapi? ( x11-libs/libva )
-	alsa? ( media-libs/alsa-lib )
-	yaepg? ( >=media-video/vdr-1.7[yaepg] )"
+	vdpau? ( x11-libs/libvdpau
+			virtual/ffmpeg[vdpau] )
+	vaapi? ( x11-libs/libva
+			virtual/ffmpeg[vaapi] )
+	alsa? ( media-libs/alsa-lib )"
 DEPEND="${RDEPEND}
-	x11-libs/xcb-util
-	sys-devel/gettext
 	virtual/pkgconfig
-	oss? ( sys-kernel/linux-headers )"
+	x11-libs/xcb-util"
 
 VDR_CONFD_FILE="${FILESDIR}/confd-${PV}"
 VDR_RCADDON_FILE="${FILESDIR}/rc-addon-${PV}.sh"
 
-src_compile() {
-	local myconf
+src_prepare() {
+	vdr-plugin-2_src_prepare
 
-	myconf+=" ALSA=$(usex alsa 1 0)"
-	myconf+=" OSS=$(usex oss 1 0)"
-	myconf+=" VDPAU=$(usex vdpau 1 0)"
-	myconf+=" VAAPI=$(usex vaapi 1 0)"
-	myconf+=" SCREENSAVER=$(usex xscreensaver 1 0)"
-	if has_version ">=media-video/ffmpeg-0.8" ; then
-		myconf+=" SWRESAMPLE=1"
-	fi
-
-	append-cflags -DHAVE_PTHREAD_NAME
-	append-cxxflags -DHAVE_PTHREAD_NAME
-	tc-export CC CXX
-
-	BUILD_PARAMS="${myconf}"
-	vdr-plugin-2_src_compile
+	BUILD_PARAMS+=" ALSA=$(usex alsa 1 0)"
+	BUILD_PARAMS+=" OSS=$(usex oss 1 0)"
+	BUILD_PARAMS+=" VAAPI=$(usex vaapi 1 0)"
+	BUILD_PARAMS+=" VDPAU=$(usex vdpau 1 0)"
+	BUILD_PARAMS+=" SCREENSAVER=$(usex xscreensaver 1 0)"
 }
 
 src_install() {
 	vdr-plugin-2_src_install
-	dodoc ChangeLog
+
+	dodoc ChangeLog Todo
 }

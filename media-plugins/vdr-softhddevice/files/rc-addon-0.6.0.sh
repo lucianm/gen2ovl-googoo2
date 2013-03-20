@@ -9,8 +9,10 @@
 : ${SOFTHDDEVICE_VIDEO_DISPLAY:=":0.0"}
 : ${SOFTHDDEVICE_VIDEO_DEVICE:=vaapi}
 : ${SOFTHDDEVICE_VIDEO_START_X11SERVER:=no}
+: ${SOFTHDDEVICE_VIDEO_X11SERVER_ARGS:=""}
 : ${SOFTHDDEVICE_VIDEO_START_FULLSCREEN:=no}
 : ${SOFTHDDEVICE_START_SUSPENDED:=no}
+: ${SOFTHDDEVICE_START_DETACHED:=no}
 : ${SOFTHDDEVICE_WORKAROUNDS:=""}
 
 plugin_pre_vdr_start() {
@@ -32,6 +34,9 @@ plugin_pre_vdr_start() {
 	if [ "${SOFTHDDEVICE_VIDEO_START_X11SERVER}" = "yes" ]; then
 		add_plugin_param "-x "
 	fi
+	if [ -n "${SOFTHDDEVICE_VIDEO_X11SERVER_ARGS}" ]; then
+		add_plugin_param "-X ${SOFTHDDEVICE_VIDEO_X11SERVER_ARGS} "
+	fi
 	if [ "${SOFTHDDEVICE_VIDEO_START_FULLSCREEN}" = "yes" ]; then
 		add_plugin_param "-f "
 	fi
@@ -40,6 +45,9 @@ plugin_pre_vdr_start() {
 	fi
 	if [ "${SOFTHDDEVICE_START_SUSPENDED}" = "yes" ]; then
 		add_plugin_param "-s "
+	fi
+	if [ "${SOFTHDDEVICE_START_DETACHED}" = "yes" ]; then
+		add_plugin_param "-D "
 	fi
 	for Workaround in ${SOFTHDDEVICE_WORKAROUNDS}; do
 		add_plugin_param "-w ${Workaround} "
