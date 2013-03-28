@@ -16,7 +16,7 @@ LICENSE="GPL-2"
 SLOT="0"
 IUSE=""
 
-DEPEND=">=media-video/vdr-1.6"
+DEPEND=">=media-video/vdr-1.7.22"
 RDEPEND="${DEPEND}"
 
 S=${WORKDIR}/${PN}-plugin
