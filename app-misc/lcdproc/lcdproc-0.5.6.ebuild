@@ -1,8 +1,8 @@
-# Copyright 1999-2012 Gentoo Foundation
+# Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-misc/lcdproc/lcdproc-0.5.5.ebuild,v 1.2 2012/07/29 16:19:03 armin76 Exp $
+# $Header: Exp $
 
-EAPI=4
+EAPI="5"
 inherit multilib versionator
 
 MY_PV=$(replace_version_separator 3 '-')
@@ -10,7 +10,7 @@ MY_P=${PN}-${MY_PV}
 S=${WORKDIR}/${MY_P}
 
 DESCRIPTION="Client/Server suite to drive all kinds of LCD (-like) devices"
-HOMEPAGE="http://lcdproc.org/"
+HOMEPAGE="http://${PN}.org/"
 SRC_URI="mirror://sourceforge/${PN}/${MY_P}.tar.gz"
 
 LICENSE="GPL-2"
@@ -20,15 +20,15 @@ KEYWORDS="~amd64 ~ppc ~ppc64 ~x86"
 IUSE="doc debug hid nfs samba seamless-hbars usb lirc irman joystick ftdi"
 
 # The following array holds the USE_EXPANDed keywords
-IUSE_LCD_DEVICES=(ncurses bayrad cfontz cfontz633 cfontzpacket
-	cwlinux eyeboxone g15 graphlcd glk
+IUSE_LCD_DEVICES=(ncurses bayrad cfontz cfontzpacket
+	cwlinux eyeboxone g15 glcd graphlcd glk
 	hd44780 icpa106 imon imonlcd iowarrior
 	lb216 lcdm001 lcterm
 	md8800 mdm166a ms6931 mtcs16209x mtxorb noritakevfd
-	pyramid sed1330 sed1520 serialvfd sli
+	pyramid sdeclcd sed1330 sed1520 serialvfd sli
 	stv5730 SureElec svga t6963 text tyan
 	ula200 xosd ea65 picolcd serialpos
-	i2500vfd irtrans lis shuttlevfd )
+	i2500vfd irtrans lis shuttlevfd vlsys_m428 )
 
 # Iterate through the array and add the lcd_devices_* that we support
 NUM_DEVICES=${#IUSE_LCD_DEVICES[@]}
@@ -81,15 +81,15 @@ src_prepare() {
 src_configure() {
 	# This array contains the driver names required by configure --with-drivers=
 	# The positions must be the same as the corresponding use_expand flags
-	local DEVICE_DRIVERS=(curses bayrad CFontz CFontz633 CFontzPacket
-		CwLnx EyeboxOne g15 glcdlib glk
+	local DEVICE_DRIVERS=(curses bayrad CFontz CFontzPacket
+		CwLnx EyeboxOne g15 glcd glcdlib glk
 		hd44780 icp_a106 imon imonlcd IOWarrior
 		lb216 lcdm001 lcterm
 		MD8800 mdm166a ms6931 mtc_s16209x MtxOrb NoritakeVFD
-		pyramid sed1330 sed1520 serialVFD sli
+		pyramid sdeclcd sed1330 sed1520 serialVFD sli
 		stv5730 SureElec svga t6963 text tyan
 		ula200 xosd ea65 picolcd serialPOS
-		i2500vfd irtrans lis shuttleVFD )
+		i2500vfd irtrans lis shuttleVFD vlsys_m428 )
 
 	# Generate comma separated list of drivers
 	COMMA_DRIVERS=""
