@@ -38,7 +38,7 @@ HOMEPAGE="http://xbmc.org/"
 
 LICENSE="GPL-2"
 SLOT="0"
-IUSE="airplay alsa altivec avahi bluetooth bluray cec css debug goom java joystick midi mysql nfs profile +projectm pulseaudio pvr +rsxs rtmp +samba sse sse2 sftp udev upnp vaapi vdpau webserver +xrandr ffmpeg"
+IUSE="airplay alsa altivec avahi bluetooth bluray cec css debug +fishbmc goom java joystick midi mysql nfs profile +projectm pulseaudio pvr +rsxs rtmp +samba sse sse2 sftp udev upnp vaapi vdpau webserver +xrandr ffmpeg"
 REQUIRED_USE="pvr? ( mysql )"
 
 COMMON_DEPEND="virtual/glu
@@ -204,6 +204,7 @@ src_configure() {
 		$(use_enable cec libcec) \
 		$(use_enable css dvdcss) \
 		$(use_enable debug) \
+		$(use_enable fishbmc) \
 		$(use_enable goom) \
 		--disable-hal \
 		$(use_enable joystick) \
