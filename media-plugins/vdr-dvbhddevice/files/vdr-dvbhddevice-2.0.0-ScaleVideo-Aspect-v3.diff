@@ -1,0 +1,43 @@
+From 1591c4cdc50dda35c52902ce46851ab57291351c Mon Sep 17 00:00:00 2001
+From: Lucian Muresan <LucianM@users.sourceforge.net>
+Date: Fri, 5 Apr 2013 11:21:25 +0200
+Subject: [PATCH] vdr-2.0.0 dvbhdffdevice ScaleVideo Aspect v3
+
+---
+ PLUGINS/src/dvbhddevice/dvbhdffdevice.c | 19 +++++++++++++++++--
+ 1 file changed, 17 insertions(+), 2 deletions(-)
+
+diff --git dvbhddevice/dvbhdffdevice.c dvbhddevice/dvbhdffdevice.c
+index dd7ace5..7a05ccb 100644
+--- dvbhddevice/dvbhdffdevice.c
++++ dvbhddevice/dvbhdffdevice.c
+@@ -579,9 +579,24 @@ void cDvbHdFfDevice::ScaleVideo(const cRect &Rect)
+         double osdPixelAspect;
+ 
+         GetOsdSize(osdWidth, osdHeight, osdPixelAspect);
++
++        // make corrections
++        double osdAspect = double(osdWidth) / double(osdHeight);
++        cRect corRect(Rect);
++        corRect.SetWidth(Rect.Height() * osdAspect);
++        corRect.SetHeight(Rect.Width() / osdAspect);
++        if (double(Rect.Width())/double(Rect.Height()) > osdAspect) {
++            corRect.SetHeight(Rect.Height());
++            corRect.SetX(Rect.X() + (Rect.Width() - corRect.Width()) / 2);
++        }
++        else if (double(Rect.Width())/double(Rect.Height()) < osdAspect) {
++            corRect.SetWidth(Rect.Width());
++            corRect.SetY(Rect.Y() + (Rect.Height() - corRect.Height()) / 2);
++        }
++
+         mHdffCmdIf->CmdAvSetVideoWindow(0, true,
+-            Rect.X() * 1000 / osdWidth, Rect.Y() * 1000 / osdHeight,
+-            Rect.Width() * 1000 / osdWidth, Rect.Height() * 1000 / osdHeight);
++            corRect.X() * 1000 / osdWidth, corRect.Y() * 1000 / osdHeight,
++            corRect.Width() * 1000 / osdWidth, corRect.Height() * 1000 / osdHeight);
+     }
+ }
+ 
+-- 
+1.8.1.msysgit.1
+

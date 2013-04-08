@@ -20,19 +20,9 @@ RDEPEND="${DEPEND}"
 
 S=${WORKDIR}/vdr-${PV}/PLUGINS/src/${VDRPLUGIN}
 
-src_prepare() {
-	vdr-plugin-2_src_prepare
-
-	fix_vdr_libsi_include dvbhdffdevice.c
-}
-
 src_install() {
 	vdr-plugin-2_src_install
 
 	insinto /usr/include
-	doins "${S}"/dvbhdffdevice.h
-	doins "${S}"/hdffcmd.h
-
-	insinto /usr/include/libhdffcmd
-	doins "${S}"/libhdffcmd/*.h
+	doins "${S}"/dvbsdffdevice.h
 }
