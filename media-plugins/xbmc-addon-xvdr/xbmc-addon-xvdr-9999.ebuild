@@ -1,8 +1,8 @@
-# Copyright 1999-2012 Gentoo Foundation
+# Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
-EAPI="4"
+EAPI="5"
 
 inherit git-2 autotools multilib eutils
 
@@ -45,4 +45,3 @@ pkg_info() {
 	einfo "IMPORTANT:"
 	einfo "Please disable *all* PVR addons *before* running the XVDR addon!"
 }
-
