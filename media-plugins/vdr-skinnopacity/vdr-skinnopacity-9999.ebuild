@@ -1,4 +1,4 @@
-# Copyright 1999-2012 Gentoo Foundation
+# Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
@@ -6,7 +6,7 @@ EAPI="5"
 
 inherit vdr-plugin-2
 
-VERSION="1145" # every bump, new version
+VERSION="1344" # every bump, new version
 
 if [ "${PV}" = "9999" ]; then
 	inherit git-2
@@ -29,7 +29,7 @@ DEPEND=">=media-video/vdr-1.7.34
 RDEPEND="${DEPEND}
 	virtual/channel-logos-hq"
 
-#PATCHES="${FILESDIR}/${PN}_channelName-obsoleted.patch"
+#PATCHES="${FILESDIR}/${PN}_..."
 
 src_install() {
 	vdr-plugin-2_src_install

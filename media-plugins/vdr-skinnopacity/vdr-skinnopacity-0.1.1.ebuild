@@ -6,7 +6,7 @@ EAPI="5"
 
 inherit vdr-plugin-2
 
-VERSION="1287" # every bump, new version
+VERSION="1344" # every bump, new version
 
 if [ "${PV}" = "9999" ]; then
 	inherit git-2
@@ -29,7 +29,7 @@ DEPEND=">=media-video/vdr-1.7.34
 RDEPEND="${DEPEND}
 	virtual/channel-logos-hq"
 
-#PATCHES="${FILESDIR}/${PN}_Fixed-some-crashes.patch"
+#PATCHES="${FILESDIR}/${PN}_..."
 
 src_install() {
 	vdr-plugin-2_src_install
