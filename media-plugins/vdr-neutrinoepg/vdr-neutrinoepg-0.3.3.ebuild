@@ -8,10 +8,10 @@ inherit vdr-plugin-2
 
 if [ ${PV} == "9999" ] ; then
 	inherit git-2
-	EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-play.git"
+	EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-${VDRPLUGIN}.git"
 	KEYWORDS=""
 else
-	SRC_URI="mirror://vdr-developerorg/1342/${VDRPLUGIN}-${PV}.tar.gz"
+	SRC_URI="mirror://vdr-developerorg/1351/${VDRPLUGIN}-${PV}.tar.gz"
 	KEYWORDS="~x86 ~amd64"
 fi
 
