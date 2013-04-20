@@ -29,9 +29,6 @@ DEPEND=">=media-video/vdr-1.7.27
 RDEPEND="${DEPEND}
 	>=media-plugins/vdr-streamdev-0.6.0[server,upnp]"
 
-PATCHES="${FILESDIR}/0001-vdr-upnp-adapted-Makefiles-to-vdr-1.7.36.patch
-	${FILESDIR}/0002-vdr-upnp-xgettext-scanning-all.patch"
-
 src_prepare() {
 
 	vdr-plugin-2_src_prepare
