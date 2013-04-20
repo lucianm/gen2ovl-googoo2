@@ -43,7 +43,7 @@ RDEPEND="${DEPEND}
 			virtual/ffmpeg[encode,xvid=] ) )"
 
 MY_YAC_CONF_DIR="/etc/vdr/plugins/yacoto"
-MY_YAC_DIR="/usr/share/vdr/yacoto"
+MY_YAC_DIR="/usr/share/vdr/plugins/yacoto"
 
 PATCHES="
 	${FILESDIR}/${P}_quotes.diff
