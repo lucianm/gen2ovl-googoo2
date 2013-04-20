@@ -1,8 +1,8 @@
-# Copyright 1999-2012 Gentoo Foundation
+# Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
-EAPI=4
+EAPI=5
 GENTOO_VDR_CONDITIONAL=yes
 
 inherit vdr-plugin-2 cvs toolchain-funcs eutils
@@ -79,7 +79,7 @@ src_prepare() {
 
 	vdr-plugin-2_src_prepare
 
-	sed -i -e 's:^\(LOCALEDIR\) .*:\1 = $(DESTDIR)/usr/share/vdr/locale:' \
+	sed -i -e 's:^\(LOCALEDIR\) .*:\1 = $(DESTDIR)/usr/share/locale:' \
 		-e "s:LIBDIR .*:LIBDIR = ${VDR_PLUGIN_DIR}:" \
 		Makefile || die
 }

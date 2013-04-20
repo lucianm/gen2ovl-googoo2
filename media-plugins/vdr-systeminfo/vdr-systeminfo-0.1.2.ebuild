@@ -1,8 +1,8 @@
-# Copyright 1999-2012 Gentoo Foundation
+# Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
-EAPI="4"
+EAPI="5"
 
 inherit vdr-plugin-2
 
@@ -15,18 +15,16 @@ SLOT="0"
 KEYWORDS="~x86 ~amd64"
 IUSE="nvidia"
 
-DEPEND=">=media-video/vdr-1.4.7"
+DEPEND=">=media-video/vdr-1.7.34"
 
 RDEPEND="sys-apps/lm_sensors
 	app-admin/hddtemp
 	nvidia? ( media-video/nvidia-settings )"
 
-#PATCHES="${FILESDIR}/${P}_log.diff"
-
 src_install() {
 	vdr-plugin-2_src_install
 
-	insinto /usr/share/vdr/systeminfo/
+	insinto /usr/share/vdr/plugins/systeminfo/
 	insopts -m0755
 	doins "${FILESDIR}"/systeminfo.sh
 }

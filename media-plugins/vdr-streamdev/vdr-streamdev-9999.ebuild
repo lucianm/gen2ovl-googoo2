@@ -57,7 +57,7 @@ src_install() {
 	vdr-plugin-2_src_install
 
 	if use server; then
-		insinto /usr/share/vdr/streamdev
+		insinto /usr/share/vdr/plugins/streamdev-server
 		doins streamdev-server/externremux.sh
 
 		insinto /usr/share/vdr/rcscript
