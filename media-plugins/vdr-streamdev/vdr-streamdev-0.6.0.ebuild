@@ -56,8 +56,8 @@ src_install() {
 	vdr-plugin-2_src_install
 
 	if use server; then
-		insinto /usr/share/vdr/plugins/streamdev-server
-		doins streamdev-server/externremux.sh
+		exeinto /usr/share/vdr/plugins/streamdev-server
+		doexe streamdev-server/externremux.sh
 
 		insinto /usr/share/vdr/rcscript
 		newins "${FILESDIR}"/rc-addon-0.6.0.sh plugin-streamdev-server.sh
