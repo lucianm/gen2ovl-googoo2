@@ -5,7 +5,7 @@ LICENSE="ISC"
 SLOT="0"
 KEYWORDS="~x86 ~amd64"
 IUSE=""
-DEPEND=">=dev-libs/skalibs-1.2.8"
+DEPEND=">=dev-libs/skalibs-1.3.0"
 RDEPEND="${DEPEND}"
 
 S="${WORKDIR}/admin/${P}"

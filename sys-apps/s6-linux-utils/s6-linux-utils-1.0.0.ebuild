@@ -15,7 +15,7 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE="doc static-libs"
 
-DEPEND="dev-libs/skalibs"
+DEPEND=">=dev-libs/skalibs-1.3.0"
 RDEPEND=""
 
 S=${WORKDIR}/admin/${P}
@@ -23,8 +23,8 @@ S=${WORKDIR}/admin/${P}
 src_prepare() {
    echo ${S} > conf-compile/conf-sp_root
    mkdir -p package/prog/skalibs/sysdeps
-   cp -a /usr/$(get_libdir)/skalibs/sysdeps package/prog/skalibs/ || die "is dev-libs/skalibs installed?"
-   ln -s ../../package/prog/skalibs/sysdeps/systype ${S}/src/sys/systype
+#   cp -a /usr/$(get_libdir)/skalibs/sysdeps package/prog/skalibs/ || die "is dev-libs/skalibs installed?"
+#   ln -s ../../package/prog/skalibs/sysdeps/systype ${S}/src/sys/systype
 }
 
 src_configure() {
