@@ -1,0 +1,35 @@
+#!/sbin/runscript
+# Copyright 1999-2013 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header: $
+#
+# /etc/init.d/squash_portage wraps the squash_portage.sh script which allows
+# efficient compression of the Gentoo portage arborescence, see the comments inside that script
+# for further info
+#
+
+DESC="Portage tree and overlays filesystem squasher"
+
+extra_started_commands="sync"
+
+depend() {
+	need localmount modules
+}
+
+sync() {
+	ebegin "Running ${DESC} maintenance"
+	/usr/sbin/squash_portage sync
+	eend ${?}
+}
+
+start() {
+	ebegin "Starting ${DESC}"
+	/usr/sbin/squash_portage start
+	eend ${?}
+}
+
+stop() {
+	ebegin "Stopping ${DESC}"
+	/usr/sbin/squash_portage stop
+	eend ${?}
+}

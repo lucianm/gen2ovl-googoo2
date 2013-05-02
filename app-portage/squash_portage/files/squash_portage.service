@@ -1,0 +1,12 @@
+[Unit]
+Description=Portage tree and overlays filesystem squasher
+After=systemd-modules-load.service local-fs.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/squash_portage start
+ExecStop=/usr/sbin/squash_portage stop
+
+[Install]
+WantedBy=multi-user.target
