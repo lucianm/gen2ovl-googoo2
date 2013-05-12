@@ -1,8 +1,8 @@
-# Copyright 1999-2012 Gentoo Foundation
+# Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/media-plugins/vdr-skinenigmang/vdr-skinenigmang-0.1.1.ebuild,v 1.3 2012/04/06 23:40:35 hd_brummy Exp $
+# $Header: Exp $
 
-EAPI="4"
+EAPI="5"
 
 inherit vdr-plugin-2 git
 
@@ -21,9 +21,12 @@ DEPEND=">=media-video/vdr-1.5.7"
 RDEPEND="${DEPEND}
 		x11-themes/channel-logos-enigmang
 		!x11-themes/skinenigmang-logos
-		imagemagick? ( media-gfx/imagemagick[cxx] )"
+		imagemagick? ( || ( media-gfx/imagemagick[cxx]
+				    media-gfx/imagemagick[cxx] ) )"
 
 S=${WORKDIR}/${VDRPLUGIN}
+
+PATCHES="${FILESDIR}/${P}-Makefile-Magick++-detection.patch"
 
 src_prepare() {
 	vdr-plugin-2_src_prepare
@@ -36,12 +39,6 @@ src_prepare() {
 	if has_version ">=media-video/vdr-1.5.9"; then
 		sed -i -e 's/.*$(VDRLOCALE).*/ifeq (1,1)/' Makefile
 	fi
-
-#	if has_version ">=media-video/vdr-1.7.27"; then
-#		epatch "${FILESDIR}"/vdr-1.7.27.diff
-#	fi
-
-	sed -i -e "s:-I/usr/local/include/ImageMagick::" Makefile
 }
 
 src_install() {

@@ -1,0 +1,27 @@
+From 5753d2febafa552c6fdef3df7d266eed2f8237b6 Mon Sep 17 00:00:00 2001
+From: Lucian Muresan <lucianm@users.sourceforge.net>
+Date: Sun, 12 May 2013 17:55:39 +0200
+Subject: [PATCH] vdr-skinenigmang-9999 Makefile Magick++ detection
+
+---
+ Makefile | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index e8bc049..e9120ac 100644
+--- a/Makefile
++++ b/Makefile
+@@ -130,8 +130,8 @@ OBJS = $(PLUGIN).o enigma.o config.o logo.o tools.o status.o texteffects.o setup
+ ifdef HAVE_IMAGEMAGICK
+ OBJS += bitmap.o
+ ifneq ($(HAVE_IMAGEMAGICK), GRAPHICS)
+-LIBS += -lMagick++
+-INCLUDES += -I/usr/include/ImageMagick -I/usr/local/include/ImageMagick
++LIBS += $(shell pkg-config --libs Magick++)
++INCLUDES += $(shell pkg-config --cflags-only-I Magick++)
+ else
+ LIBS += $(shell pkg-config --libs GraphicsMagick++)
+ INCLUDES += $(shell pkg-config --cflags GraphicsMagick++)
+-- 
+1.8.2.1
+
