@@ -1,0 +1,34 @@
+From ee2646ebc3bedd0ae77fad97e077787b420cd716 Mon Sep 17 00:00:00 2001
+From: Lucian Muresan <lucianm@users.sourceforge.net>
+Date: Sun, 12 May 2013 18:54:39 +0200
+Subject: [PATCH] vdr-skinpearlhd-9999-Makefile-Magick++-detection
+
+---
+ Makefile | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 12ffbc1..2732080 100644
+--- a/Makefile
++++ b/Makefile
+@@ -48,7 +48,7 @@ SOFILE = libvdr-$(PLUGIN).so
+ 
+ ### Includes and Defines (add further entries here):
+ 
+-INCLUDES += -I/usr/include/ImageMagick
++INCLUDES += $(shell pkg-config --cflags-only-I Magick++)
+ 
+ DEFINES += -DPLUGIN_NAME_I18N='"$(PLUGIN)"'
+ 
+@@ -60,7 +60,7 @@ endif
+ 
+ OBJS = $(PLUGIN).o pearlhd.o bitmap.o config.o setup.o
+ 
+-LIBS = -lMagick++
++LIBS += $(shell pkg-config --libs Magick++)
+ 
+ ### The main target:
+ 
+-- 
+1.8.2.1
+
