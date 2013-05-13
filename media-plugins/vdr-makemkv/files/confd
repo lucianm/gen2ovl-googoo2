@@ -1,0 +1,13 @@
+#
+# /etc/conf.d/vdr.makemkv
+#
+
+# path to MakeMKV console binary
+MAKEMKV_PATH_BINCON="/opt/bin/makemkvcon"
+
+# path to VDR's svdrpsend script
+MAKEMKV_PATH_SVDRPSEND="/usr/bin/svdrpsend"
+
+# path to BluRay drive device
+MAKEMKV_PATH_BDD="/dev/sr0"
+

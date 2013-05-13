@@ -1,0 +1,20 @@
+diff -Naur vdr-plugin-makemkv-0.0.2_orig/makemkv.c vdr-plugin-makemkv-0.0.2/makemkv.c
+--- vdr-plugin-makemkv-0.0.2_orig/makemkv.c	2013-05-06 20:13:45.000000000 +0200
++++ vdr-plugin-makemkv-0.0.2/makemkv.c	2013-05-13 22:47:07.724393000 +0200
+@@ -12,6 +12,7 @@
+ #include <netinet/in.h>
+ #include <signal.h>
+ #include <getopt.h>
++#include <ctype.h>
+ 
+ #include <vdr/plugin.h>
+ #include <vdr/config.h>
+@@ -504,7 +505,7 @@
+      delete ExecThread;
+      Skins.QueueMessage(mtInfo, tr("MakeMKV stopped"));
+   } else {
+-     if(access(MMConfig.makemkvcon, F_OK) != -1) {
++     if(access(MMConfig.makemkvcon, F_OK) != -1 || MMConfig.playremote) {
+         cPlugin *p1, *p2, *p3;
+         p1 = cPluginManager::GetPlugin("xineliboutput");
+         p2 = cPluginManager::GetPlugin("play");
