@@ -1,5 +1,5 @@
---- makemkv-oss-1.7.7/makefile.linux.orig
-+++ makemkv-oss-1.7.7/makefile.linux
+--- makemkv-oss-1.8.2/makefile.linux.orig
++++ makemkv-oss-1.8.2/makefile.linux
 @@ -8,7 +8,7 @@
  MOC=moc
  endif

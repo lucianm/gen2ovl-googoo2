@@ -1,9 +1,9 @@
-# Copyright 1999-2012 Gentoo Foundation
+# Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/media-video/makemkv/makemkv-1.7.7.ebuild,v 1.1 2012/10/02 04:15:53 mattm Exp $
+# $Header: /var/cvsroot/gentoo-x86/media-video/makemkv/makemkv-1.8.1.ebuild,v 1.1 2013/04/30 00:01:02 mattm Exp $
 
 EAPI=4
-inherit eutils gnome2-utils multilib
+inherit eutils gnome2-utils multilib flag-o-matic
 
 MY_P=makemkv-oss-${PV}
 MY_PB=makemkv-bin-${PV}
@@ -25,9 +25,9 @@ RDEPEND="dev-libs/expat
 	dev-libs/openssl:0
 	sys-libs/zlib
 	virtual/opengl
-	x11-libs/qt-core:4
-	x11-libs/qt-dbus:4
-	x11-libs/qt-gui:4
+	dev-qt/qtcore:4
+	dev-qt/qtdbus:4
+	dev-qt/qtgui:4
 	amd64? ( multilib? ( app-emulation/emul-linux-x86-baselibs ) )"
 DEPEND="${RDEPEND}"
 
@@ -35,6 +35,10 @@ S=${WORKDIR}/${MY_P}
 
 src_prepare() {
 	epatch "${FILESDIR}"/${P}-makefile.linux.patch
+}
+
+src_configure() {
+	replace-flags -O* -Os
 }
 
 src_compile() {
@@ -54,7 +58,7 @@ src_install() {
 
 	local res
 	for res in 16 22 32 64 128; do
-		newicon -s ${res} makemkvgui/src/img/${res}/mkv_icon.png ${PN}.png
+		newicon -s ${res} makemkvgui/share/icons/${res}x${res}/makemkv.png ${PN}.png
 	done
 
 	make_desktop_entry ${PN} MakeMKV ${PN} 'Qt;AudioVideo;Video'
