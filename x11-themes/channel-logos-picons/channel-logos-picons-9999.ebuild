@@ -22,7 +22,7 @@ S=${WORKDIR}
 RRDEPEND="${DEPEND}"
 
 src_install() {
-	dodoc README.md VERSION
+	dodoc README.md
 	chmod ugo+x picons.sh
 	./picons.sh picons
 	insinto "${CHANLOGOBASE}/${LOGOPACKNAME}"
