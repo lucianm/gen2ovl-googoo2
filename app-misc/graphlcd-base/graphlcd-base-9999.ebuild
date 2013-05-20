@@ -1,4 +1,4 @@
-# Copyright 1999-2012 Gentoo Foundation
+# Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=5
@@ -19,7 +19,7 @@ SRC_URI=""
 KEYWORDS=""
 SLOT="0"
 LICENSE="GPL-2"
-IUSE="debug driver_ax206_experimental driver_picolcd_256x64_experimental +fontconfig g15 graphicsmagick +imagemagick serdisplib +truetype"
+IUSE="debug driver_ax206_experimental driver_picolcd_256x64_experimental +fontconfig g15 graphicsmagick +imagemagick serdisplib +truetype vnc"
 REQUIRED_USE="imagemagick? ( !graphicsmagick )"
 
 DEPEND="truetype? ( media-libs/freetype )
@@ -29,11 +29,10 @@ DEPEND="truetype? ( media-libs/freetype )
 	g15? ( app-misc/g15daemon )
 	serdisplib? ( dev-libs/serdisplib )
 	fontconfig? ( media-libs/fontconfig )
+	vnc? ( net-libs/libvncserver )
 "
 
 RDEPEND="truetype? ( media-fonts/corefonts )"
-
-REQUIRED_USE="imagemagick? ( !graphicsmagick )"
 
 src_prepare() {
 
@@ -66,6 +65,10 @@ src_prepare() {
 
 	if use driver_picolcd_256x64_experimental; then
 		sed -i "s:#HAVE_picoLCD_256x64_EXPERIMENTAL:HAVE_picoLCD_256x64_EXPERIMENTAL:" Make.config || die "sed HAVE_picoLCD_256x64_EXPERIMENTAL failed"
+	fi
+
+	if use !vnc; then
+		sed -i "s:WANT_DRV_VNCSERVER:#WANT_DRV_VNCSERVER:" Make.config || die "sed #WANT_DRV_VNCSERVER failed"
 	fi
 
 }
