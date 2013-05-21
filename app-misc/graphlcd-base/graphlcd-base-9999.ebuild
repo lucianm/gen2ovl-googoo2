@@ -68,7 +68,7 @@ src_prepare() {
 	fi
 
 	if use !vnc; then
-		sed -i "s:WANT_DRV_VNCSERVER:#WANT_DRV_VNCSERVER:" Make.config || die "sed #WANT_DRV_VNCSERVER failed"
+		sed -i "s:HAVE_DRIVER_VNCSERVER:#HAVE_DRIVER_VNCSERVER:" Make.config || die "sed #HAVE_DRIVER_VNCSERVER failed"
 	fi
 
 }
