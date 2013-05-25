@@ -6,7 +6,7 @@ EAPI="5"
 
 inherit vdr-plugin-2
 
-VERSION="1039" # every bump, new version
+VERSION="1380" # every bump, new version
 
 if [ "${PV}" = "9999" ]; then
 	inherit git-2
@@ -32,14 +32,10 @@ RDEPEND="${DEPEND}
 #VDR_CONFD_FILE="${FILESDIR}/confd-${PV}"
 #VDR_RCADDON_FILE="${FILESDIR}/rc-addon-${PV}.sh"
 
-#PATCHES="${FILESDIR}/vdr-tvguide-Makefile-vdr-1.7.36.patch"
+#PATCHES="${FILESDIR}/.."
 
 src_install() {
 	vdr-plugin-2_src_install
-#DESTDIR="${S}" 
-	#insinto /etc/vdr/themes
-	#doins "${S}"/themes/*.theme
-
 	chown vdr:vdr -R "${D}"/etc/vdr
 }
 
