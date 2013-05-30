@@ -4,22 +4,23 @@
 
 EAPI="5"
 
-inherit vdr-plugin-2 ssl-cert toolchain-funcs
+inherit vdr-plugin-2 ssl-cert
 
 DESCRIPTION="VDR Plugin: Web Access To Settings"
 HOMEPAGE="http://live.vdr-developer.org"
+
 if [[ "${PV}" = "9999" ]]; then
 	SRC_URI=""
 	KEYWORDS=""
-	#EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-${VDRPLUGIN}.git"
-	EGIT_REPO_URI="git://github.com/CReimer/vdr-plugin-${VDRPLUGIN}.git"
-	inherit git
+	EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-${VDRPLUGIN}.git"
+	#EGIT_REPO_URI="git://github.com/CReimer/vdr-plugin-${VDRPLUGIN}.git"
+	inherit git-2
 else
 	SRC_URI="mirror://gentoo/${P}.tar.bz2
-		http://vdr.websitec.de/download/${PN}/${P}.tar.gz
 		http://live.vdr-developer.org/downloads/${P}.tar.gz"
 	KEYWORDS="~amd64 ~x86"
 fi
+
 
 LICENSE="GPL-2"
 SLOT="0"
@@ -35,13 +36,6 @@ VDR_CONFD_FILE="${FILESDIR}/confd-0.2"
 VDR_RCADDON_FILE="${FILESDIR}/rc-addon-0.2.sh"
 
 KEEP_I18NOBJECT="yes"
-
-# Damn vdr.eclass overrides $S...
-if [[ "${PV}" = "9999" ]]; then
-	S="${WORKDIR}/${VDRPLUGIN}"
-else
-	S="${WORKDIR}/${P}"
-fi
 
 make_live_cert() {
 	# TODO: still true?
@@ -66,13 +60,10 @@ make_live_cert() {
 	chown vdr:vdr "${ROOT}"/etc/vdr/plugins/live/live{,-key}.pem
 }
 
-pkg_setup() {
-	vdr-plugin-2_pkg_setup
-
-	tc-export CXX AR
-}
-
 src_prepare() {
+	# remove untranslated language files
+	rm "${S}"/po/{ca_ES,da_DK,el_GR,et_EE,hr_HR,hu_HU,nl_NL,nn_NO,pt_PT,ro_RO,ru_RU,sl_SI,sv_SE,tr_TR}.po
+
 	vdr-plugin-2_src_prepare
 
 	if ! use pcre; then
@@ -80,17 +71,13 @@ src_prepare() {
 	fi
 }
 
-src_compile() {
-	BUILD_PARAMS="-j1"
-	vdr-plugin-2_src_compile
-}
-
 src_install() {
 	vdr-plugin-2_src_install
 
-	insinto /etc/vdr/plugins/live
+	insinto /usr/share/vdr/plugins/live
+	doins -r live/*
 
-	fowners -R vdr:vdr /etc/vdr/plugins/live
+	fowners -R vdr:vdr /usr/share/vdr/plugins/live
 }
 
 pkg_postinst() {
@@ -106,8 +93,7 @@ pkg_postinst() {
 
 	if use ssl ; then
 		if path_exists -a "${ROOT}"/etc/vdr/plugins/live/live.pem; then
-			einfo "found an existing SSL cert, to create a new SSL cert, run:"
-			einfo ""
+			einfo "found an existing SSL cert, to create a new SSL cert, run:\n"
 			einfo "emerge --config ${PN}"
 		else
 			einfo "No SSL cert found, creating a default one now"

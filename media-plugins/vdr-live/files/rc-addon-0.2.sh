@@ -1,4 +1,4 @@
-# $Header: /var/cvsroot/gentoo-x86/media-plugins/vdr-live/files/rc-addon-0.2.sh,v 1.1 2011/01/27 17:58:11 hd_brummy Exp $
+# $Header: /var/cvsroot/gentoo-x86/media-plugins/vdr-live/files/rc-addon-0.2.sh,v 1.2 2012/06/04 19:42:24 hd_brummy Exp $
 #
 # zzam@g.o
 # hd_brummy@g.o
@@ -23,6 +23,4 @@ plugin_pre_vdr_start() {
 	for ip in ${LIVE_BIND_IPS:=`hostname -i`}; do
 		add_plugin_param "-i ${ip}"
 	done
-	add_plugin_param "--epgimages=${LIVE_EPGIMGDIR:=/var/cache/vdr/epgimages/}"
-	add_plugin_param "--log=${LIVE_LOGLEVELTNTNET:=ERROR}"
 }
