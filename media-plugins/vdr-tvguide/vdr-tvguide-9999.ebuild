@@ -6,7 +6,7 @@ EAPI="5"
 
 inherit vdr-plugin-2
 
-VERSION="1381" # every bump, new version
+VERSION="1393" # every bump, new version
 
 if [ "${PV}" = "9999" ]; then
 	inherit git-2
