@@ -47,6 +47,9 @@ VDR_RCADDON_FILE="${FILESDIR}/rc-addon-${PV}.sh"
 src_prepare() {
 	vdr-plugin-2_src_prepare
 
+	if has_version ">=media-video/ffmpeg-2.0"; then
+		sed -i "s:#CONFIG += -DH264_EOS_TRICKSPEED:CONFIG += -DH264_EOS_TRICKSPEED:" Makefile || die
+	fi
 	BUILD_PARAMS+=" ALSA=$(usex alsa 1 0)"
 	BUILD_PARAMS+=" OSS=$(usex oss 1 0)"
 	BUILD_PARAMS+=" VAAPI=$(usex vaapi 1 0)"
