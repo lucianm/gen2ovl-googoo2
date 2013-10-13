@@ -2,9 +2,9 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
-EAPI="4"
+EAPI="5"
 
-inherit vdr-plugin-2 eutils git
+inherit vdr-plugin-2 eutils git-2
 
 #VERSION="936" #every bump, new version
 

@@ -2,13 +2,13 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
-EAPI="4"
+EAPI="5"
 
 inherit eutils vdr-plugin-2
 
 EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-${VDRPLUGIN}.git"
 
-inherit git
+inherit git-2
 
 # weird version and paths stuff, for version bumps we have
 # to modify REV_DIR
@@ -29,7 +29,7 @@ DEPEND=">=media-video/vdr-1.2.6
 	!media-video/noad"
 
 src_unpack() {
-	git_src_unpack
+	git-2_src_unpack
 	mv "${S}" "${S}/../.."
 	mv "${WORKDIR}/plugin" -Tf "${WORKDIR}/${VDRPLUGIN}-${PV}"
 

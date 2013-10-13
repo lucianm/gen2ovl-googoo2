@@ -4,7 +4,7 @@
 
 EAPI="5"
 
-inherit vdr-plugin-2 git
+inherit vdr-plugin-2 git-2
 
 DESCRIPTION="VDR - Skin Plugin: enigma-ng"
 HOMEPAGE="http://andreas.vdr-developer.org/enigmang/"
