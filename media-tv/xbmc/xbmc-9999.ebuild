@@ -1,8 +1,8 @@
 # Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/media-tv/xbmc/xbmc-9999.ebuild,v 1.143 2013/04/23 01:33:23 vapier Exp $
+# Exp $
 
-EAPI=5
+EAPI="5"
 
 # Does not work with py3 here
 # It might work with py:2.5 but I didn't test that
@@ -52,7 +52,6 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	app-arch/zip
 	app-i18n/enca
 	airplay? ( app-pda/libplist )
-	>=dev-lang/python-2.4
 	dev-libs/boost
 	dev-libs/fribidi
 	dev-libs/libcdio[-minimal]
@@ -102,7 +101,7 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	avahi? ( net-dns/avahi )
 	nfs? ( net-fs/libnfs )
 	webserver? ( net-libs/libmicrohttpd[messages] )
-	sftp? ( net-libs/libssh )
+	sftp? ( net-libs/libssh[sftp] )
 	net-misc/curl
 	samba? ( >=net-fs/samba-3.4.6[smbclient] )
 	bluetooth? ( net-wireless/bluez )
@@ -151,9 +150,8 @@ src_unpack() {
 }
 
 src_prepare() {
-	epatch "${FILESDIR}"/${PN}-9999-nomythtv.patch
+#	epatch "${FILESDIR}"/${PN}-9999-nomythtv.patch
 	epatch "${FILESDIR}"/${PN}-9999-no-arm-flags.patch #400617
-	epatch "${FILESDIR}"/${PN}-13.0-system-projectm.patch
 	# The mythtv patch touches configure.ac, so force a regen
 	rm -f configure
 
