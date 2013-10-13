@@ -1,0 +1,5 @@
+# This it the configuration file for the openrc-runlevel_wrapper.sh
+# script for NetworkManagerDispatcher and the network service runlevel
+
+SERVICES_RUNLEVEL="networkmanager_activated"
+
