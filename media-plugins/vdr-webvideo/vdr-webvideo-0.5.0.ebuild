@@ -1,14 +1,14 @@
-# Copyright 1999-2012 Gentoo Foundation
+# Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-EAPI="4"
+EAPI="5"
 
 inherit vdr-plugin-2
 
 DESCRIPTION="VDR Plugin: video website browser / viewer"
 HOMEPAGE="http://users.tkk.fi/~aajanki/vdr/webvideo/"
-SRC_URI="http://projects.vdr-developer.org/attachments/download/1057/${P}.tgz"
+SRC_URI="http://projects.vdr-developer.org/attachments/download/1355/${P}.tgz"
 
 LICENSE="GPL-2"
 SLOT="0"
@@ -19,6 +19,8 @@ DEPEND=">=media-video/vdr-1.6.0
 	=media-video/webvi-${PV}"
 
 S="${WORKDIR}/${VDRPLUGIN}-${PV}/src/vdr-plugin"
+
+PATCHES="${FILESDIR}/webvideo-0.5.0_vdr-2.1.2.diff"
 
 src_install() {
 

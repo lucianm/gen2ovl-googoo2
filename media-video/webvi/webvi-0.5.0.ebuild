@@ -1,8 +1,8 @@
-# Copyright 1999-2012 Gentoo Foundation
+# Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-EAPI="4"
+EAPI="5"
 
 inherit eutils
 
@@ -12,7 +12,7 @@ HOMEPAGE="http://users.tkk.fi/~aajanki/vdr/webvideo/"
 
 IUSE="+yle"
 
-SRC_URI="http://projects.vdr-developer.org/attachments/download/1057/vdr-webvideo-${PV}.tgz"
+SRC_URI="http://projects.vdr-developer.org/attachments/download/1355/vdr-webvideo-${PV}.tgz"
 
 LICENSE="GPL-2"
 
