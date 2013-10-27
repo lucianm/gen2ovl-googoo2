@@ -24,6 +24,8 @@ RDEPEND="${DEPEND}"
 
 S=${WORKDIR}/${PN}-plugin
 
+PATCHES="${FILESDIR}/vnsiserver-VDR-API-2.1.2-compatibility.patch"
+
 src_unpack() {
 	git-2_src_unpack
 

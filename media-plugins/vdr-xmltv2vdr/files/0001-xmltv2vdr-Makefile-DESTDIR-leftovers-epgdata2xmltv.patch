@@ -1,6 +1,6 @@
-From 79818dec973e55af0ce4b09cd34ff6019321df4b Mon Sep 17 00:00:00 2001
+From 96fe0d4d52fa5ab757d5f2d13d631fb5798a0617 Mon Sep 17 00:00:00 2001
 From: Lucian Muresan <lucianm@users.sourceforge.net>
-Date: Tue, 8 Jan 2013 00:10:38 +0100
+Date: Sun, 27 Oct 2013 22:28:37 +0100
 Subject: [PATCH] xmltv2vdr Makefile DESTDIR leftovers epgdata2xmltv
 
 ---
@@ -25,5 +25,5 @@ index 3301bd2..8ed8c4d 100644
  dist: clean
  	@-rm -rf $(TMPDIR)/epgdata2xmltv
 -- 
-1.8.0.2
+1.8.3.2
 

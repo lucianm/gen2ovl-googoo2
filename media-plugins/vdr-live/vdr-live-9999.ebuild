@@ -61,6 +61,8 @@ make_live_cert() {
 }
 
 src_prepare() {
+	epatch "${FILESDIR}/live-vdr2.1.2compat.diff"
+
 	# remove untranslated language files
 	rm "${S}"/po/{ca_ES,da_DK,el_GR,et_EE,hr_HR,hu_HU,nl_NL,nn_NO,pt_PT,ro_RO,ru_RU,sl_SI,sv_SE,tr_TR}.po
 
@@ -105,3 +107,4 @@ pkg_postinst() {
 pkg_config() {
 	make_live_cert
 }
+

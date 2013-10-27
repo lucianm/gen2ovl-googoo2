@@ -29,6 +29,8 @@ DEPEND=">=media-video/vdr-1.7.27
 RDEPEND="${DEPEND}
 	>=media-plugins/vdr-streamdev-0.6.0[server,upnp]"
 
+PATCHES="${FILESDIR}/upnp-vdr2.1.2compat.diff"
+
 src_prepare() {
 
 	vdr-plugin-2_src_prepare
@@ -44,3 +46,4 @@ src_install() {
 	vdr-plugin-2_src_install
 
 }
+

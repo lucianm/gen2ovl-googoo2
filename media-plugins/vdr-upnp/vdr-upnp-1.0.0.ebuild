@@ -28,6 +28,8 @@ DEPEND=">=media-video/vdr-1.7.27
 RDEPEND="${DEPEND}
 	>=media-plugins/vdr-streamdev-0.6.0[server,upnp]"
 
+PATCHES="${FILESDIR}/upnp-vdr2.1.2compat.diff"
+
 src_compile() {
 
 	# build main plugin, normally
@@ -74,3 +76,4 @@ src_install() {
 	done
 
 }
+
