@@ -1,0 +1,30 @@
+diff -Naur yacoto-0.5_orig/yac-menuconvert.c yacoto-0.5/yac-menuconvert.c
+--- yacoto-0.5_orig/yac-menuconvert.c	2011-05-01 08:21:18.000000000 +0200
++++ yacoto-0.5/yac-menuconvert.c	2013-10-28 00:48:31.423572000 +0100
+@@ -228,7 +228,11 @@
+ bool cYacMenuConvert::SetFreeDiskDisplay()
+ {
+    int FreeMB;
++#if APIVERSNUM > 20101
++   cVideoDirectory::VideoDiskSpace(&FreeMB);
++#else
+    VideoDiskSpace(&FreeMB);
++#endif
+    cString freeDiskSpaceString = cString::sprintf("%.1f GB %s", ((float)FreeMB) / 1000, tr("free"));
+ 
+    SetTitle(cString::sprintf("%s - %s", tr("Convert recordings"), (const char *)freeDiskSpaceString ));
+diff -Naur yacoto-0.5_orig/yac-menurecordings.c yacoto-0.5/yac-menurecordings.c
+--- yacoto-0.5_orig/yac-menurecordings.c	2012-11-12 18:00:09.000000000 +0100
++++ yacoto-0.5/yac-menurecordings.c	2013-10-28 00:49:29.038572000 +0100
+@@ -198,7 +198,11 @@
+ bool cYacMenuRecordings::SetFreeDiskDisplay()
+ {
+    int FreeMB;
++#if APIVERSNUM > 20101
++   cVideoDirectory::VideoDiskSpace(&FreeMB);
++#else
+    VideoDiskSpace(&FreeMB);
++#endif
+    cString freeDiskSpaceString = cString::sprintf("%.1f GB %s", ((float)FreeMB) / 1000, tr("free"));
+ 
+    SetTitle(cString::sprintf("%s  -  %s", base ? base : tr("Recordings"), (const char *)freeDiskSpaceString ));

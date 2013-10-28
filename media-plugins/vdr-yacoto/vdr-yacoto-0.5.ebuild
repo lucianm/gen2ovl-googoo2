@@ -1,14 +1,14 @@
-# Copyright 1999-2012 Gentoo Foundation
+# Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-EAPI="4"
+EAPI="5"
 
 inherit vdr-plugin-2
 
 DESCRIPTION="VDR plugin: Yacoto - Yet Another Convert Tool"
 HOMEPAGE="http://redmine.gen2vdr.org/projects/vdr-plugin-${VDRPLUGIN}"
-SRC_URI="http://redmine.gen2vdr.org/attachments/147/${P}.tgz"
+SRC_URI="http://redmine.gen2vdr.org/attachments/187/${P}.tgz"
 
 LICENSE="GPL-2"
 SLOT="0"
@@ -46,19 +46,10 @@ MY_YAC_CONF_DIR="/etc/vdr/plugins/yacoto"
 MY_YAC_DIR="/usr/share/vdr/plugins/yacoto"
 
 PATCHES="
-	${FILESDIR}/${P}_quotes.diff
-	${FILESDIR}/${P}_DirOrderState.diff
-	${FILESDIR}/${P}_tilde-in-path.diff
-	${FILESDIR}/${P}_projectx.diff
+	${FILESDIR}/${PN}-0.5_vdr-2.1.2.diff
 "
 
 src_prepare() {
-	if has_version ">=media-video/vdr-1.7.23"; then
-		epatch "${FILESDIR}/${P}_svdrpsend_vdr-1.7.23.diff"
-	fi
-	if has_version ">=media-video/vdr-1.7.27"; then
-		epatch "${FILESDIR}/${P}_vdr-1.7.27.diff"
-	fi
 
 	vdr-plugin-2_src_prepare
 
@@ -110,7 +101,8 @@ src_install() {
 		cd "${D}${MY_YAC_CONF_DIR}"/conf/dvd
 		rename .conf.sample .conf *.conf.sample
 	fi
-
+	
+	chmod -R ugo-x "${D}${MY_YAC_CONF_DIR}"
 }
 
 pkg_postinst(){
