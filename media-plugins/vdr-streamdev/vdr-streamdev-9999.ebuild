@@ -1,8 +1,8 @@
-# Copyright 1999-2012 Gentoo Foundation
+# Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-EAPI="4"
+EAPI="5"
 
 inherit vdr-plugin-2 git-2
 
@@ -51,9 +51,25 @@ src_prepare() {
 	sed -i "s:include \$(VDRDIR)/Make.global:-include \$(VDRDIR)/Make.global:" Makefile
 
 	fix_vdr_libsi_include server/livestreamer.c
+
+	make -C ./tools .dependencies
+	sed -i "s:tools\/:..\/tools\/:" tools/.dependencies
+	sed -i "s:h tools\/:h ..\/tools\/:" tools/.dependencies
+	sed -i "s:h common.h:h ..\/common.h:" tools/.dependencies
 }
 
+src_compile() {
+	INCLUDES=-I.. vdr-plugin-2_src_compile
+}
+
+
 src_install() {
+	cd "${S}"
+	mv ./client/libvdr-${VDRPLUGIN}-client.so libvdr-${VDRPLUGIN}-client.so.${APIVERSION}
+	if use server; then
+		mv ./server/libvdr-${VDRPLUGIN}-server.so libvdr-${VDRPLUGIN}-server.so.${APIVERSION}
+	fi
+
 	vdr-plugin-2_src_install
 
 	if use server; then
@@ -61,10 +77,10 @@ src_install() {
 		doexe streamdev-server/externremux.sh
 
 		insinto /usr/share/vdr/rcscript
-		newins "${FILESDIR}"/rc-addon-0.6.0.sh plugin-streamdev-server.sh
+		newins "${FILESDIR}"/rc-addon-9999.sh plugin-streamdev-server.sh
 
 		insinto /etc/conf.d
-		newins "${FILESDIR}"/confd-0.6.0 vdr.streamdev-server
+		newins "${FILESDIR}"/confd-9999 vdr.streamdev-server
 
 		insinto /etc/vdr/plugins/streamdev-server
 		newins streamdev-server/streamdevhosts.conf streamdevhosts.conf
