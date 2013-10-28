@@ -41,7 +41,8 @@ src_prepare() {
 
 	epatch \
 		"${FILESDIR}"/${PN}_gentoo-path.diff \
-		"${FILESDIR}"/${PN}_setdefaults.diff
+		"${FILESDIR}"/${PN}_setdefaults.diff \
+		"${FILESDIR}"/${P}_vdr-2.1.2.diff
 # \
 #		"${FILESDIR}"/${P}_vdr-1.7.36-Makefile.patch
 

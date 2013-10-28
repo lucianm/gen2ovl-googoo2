@@ -1,0 +1,15 @@
+diff -Naur burn-0.2.2.orig/jobs.c burn-0.2.2/jobs.c
+--- burn-0.2.2.orig/jobs.c	2011-10-04 18:25:45.000000000 +0200
++++ burn-0.2.2/jobs.c	2013-10-29 00:47:41.370242000 +0100
+@@ -263,7 +263,11 @@
+ 	std::string recording::get_graft_point() const
+ 	{
+ 		return proctools::format("{0}={1}")
++#if APIVERSNUM > 20101
++			   % m_fileName.substr(std::string(cVideoDirectory::Name()).length())
++#else
+ 			   % m_fileName.substr(std::string(VideoDirectory).length())
++#endif
+ 			   % m_fileName;
+ 	}
+ 
