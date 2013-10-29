@@ -27,7 +27,7 @@ IUSE=""
 DEPEND=">=media-video/vdr-1.6.0[pinplugin]"
 RDEPEND="${DEPEND}"
 
-#PATCHES="${FILESDIR}/${PN}_..."
+PATCHES="${FILESDIR}/${PN}-0.1.14_vdr-2.1.2.diff"
 
 src_prepare() {
 	vdr-plugin-2_src_prepare
