@@ -20,11 +20,17 @@ retuval() {
 	return 1
 }
 
+# delete explicitly listed objects
 for obj in $DEL_OBJ_PATHS; do
 	if [ -f "$obj" ]; then
 		rm -R $obj
 		retuval ${?} "Failed to delete '$obj'"
 	fi
+done
+
+# run listed cleanup commands
+for cmd in "${CLEANUP_CMDS[@]}"; do
+	${cmd}
 done
 
 exit 0

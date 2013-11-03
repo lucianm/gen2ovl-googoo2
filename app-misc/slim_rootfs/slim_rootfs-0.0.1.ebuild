@@ -29,7 +29,10 @@ src_install() {
 }
 
 pkg_postinst() {
+	einfo""
 	einfo "Before running '${PN}' for the first time,"
 	einfo "Please add full paths of files or directories to be deleted to"
-	einfo "the DEL_OBJ_PATHS variable in /etc/${PN}.conf, possibly with wildcards"
+	einfo "the \"DEL_OBJ_PATHS\" variable in /etc/${PN}.conf, possibly with wildcards,"
+	einfo "and also different cleanup commands in the \"CLEANUP_CMDS\" variable"
+	einfo ""
 }
