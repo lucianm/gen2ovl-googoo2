@@ -21,6 +21,8 @@
 # 2009-09-01. v.0.1.9(1) nall <soir@fuzzysock.net>
 # 2009-11-22, v.0.2.0(3) morris <mauricioarozi@gmail.com>
 # 2013-05-02, v.0.3.0    lucianm <lucianm@users.sourceforge.net>
+# 2013-11-03, v.0.3.1    lucianm <lucianm@users.sourceforge.net>
+
 
 #set -x
 
@@ -54,11 +56,18 @@ check_support() {
 	fi
 }
 
+source_make_cfgs() {
+	[ -f /etc/make.globals ] && source /etc/make.globals	# MUST source inside function
+	if [ -f /etc/make.conf ]; then
+		source /etc/make.conf
+	else
+		[ -f /etc/portage/make.conf ] && source /etc/portage/make.conf
+	fi
+}
 
 sync() {
-	source /etc/make.globals		# MUST source inside function, causes initramfs errors otherwise
-	source /etc/make.conf
-	source /etc/portage/make.conf
+	source_make_cfgs
+
 	ebegin "Syncing portage tree"
 	if [ ${SYNC_CMD} ]; then
 		eval ${SYNC_CMD}
@@ -78,21 +87,27 @@ sync() {
 }
 
 start() {
-	source /etc/make.globals	# MUST source inside function
-	source /etc/make.conf
-	source /etc/portage/make.conf
+	source_make_cfgs
 
 	ebegin "Mounting read-only squashfs image(s)"
 	check_support
-	if [ ! -d "${SQFS_DIRNAME}" ]; then
-		einfo "${SQFS_DIRNAME} does not exist, creating"
-		mkdir -p "${SQFS_DIRNAME}"
-		retuval ${?} "Error: mkdir -p ${SQFS_DIRNAME}"
-	fi
+	for i in ${SQFSS[@]}; do
+		local mp=${SQFS_DIRNAME}/${i}
+		if [ ! -d "${mp}" ]; then
+			einfo "${mp} does not exist, creating"
+			mkdir -p "${mp}"
+			retuval ${?} "Error: mkdir -p ${mp}"
+		fi
+	done; unset i
 
 	for i in ${SQFSS[@]}; do
+		local SNEW="${SQFS_DIRNAME}/sqfs.${i}-current.sqfs"
+		if [ ! -f "${SNEW}" ]; then
+			einfo "Creating '${SNEW}' for the first time..."
+			/usr/bin/mksquashfs "${SQFS_DIRNAME}/${SQFSS[${i}]}" "${SNEW}" ${SQFS_OPTS}
+		fi
 		einfo "Mounting ${i}"
-		mount -rt squashfs -o loop,nodev,noexec "${SQFS_DIRNAME}/sqfs.${i}-current.sqfs" "${SQFS_DIRNAME}/${i}"
+		mount -rt squashfs -o loop,nodev,noexec "${SNEW}" "${SQFS_DIRNAME}/${i}"
 		retuval ${?} "Error: mount -rt squashfs -o loop,nodev,noexec \"${SQFS_DIRNAME}/sqfs.${i}-current.sqfs\" \"${SQFS_DIRNAME}/${i}\""
 		[ "${SQFS_DIST}" ] || \
 		if [ `echo ${DISTDIR} | grep "${SQFS_DIRNAME}/${i}"` ]; then
@@ -128,9 +143,7 @@ start() {
 }
 
 stop() {
-	source /etc/make.globals	# MUST source inside function
-	source /etc/make.conf
-	source /etc/portage/make.conf
+	source_make_cfgs
 
 	check_support
 	if [ "$RC_RUNLEVEL" != shutdown ]; then	# OpenRC timeout doesn't allow this kind of thing
