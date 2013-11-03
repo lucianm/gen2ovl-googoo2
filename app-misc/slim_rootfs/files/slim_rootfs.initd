@@ -1,0 +1,26 @@
+#!/sbin/runscript
+# Copyright 1999-2013 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header: $
+#
+# /etc/init.d/slim_rootfs wraps the slim_rootfs script which allows
+# deleting selected paths from the rootfs, to make it slim
+#
+
+DESC="RootFS diet cure"
+
+depend() {
+	need localmount modules
+}
+
+start() {
+	ebegin "Starting ${DESC}"
+	/usr/sbin/slim_rootfs
+	eend ${?}
+}
+
+stop() {
+	ebegin "Stopping ${DESC}"
+	/usr/sbin/slim_rootfs
+	eend ${?}
+}

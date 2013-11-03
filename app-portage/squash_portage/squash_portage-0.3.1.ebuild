@@ -40,7 +40,7 @@ src_install() {
 	doins "${FILESDIR}/${PN}.conf"
 }
 
-pkg_postinst () {
+pkg_postinst() {
 	einfo "Before running '${PN} start' for the first time,"
 	einfo "Please perform the following operations:"
 	einfo ""
@@ -70,5 +70,4 @@ pkg_postinst () {
 	einfo "Every time you want to sync portage and layman, just run '${PN} sync'"
 	einfo "To make any changes occured otherwise than by the sync command above persistent,"
 	einfo "run '${PN} restart'"
-
 }

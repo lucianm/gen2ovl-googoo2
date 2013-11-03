@@ -1,0 +1,12 @@
+[Unit]
+Description=RootFS diet cure
+After=systemd-modules-load.service local-fs.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/slim_rootfs
+ExecStop=/usr/sbin/slim_rootfs
+
+[Install]
+WantedBy=multi-user.target
