@@ -16,9 +16,10 @@ SRC_URI=""
 KEYWORDS=""
 LICENSE="GPL-2"
 SLOT="0"
-IUSE="debug ffdecsa-test"
+IUSE="debug ffdecsa-test libdvbcsa"
 
-DEPEND=">=media-video/vdr-1.7.8"
+DEPEND=">=media-video/vdr-1.7.8
+	libdvbcsa? ( media-libs/libdvbcsa )"
 
 RDEPEND="${DEPEND}"
 
@@ -101,20 +102,26 @@ src_compile() {
 	# perform just sequentially (otherwise it may fail),
 	# and also pass the user's choice for the FFdecsa parallel-mode if it exists
 	einfo ""
-	if ! [ -z ${FFDECSA_PAR} ]; then
-		einfo "Found FFdecsa parallel-mode setting FFDECSA_PAR=${FFDECSA_PAR}, will try to build with that."
-		BUILD_PARAMS="-j1 PARALLEL=${FFDECSA_PAR}"
-	else
-		einfo "Compiling FFdecsa with the default parallel-mode set in the package source Makefile as"
-		einfo "'PARALLEL   ?= $(grep 'PARALLEL   ?=' Makefile | cut -d' ' -f 5)'."
-		einfo "However, you may override this by setting the 'FFDECSA_PAR' variable yourself."
-		if ! use ffdecsa-test; then
-			einfo ""
-			einfo "For possible modes, please consult the 'PARALLEL_...' #defines in FFdecsa.c, or"
-			einfo "emerge this package with USE='ffdecsa-test' and choose an appropriate mode listed at the"
-			einfo "end of all tests and re-emerge one more time."
+	
+	if ! use libdvbcsa; then
+		if ! [ -z ${FFDECSA_PAR} ]; then
+			einfo "Found FFdecsa parallel-mode setting FFDECSA_PAR=${FFDECSA_PAR}, will try to build with that."
+			BUILD_PARAMS="-j1 PARALLEL=${FFDECSA_PAR}"
+		else
+			einfo "Compiling FFdecsa with the default parallel-mode set in the package source Makefile as"
+			einfo "'PARALLEL   ?= $(grep 'PARALLEL   ?=' Makefile | cut -d' ' -f 5)'."
+			einfo "However, you may override this by setting the 'FFDECSA_PAR' variable yourself."
+			if ! use ffdecsa-test; then
+				einfo ""
+				einfo "For possible modes, please consult the 'PARALLEL_...' #defines in FFdecsa.c, or"
+				einfo "emerge this package with USE='ffdecsa-test' and choose an appropriate mode listed at the"
+				einfo "end of all tests and re-emerge one more time."
+			fi
+			BUILD_PARAMS="-j1"
 		fi
-		BUILD_PARAMS="-j1"
+	else
+		einfo "Building against external libdvbcsa in favour of the built-in FFdecsa..."
+		BUILD_PARAMS="-j1 LIBDVBCSA=1"
 	fi
 
 	# now let our base eclass build
