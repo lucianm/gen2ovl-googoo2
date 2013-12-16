@@ -1,6 +1,6 @@
 # Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/media-video/makemkv/makemkv-1.8.1.ebuild,v 1.1 2013/04/30 00:01:02 mattm Exp $
+# $Header: /var/cvsroot/gentoo-x86/media-video/makemkv/makemkv-1.8.6-r1.ebuild,v 1.5 2013/11/22 09:52:39 mattm Exp $
 
 EAPI=4
 inherit eutils gnome2-utils multilib flag-o-matic
@@ -28,10 +28,11 @@ RDEPEND="dev-libs/expat
 	dev-qt/qtcore:4
 	dev-qt/qtdbus:4
 	dev-qt/qtgui:4
+	|| ( >=media-video/ffmpeg-1.0.0 >=media-video/libav-0.8.9 )
 	amd64? ( multilib? ( app-emulation/emul-linux-x86-baselibs ) )"
 DEPEND="${RDEPEND}"
 
-S=${WORKDIR}/${MY_P}
+S=${WORKDIR}/makemkv-oss-${PV}
 
 src_prepare() {
 	epatch "${FILESDIR}"/${P}-makefile.linux.patch
@@ -39,10 +40,13 @@ src_prepare() {
 
 src_configure() {
 	replace-flags -O* -Os
+	if [[ -x ${ECONF_SOURCE:-.}/configure ]] ; then
+		econf
+	fi
 }
 
 src_compile() {
-	emake GCC="$(tc-getCC) ${CFLAGS} ${LDFLAGS}" -f makefile.linux
+	emake GCC="$(tc-getCC) ${CFLAGS} ${LDFLAGS}" || die "Make failed!"
 }
 
 src_install() {
