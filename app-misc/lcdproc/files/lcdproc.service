@@ -1,0 +1,12 @@
+[Unit]
+Description=lcdproc Service
+After=syslog.target LCDd.service
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/lcdproc -c /etc/lcdproc.conf
+ControlGroup=cpu:/
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

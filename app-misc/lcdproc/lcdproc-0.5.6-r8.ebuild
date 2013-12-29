@@ -3,7 +3,7 @@
 # $Header: /var/cvsroot/gentoo-x86/app-misc/lcdproc/lcdproc-0.5.6-r1.ebuild,v 1.1 2013/04/18 21:10:22 xmw Exp $
 
 EAPI=5
-inherit multilib versionator
+inherit multilib versionator systemd
 
 MY_PV=$(replace_version_separator 3 '-')
 MY_P=${PN}-${MY_PV}
@@ -17,7 +17,7 @@ LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~amd64 ~ppc ~ppc64 ~x86"
 
-IUSE="debug doc ftdi hid irman joystick lirc nfs png samba seamless-hbars truetype usb"
+IUSE="debug doc ftdi hid irman joystick lirc nfs png samba seamless-hbars systemd truetype usb"
 
 # The following array holds the USE_EXPANDed keywords
 IUSE_LCD_DEVICES=(ncurses bayrad cfontz cfontzpacket
@@ -61,7 +61,10 @@ RDEPEND="
 	lcd_devices_picolcd?    ( virtual/libusb:0 )
 	lcd_devices_i2500vfd?   ( dev-embedded/libftdi )
 	lcd_devices_lis?        ( dev-embedded/libftdi virtual/libusb:0 )
-	lcd_devices_shuttlevfd? ( virtual/libusb:0 )"
+	lcd_devices_shuttlevfd? ( virtual/libusb:0 )
+	
+	systemd? ( sys-apps/systemd )"
+
 DEPEND="${RDEPEND}
 	doc? ( app-text/xmlto
 	       app-text/docbook-xml-dtd:4.5 )"
@@ -185,6 +188,9 @@ src_install() {
 	newinitd "${FILESDIR}/0.5.1-LCDd.initd" LCDd
 	newinitd "${FILESDIR}/0.5.5-lcdproc.initd" lcdproc
 	newconfd "${FILESDIR}/0.5.5-lcdproc.confd" lcdproc
+	
+	use systemd && systemd_dounit "${FILESDIR}/LCDd.service"
+	use systemd && systemd_dounit "${FILESDIR}/lcdproc.service"
 
 	dodoc README CREDITS ChangeLog INSTALL TODO
 
