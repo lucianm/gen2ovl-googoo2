@@ -4,7 +4,7 @@
 
 EAPI="5"
 
-inherit eutils user
+inherit eutils user systemd
 
 DESCRIPTION="Scripts necessary for use of vdr as a set-top-box"
 HOMEPAGE="http://www.gentoo.org/"
@@ -14,11 +14,12 @@ SRC_URI="mirror://gentoo/${P}.tar.bz2
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="amd64 ~arm ~ppc x86"
-IUSE="nvram"
+IUSE="nvram systemd"
 
 RDEPEND="nvram? ( sys-power/nvram-wakeup )
 	app-admin/sudo
-	sys-process/wait_on_pid"
+	sys-process/wait_on_pid
+	systemd? ( sys-apps/systemd )"
 
 VDR_HOME=/var/vdr
 
@@ -40,6 +41,10 @@ src_prepare() {
 
 src_install() {
 	emake -s install DESTDIR="${D}" || die "make install failed"
+	if use systemd; then
+		systemd_dounit "${FILESDIR}/vdr.service"
+		dosbin "${FILESDIR}/vdr-systemd_helper.sh"
+	fi
 	dodoc README TODO ChangeLog README.grub2
 
 	# create necessary directories
