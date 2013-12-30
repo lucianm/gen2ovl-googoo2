@@ -1,0 +1,18 @@
+[Unit]
+Description=LIRC irexec Daemon @user
+#
+# this unit is started by irexec.service
+#
+
+DefaultDependencies=no
+Requires=lirc.service
+After=lirc.service
+
+[Service]
+Type=forking
+EnvironmentFile=/etc/conf.d/irexec
+User=%i
+ExecStart=/usr/bin/irexec --daemon $IREXEC_OPTS
+
+[Install]
+WantedBy=multi-user.target

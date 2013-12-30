@@ -4,7 +4,7 @@
 
 EAPI=5
 
-inherit eutils linux-mod linux-info toolchain-funcs flag-o-matic autotools
+inherit eutils linux-mod linux-info toolchain-funcs flag-o-matic autotools systemd
 
 DESCRIPTION="decode and send infra-red signals of many commonly used remote controls"
 HOMEPAGE="http://www.lirc.org/"
@@ -20,7 +20,7 @@ fi
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~amd64 ~ppc ~ppc64 ~x86"
-IUSE="debug doc hardware-carrier transmitter static-libs X"
+IUSE="debug doc hardware-carrier transmitter static-libs systemd X"
 
 S="${WORKDIR}/${MY_P}"
 
@@ -32,7 +32,8 @@ RDEPEND="
 	)
 	lirc_devices_alsa_usb? ( media-libs/alsa-lib )
 	lirc_devices_audio? ( >media-libs/portaudio-18 )
-	lirc_devices_irman? ( media-libs/libirman )"
+	lirc_devices_irman? ( media-libs/libirman )
+	systemd? ( sys-apps/systemd )"
 
 # 2012-07-17, Ian Stakenvicius
 # A helper script that scrapes out values for nearly all of the variables below
@@ -363,6 +364,10 @@ src_install() {
 	newinitd "${FILESDIR}"/lircd-0.8.6-r2 lircd
 	newinitd "${FILESDIR}"/lircmd lircmd
 	newconfd "${FILESDIR}"/lircd.conf.4 lircd
+	
+	use systemd && systemd_dounit "${FILESDIR}/lircd.service"
+	use systemd && systemd_dounit "${FILESDIR}/irexec.service"
+	use systemd && systemd_newunit "${FILESDIR}/irexec_as_user_AT.service" "irexec_as_user@.service"
 
 	insinto /etc/modprobe.d/
 	newins "${FILESDIR}"/modprobed.lirc lirc.conf
@@ -428,4 +433,11 @@ pkg_postinst() {
 
 	einfo "The new default location for lircd.conf is inside of"
 	einfo "/etc/lirc/ directory"
+
+	if use systemd; then
+		einfo "If you want to start irexec as a systemd service, you MUST"
+		einfo "specify IREXEC_USER in /etc/conf.d/irexec. and use"
+		einfo "Just use the service irexec.service, and NOT the helper"
+		einfo "irexec_as_user@.service !!!"
+	fi
 }
