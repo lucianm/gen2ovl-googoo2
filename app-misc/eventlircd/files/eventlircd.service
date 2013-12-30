@@ -1,0 +1,17 @@
+[Unit]
+Description=Hot-plugged input event device based LIRC daemon
+DefaultDependencies=no
+After=network.target
+
+[Service]
+Type=forking
+EnvironmentFile=/etc/conf.d/eventlircd
+ExecStartPre=/bin/mkdir -p /var/run/lirc
+ExecStartPre=/bin/rm -f /dev/lircd
+ExecStart=/usr/sbin/eventlircd $EVENTLIRCD_OPTS
+ExecStopPost=/bin/rm -f /dev/lircd
+ExecStopPost=/bin/rm -fR /var/run/lirc
+
+[Install]
+WantedBy=multi-user.target
+Alias=lirc.service

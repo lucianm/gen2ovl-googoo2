@@ -63,6 +63,6 @@ src_install() {
 	autotools-utils_src_install
 	newconfd "${FILESDIR}/confd" "${PN}"
 	newinitd "${FILESDIR}/initd" "${PN}"
-	use systemd ?? systemd_dounit "${FILESDIR}/${PN}.service"
+	use systemd && systemd_dounit "${FILESDIR}/${PN}.service"
 	dodoc AUTHORS ChangeLog INSTALL NEWS README
 }
