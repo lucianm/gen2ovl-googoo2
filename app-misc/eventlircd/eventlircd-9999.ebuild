@@ -1,12 +1,12 @@
-# Copyright 1999-2012 Gentoo Foundation
+# Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-EAPI=4
+EAPI=5
 
 ESVN_REPO_URI="http://${PN}.googlecode.com/svn/trunk"
 
-inherit autotools-utils subversion
+inherit autotools-utils subversion systemd
 
 DESCRIPTION="LIRC helper daemon unifying and hotplugging event devices"
 HOMEPAGE="http://code.google.com/p/${PN}/"
@@ -16,10 +16,11 @@ LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS=""
 
-IUSE="debug +ir-keytable"
+IUSE="debug +ir-keytable systemd"
 
 DEPEND="app-misc/lirc
-	sys-fs/udev"
+	virtual/udev
+	systemd? ( sys-apps/systemd )"
 
 RDEPEND="${DEPEND}
 	ir-keytable? ( media-tv/v4l-utils )"
@@ -62,5 +63,6 @@ src_install() {
 	autotools-utils_src_install
 	newconfd "${FILESDIR}/confd" "${PN}"
 	newinitd "${FILESDIR}/initd" "${PN}"
+	use systemd ?? systemd_dounit "${FILESDIR}/${PN}.service"
 	dodoc AUTHORS ChangeLog INSTALL NEWS README
 }
