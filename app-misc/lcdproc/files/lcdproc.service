@@ -4,7 +4,8 @@ After=syslog.target LCDd.service
 
 [Service]
 Type=forking
-ExecStart=/usr/bin/lcdproc -c /etc/lcdproc.conf
+EnvironmentFile=/etc/conf.d/lcdproc
+ExecStart=/usr/bin/lcdproc -c /etc/lcdproc.conf $LCDPROC_CLIENT_OPTS
 ControlGroup=cpu:/
 Restart=always
 
