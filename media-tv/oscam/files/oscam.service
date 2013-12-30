@@ -4,7 +4,8 @@ After=network.target
 Before=vdr.service
 
 [Service]
-ExecStart=/usr/bin/oscam -c /etc/oscam -d 128
+EnvironmentFile=/etc/conf.d/oscam
+ExecStart=/usr/bin/oscam $_OSCAM_OPTS
 PIDFile=/tmp/.oscam/oscam.pid
 ControlGroup=cpu:/
 Restart=always
