@@ -4,7 +4,7 @@
 
 EAPI=5
 
-inherit eutils cmake-utils
+inherit eutils cmake-utils systemd
 
 #
 # Just define the OSCAM_VCS="git" environment variable in /etc/make.conf or in /etc/portage/env/media-tv/oscam
@@ -45,7 +45,7 @@ for cardreader in ${CARD_READERS}; do
 done
 
 IUSE="${IUSE_PROTOCOLS} ${IUSE_READERS} ${IUSE_CARDREADERS}
-	pcsc +reader usb +www touch +dvbapi irdeto_guessing +anticasc debug +monitor +ssl loadbalancing cacheex cw_cycle_check lcd led ipv6"
+	pcsc +reader usb +www touch +dvbapi irdeto_guessing +anticasc debug +monitor +ssl loadbalancing cacheex cw_cycle_check lcd led ipv6 systemd"
 
 REQUIRED_USE="
 	protocol_camd35_tcp?	( protocol_camd35 )
@@ -76,7 +76,8 @@ DEPEND="dev-util/cmake"
 RDEPEND="${DEPEND}
 	dev-libs/openssl
 	usb? ( dev-libs/libusb )
-	pcsc? ( sys-apps/pcsc-lite )"
+	pcsc? ( sys-apps/pcsc-lite )
+	systemd? ( sys-apps/systemd )"
 
 RESTRICT="nomirror"
 
@@ -163,6 +164,8 @@ src_install() {
 	fperms 0755 /etc/oscam || die
 	newinitd "${FILESDIR}/${PN}.initd" oscam
 	newconfd "${FILESDIR}/${PN}.confd" oscam
+
+	use systemd && systemd_dounit "${FILESDIR}/${PN}.service"
 
 	dodir "/var/log/${PN}"
 }

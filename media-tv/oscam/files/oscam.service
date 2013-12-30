@@ -1,0 +1,13 @@
+[Unit]
+Description=OsCAM Server
+After=network.target
+Before=vdr.service
+
+[Service]
+ExecStart=/usr/bin/oscam -c /etc/oscam -d 128
+PIDFile=/tmp/.oscam/oscam.pid
+ControlGroup=cpu:/
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
