@@ -1,0 +1,45 @@
+# ChangeLog for dev-libs/tntdb
+# Copyright 1999-2012 Gentoo Foundation; Distributed under the GPL v2
+# $Header: $
+
+*tntdb-1.2 (16 Sep 2012)
+
+  16 Sep 2012; Christopher Head (Hawk777) <chead@chead.ca> -tntdb-1.1.ebuild,
+  +tntdb-1.2.ebuild:
+  Version bump to 1.2 and set REQUIRED_USE sensibly; thanks to yngwin and
+  Tommy[D] for review.
+
+*tntdb-1.1 (15 Jan 2012)
+
+  15 Jan 2012; Christopher Head (Hawk777) <headch@gmail.com>
+  -tntdb-1.0.1.ebuild, +tntdb-1.1.ebuild:
+  Version bump to 1.1 and EAPI bump to 4; thanks to Tommy[D] for review.
+
+  18 Jun 2010; Johan Bergström (jbergstroem) <bugs@bergstroem.nu>
+  tntdb-1.0.1.ebuild:
+  Migrating away from deprecated postgres virtuals
+
+  17 Nov 2008; Tiziano Müller <dev-zero@gentoo.org> -tntdb-0.9.4.ebuild,
+  +tntdb-1.0.1.ebuild:
+  Version bump.
+
+  07 Jun 2008; Tiziano Müller <dev-zero@gentoo.org> tntdb-0.9.4.ebuild:
+  Changed dependency from dev-db/libpq to virtual/postgresql-base
+
+  17 Feb 2008; (Tommy[D]) tommy100@gmx.de tntdb-0.9.4.ebuild:
+  Shorten description
+
+  20 Jun 2007; Jakub Moc <jakub@gentoo.org> tntdb-0.9.1-r1.ebuild:
+  Fix mysql dependency
+
+  16 Jun 2007; Jakub Moc <jakub@gentoo.org> ChangeLog:
+  Remove old ebuild with broken deps
+
+  15 Jun 2007; Auke Booij (tulcod) <auke.booij@gmail.com>
+  +tntdb-0.9.1-r1.ebuild:
+  DEPEND and RDEPEND fixed, tntdb should actually not depend on tntnet
+
+  11 Jun 2007; Auke Booij (tulcod) <auke.booij@gmail.com>
+  +tntdb-0.9.1.ebuild, +metadata.xml:
+  New Ebuild for bug 181641 thanks to DrEevil, shillelagh and me :)
+
