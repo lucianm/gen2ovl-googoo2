@@ -24,7 +24,8 @@ IUSE="debug"
 
 DEPEND=">=media-video/vdr-1.6
 	>=app-misc/graphlcd-base-9999"
-RDEPEND="${DEPEND}"
+RDEPEND="${DEPEND}
+	media-fonts/vdrsymbols-ttf"
 
 #PATCHES="${FILESDIR}/graphlcd-9999_Makefile-vdr-1.7.34.diff"
 
@@ -67,6 +68,7 @@ src_install() {
 	dosym /usr/share/fonts/ttf-bitstream-vera/VeraBd.ttf ${myresdir}/plugins/${VDRPLUGIN}/fonts/VeraBd.ttf
 	dosym /usr/share/fonts/ttf-bitstream-vera/Vera.ttf ${myresdir}/plugins/${VDRPLUGIN}/fonts/Vera.ttf
 	dosym /usr/share/fonts/dejavu/DejaVuSansCondensed.ttf ${myresdir}/plugins/${VDRPLUGIN}/fonts/DejaVuSansCondensed.ttf
+	dosym /usr/share/fonts/vdrsymbols-ttf/VDRSymbolsSans.ttf ${myresdir}/plugins/${VDRPLUGIN}/fonts/VDRSymbolsSans.ttf
 
 	# symlink default hardware config file
 	insinto /etc/vdr/plugins/${VDRPLUGIN}
@@ -89,3 +91,4 @@ pkg_postinst() {
 
 	elog "Add additional options in /etc/conf.d/vdr.graphlcd"
 }
+
