@@ -7,7 +7,7 @@ EAPI="4"
 inherit git-2
 
 DESCRIPTION="CLI tool for downloading media from finnish VoD services Yle Areena, Elävä Arkisto & YleX Areena"
-HOMEPAGE="http://users.tkk.fi/~aajanki/rtmpdump-yle/"
+HOMEPAGE="http://aajanki.github.io/yle-dl/index.html"
 #SRC_URI="${HOMEPAGE}/${P}.tar.gz"
 EGIT_REPO_URI="git://github.com/aajanki/yle-dl.git"
 

@@ -1,12 +1,14 @@
-# Copyright 1999-2012 Gentoo Foundation
+# Copyright 1999-2014 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-EAPI="4"
+EAPI="5"
 
 DESCRIPTION="CLI tool for downloading media from finnish VoD services Yle Areena, Elävä Arkisto & YleX Areena"
-HOMEPAGE="http://users.tkk.fi/~aajanki/rtmpdump-yle/"
-SRC_URI="${HOMEPAGE}/${P}.tar.gz"
+HOMEPAGE="http://aajanki.github.io/yle-dl/index.html"
+MY_PN="aajanki-${PN}"
+VER_HASH="51f30c8"
+SRC_URI="https://github.com/aajanki/yle-dl/tarball/${PV}/${MY_PN}-${PV}-0-g${VER_HASH}.tar.gz"
 
 LICENSE="GPL-2"
 SLOT="0"
@@ -16,6 +18,8 @@ IUSE=""
 DEPEND=""
 RDEPEND=">=media-video/rtmpdump-2.4
 	dev-python/pycrypto"
+
+S="${WORKDIR}/${MY_PN}-${VER_HASH}"
 
 src_prepare() {
 
