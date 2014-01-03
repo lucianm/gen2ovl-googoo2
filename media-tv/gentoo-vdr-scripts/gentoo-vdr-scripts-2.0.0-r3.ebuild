@@ -41,10 +41,6 @@ src_prepare() {
 
 src_install() {
 	emake -s install DESTDIR="${D}" || die "make install failed"
-	if use systemd; then
-		systemd_dounit "${FILESDIR}/vdr.service"
-		dosbin "${FILESDIR}/vdr-systemd_helper.sh"
-	fi
 	dodoc README TODO ChangeLog README.grub2
 
 	# create necessary directories
@@ -55,6 +51,16 @@ src_install() {
 	for kd in shutdown-data merged-config-files dvd-images tmp; do
 		keepdir "${VDR_HOME}/${kd}"
 	done
+	if use systemd; then
+		# install wrapper and actual systemd unit files
+		systemd_dounit "${FILESDIR}/vdr.service"
+		systemd_newunit "${FILESDIR}/vdr_as_user_AT.service" "vdr_as_user_@.service"
+		# install systemd helper scripts which uses OpenRC-based framework
+		dosbin "${FILESDIR}/vdr-systemd_helper.sh"
+		# create empty environment exchange file and set correct permissions
+		touch "${D}${VDR_HOME}/tmp/systemd_env"
+		fowners vdr:vdr "${VDR_HOME}/tmp/systemd_env"
+	fi
 }
 
 pkg_preinst() {
@@ -112,6 +118,13 @@ pkg_postinst() {
 		ewarn "You are setting DVDSWITCH_BURNSPEED in /etc/conf.d/vdr.dvdswitch"
 		ewarn "This no longer has any effect, please use"
 		ewarn "VDR_DVDBURNSPEED in /etc/conf.d/vdr.cd-dvd"
+	fi
+
+	if use systemd; then
+		einfo "To start VDR service automatically in systemd, just enable the"
+		einfo "wrapper unit file vdr.service (and NOT vdr_as_user@.service) like"
+		einfo "'systemctl enable vdr' after customising any of the"
+		einfo "'/etc/conf.d/vdr*' config files as you would do when using OpenRC"
 	fi
 }
 

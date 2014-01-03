@@ -1,47 +1,33 @@
-# Copyright 2013 Lucian Muresan <lucianm AT users DOT sourceforge DOT net>
+# Copyright 2011-2014 Lucian Muresan <lucianm AT users DOT sourceforge DOT net>
 # Distributed under the terms of the GNU General Public License v2
 
-
 [Unit]
-Description=Video Disk Recorder Daemon
-After=lirc.service
-#Requires=alsasound.service
-Requires=systemd-udevd.service
+Description=Video Disk Recorder wrapper Daemon
+
+#
+# starts vdr_as_user@.service either as 'vdr' user
+# or as 'root'
+#
+
 DefaultDependencies=no
-
-
+After=systemd-udevd.service lirc.service
+Requires=systemd-udevd.service
 
 [Service]
-# this will collect the parameters and set them into
-# the VDR_OPTS variable in the EnvironmentFile, but also
-# run the whole addons/plugins scripts required before starting
-# VDR as it's also usually done with OpenRC
+Type=oneshot
+RemainAfterExit=true
+
+# this will determine the user under which vdr should be
+# executed (vdr or root) and set it into VDR_USER, also
+# collect the parameters and set them into the VDR_OPTS
+# variable in the EnvironmentFile
 ExecStartPre=/usr/sbin/vdr-systemd_helper.sh --start-pre
 
-# this is where we get our parameters (still manageable
-# in the /etc/conf.d/vdr.* files
-EnvironmentFile=/var/vdr/tmp/cmd_params
-
-# start VDR with our desired parameters, please disable the
-# internal watchdog by setting the timeout to 0
-ExecStart=/usr/bin/vdr $VDR_OPTS
-
-# execute addons/plugins scripts meant to be run afer starting
-ExecStartPost=/usr/sbin/vdr-systemd_helper.sh --start-post
-
-# execute addons/plugins scripts meant to be run before stopping
-ExecStop=/usr/sbin/vdr-systemd_helper.sh --stop-pre
-
-# terminate VDR ... hmm, seems not to be needed, systemd does it anyway
-# ExecStop=/usr/bin/killall -9 /usr/bin/vdr
-
-# execute final scripts
-ExecStopPost=/usr/sbin/vdr-systemd_helper.sh --stop-post
-
-Restart=always
+EnvironmentFile=/var/vdr/tmp/systemd_env
 
 
-
+ExecStart=/bin/bash -c "systemctl start vdr_as_user@${VDR_USER}"
+ExecStop=/bin/bash -c "systemctl stop vdr_as_user@${VDR_USER}"
 
 [Install]
 WantedBy=multi-user.target

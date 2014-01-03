@@ -3,7 +3,7 @@
 # VDR helper script for using a systemd unit together
 # with media-tv/gentoo-vdr-scripts
 #
-# Copyright 2011, Lucian Muresan < lucianm AT users DOT sourceforge DOT net >
+# Copyright 2011-2014, Lucian Muresan < lucianm AT users DOT sourceforge DOT net >
 # inspired by the old OpenRC script /etc/init.d/vdr by Mathias Schwarzott
 
 # Distributed under the terms of the GNU General Public License v2
@@ -33,14 +33,17 @@ einfo() {
 
 # inspired by the old OpenRC script /etc/init.d/vdr:
 common_init() {
-	vdr_home=/var/vdr
-	cd ${vdr_home}
-
+	cd ${HOME}
+	unset MAIL
 	. /usr/share/vdr/inc/functions.sh
 	include rc-functions
 	include plugin-functions
 	VDR_LOG_FILE=/var/vdr/tmp/vdr-start-log
-	VDR_CMD_FILE=/var/vdr/tmp/cmd_params
+	# this is the environment file to pass user and parameters to the systemd unit file
+	SYSTEMD_ENV_FILE=/var/vdr/tmp/systemd_env
+	# determine under which of 'vdr' and 'root' users to run the actual systemd service, too
+	vdr_user=vdr
+	yesno ${START_VDR_AS_ROOT} && vdr_user=root
 }
 
 clear_logfile() {
@@ -68,15 +71,15 @@ if [ "$1" = "--start-pre" ]; then
 	init_params
 	init_plugin_loader start
 	load_addons_prefixed pre-start || return 1
-	unset MAIL
-	export LOGNAME=vdr USER=vdr HOME="${vdr_home}"
 	# these options are what we need to start VDR from the
-	# systemd unit file and they are collected in ${vdr_opts} by now:
-	echo "VDR_OPTS=\"${vdr_opts}\"" > ${VDR_CMD_FILE}
+	# systemd unit file(s)
+	echo "VDR_USER=\"${vdr_user}\"" > ${SYSTEMD_ENV_FILE}
+	echo "VDR_OPTS=\"${vdr_opts}\"" >> ${SYSTEMD_ENV_FILE}
 	sync
 	# this will ensure that systemd will actually parse our
 	# new version of EnvironmentFile before starting VDR
-	# otherwise it won't work
+	# otherwise it might not work correctly, this part is called
+	# by the wrapper unit as root, anyway:
 	/bin/systemctl --system daemon-reload
 elif [ "$1" = "--start-post" ]; then
 	common_init
