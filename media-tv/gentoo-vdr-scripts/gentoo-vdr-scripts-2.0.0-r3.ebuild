@@ -14,12 +14,11 @@ SRC_URI="mirror://gentoo/${P}.tar.bz2
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="amd64 ~arm ~ppc x86"
-IUSE="nvram systemd"
+IUSE="nvram"
 
 RDEPEND="nvram? ( sys-power/nvram-wakeup )
 	app-admin/sudo
-	sys-process/wait_on_pid
-	systemd? ( sys-apps/systemd )"
+	sys-process/wait_on_pid"
 
 VDR_HOME=/var/vdr
 
@@ -51,16 +50,16 @@ src_install() {
 	for kd in shutdown-data merged-config-files dvd-images tmp; do
 		keepdir "${VDR_HOME}/${kd}"
 	done
-	if use systemd; then
-		# install wrapper and actual systemd unit files
-		systemd_dounit "${FILESDIR}/vdr.service"
-		systemd_newunit "${FILESDIR}/vdr_as_user_AT.service" "vdr_as_user_@.service"
-		# install systemd helper scripts which uses OpenRC-based framework
-		dosbin "${FILESDIR}/vdr-systemd_helper.sh"
-		# create empty environment exchange file and set correct permissions
-		touch "${D}${VDR_HOME}/tmp/systemd_env"
-		fowners vdr:vdr "${VDR_HOME}/tmp/systemd_env"
-	fi
+	
+	# install systemd unit file
+	systemd_dounit "${FILESDIR}/vdr.service"
+	# install systemd helper script which uses OpenRC-based framework
+	dosbin "${FILESDIR}/vdr-systemd_helper.sh"
+	# create empty environment exchange file and set correct permissions
+	touch "${D}${VDR_HOME}/tmp/systemd_env"
+	fowners vdr:vdr "${VDR_HOME}/tmp/systemd_env"
+	insinto "/etc/systemd/system/vdr.service.d"
+	doins "${FILESDIR}/00-gentoo-vdr-user.conf"
 }
 
 pkg_preinst() {
@@ -120,12 +119,16 @@ pkg_postinst() {
 		ewarn "VDR_DVDBURNSPEED in /etc/conf.d/vdr.cd-dvd"
 	fi
 
-	if use systemd; then
-		einfo "To start VDR service automatically in systemd, just enable the"
-		einfo "wrapper unit file vdr.service (and NOT vdr_as_user@.service) like"
-		einfo "'systemctl enable vdr' after customising any of the"
-		einfo "'/etc/conf.d/vdr*' config files as you would do when using OpenRC"
-	fi
+	ewarn ""
+	ewarn "If using systemd, you can still customize any of the"
+	ewarn "'/etc/conf.d/vdr*' config files as you would do when using OpenRC."
+	ewarn "The only thing you have to take special care of is how to deal with running"
+	ewarn "the VDR service either as user 'vdr' or as user 'root'."
+	ewarn "If you have to set START_VDR_AS_ROOT=yes in /etc/conf.d/vdr, then"
+	ewarn "you HAVE TO comment out 'User=vdr' in"
+	ewarn "'/etc/systemd/system/vdr.service.d/00-gentoo-vdr-user.conf' and viceversa."
+	ewarn "Make sure you toggle these 2 user settings properly, in sync and"
+	ewarn "ONLY when the VDR service is STOPPED !!!!"
 }
 
 pkg_config() {

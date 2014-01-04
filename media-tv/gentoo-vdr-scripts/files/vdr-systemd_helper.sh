@@ -33,7 +33,7 @@ einfo() {
 
 # inspired by the old OpenRC script /etc/init.d/vdr:
 common_init() {
-	cd ${HOME}
+	cd /var/vdr
 	unset MAIL
 	. /usr/share/vdr/inc/functions.sh
 	include rc-functions
@@ -41,9 +41,6 @@ common_init() {
 	VDR_LOG_FILE=/var/vdr/tmp/vdr-start-log
 	# this is the environment file to pass user and parameters to the systemd unit file
 	SYSTEMD_ENV_FILE=/var/vdr/tmp/systemd_env
-	# determine under which of 'vdr' and 'root' users to run the actual systemd service, too
-	vdr_user=vdr
-	yesno ${START_VDR_AS_ROOT} && vdr_user=root
 }
 
 clear_logfile() {
@@ -72,15 +69,9 @@ if [ "$1" = "--start-pre" ]; then
 	init_plugin_loader start
 	load_addons_prefixed pre-start || return 1
 	# these options are what we need to start VDR from the
-	# systemd unit file(s)
-	echo "VDR_USER=\"${vdr_user}\"" > ${SYSTEMD_ENV_FILE}
-	echo "VDR_OPTS=\"${vdr_opts}\"" >> ${SYSTEMD_ENV_FILE}
+	# systemd unit file
+	echo "VDR_OPTS=\"${vdr_opts}\"" > ${SYSTEMD_ENV_FILE}
 	sync
-	# this will ensure that systemd will actually parse our
-	# new version of EnvironmentFile before starting VDR
-	# otherwise it might not work correctly, this part is called
-	# by the wrapper unit as root, anyway:
-	/bin/systemctl --system daemon-reload
 elif [ "$1" = "--start-post" ]; then
 	common_init
 	#init_plugin_loader start
