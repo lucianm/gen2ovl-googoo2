@@ -45,7 +45,7 @@ for cardreader in ${CARD_READERS}; do
 done
 
 IUSE="${IUSE_PROTOCOLS} ${IUSE_READERS} ${IUSE_CARDREADERS}
-	pcsc +reader usb +www touch +dvbapi irdeto_guessing +anticasc debug +monitor +ssl loadbalancing cacheex cw_cycle_check lcd led ipv6 systemd"
+	pcsc +reader usb +www touch +dvbapi irdeto_guessing +anticasc debug +monitor +ssl loadbalancing cacheex cw_cycle_check lcd led ipv6"
 
 REQUIRED_USE="
 	protocol_camd35_tcp?	( protocol_camd35 )
@@ -75,9 +75,9 @@ REQUIRED_USE="
 DEPEND="dev-util/cmake"
 RDEPEND="${DEPEND}
 	dev-libs/openssl
-	usb? ( dev-libs/libusb )
-	pcsc? ( sys-apps/pcsc-lite )
-	systemd? ( sys-apps/systemd )"
+	usb? ( virtual/libusb:1
+	       dev-libs/libusb-compat )
+	pcsc? ( sys-apps/pcsc-lite )"
 
 RESTRICT="nomirror"
 
@@ -165,7 +165,7 @@ src_install() {
 	newinitd "${FILESDIR}/${PN}.initd" oscam
 	newconfd "${FILESDIR}/${PN}.confd" oscam
 
-	use systemd && systemd_dounit "${FILESDIR}/${PN}.service"
+	systemd_dounit "${FILESDIR}/${PN}.service"
 
 	dodir "/var/log/${PN}"
 }
