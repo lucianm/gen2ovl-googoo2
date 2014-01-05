@@ -1,0 +1,37 @@
+diff -Naur vdr-dbus2vdr-plugin.orig/etc/dbus2vdr.service vdr-dbus2vdr-plugin/etc/dbus2vdr.service
+--- vdr-dbus2vdr-plugin.orig/etc/dbus2vdr.service	2014-01-05 02:00:31.000000000 +0100
++++ vdr-dbus2vdr-plugin/etc/dbus2vdr.service	2014-01-05 02:00:53.502000000 +0100
+@@ -8,10 +8,10 @@
+ Type=simple
+ User=vdr
+ Restart=always
+-Environment=confdir=/var/lib/vdr/plugins/dbus2vdr
++Environment=confdir=/etc/vdr/plugins/dbus2vdr
+ ExecStartPre=/usr/bin/logger -t dbus2vdr dbus2vdr-daemon starting, conf = $confdir
+-ExecStart=/usr/bin/bash -c '/usr/bin/dbus-daemon --config-file=${confdir}/network.conf --address="tcp:host=%H,bind=*,port=0" --print-address | tee ${confdir}/network-address.conf'
+-ExecStopPost=/usr/bin/rm -f $confdir/network-address.conf
++ExecStart=/bin/bash -c '/usr/bin/dbus-daemon --config-file=${confdir}/network.conf --address="tcp:host=%H,bind=*,port=0" --print-address | tee ${confdir}/network-address.conf'
++ExecStopPost=/bin/rm -f $confdir/network-address.conf
+ ExecStopPost=/usr/bin/logger -t dbus2vdr dbus2vdr-daemon stopped
+  
+ [Install]
+diff -Naur vdr-dbus2vdr-plugin.orig/Makefile vdr-dbus2vdr-plugin/Makefile
+--- vdr-dbus2vdr-plugin.orig/Makefile	2014-01-05 02:00:31.000000000 +0100
++++ vdr-dbus2vdr-plugin/Makefile	2014-01-05 02:01:33.039000000 +0100
+@@ -115,14 +115,12 @@
+ 	install -D $^ $(DESTDIR)$(LIBDIR)/$^.$(APIVERSION)
+ 
+ install-cfg: shutdown-wrapper
+-	mkdir -p $(DESTDIR)/etc/init
+ 	mkdir -p $(DESTDIR)/etc/dbus-1/system.d
+ 	mkdir -p $(DESTDIR)$(PLGCONFDIR)
+-	cp -pn etc/dbus2vdr.conf $(DESTDIR)/etc/init/dbus2vdr.conf
+ 	cp -pn etc/de.tvdr.vdr.conf $(DESTDIR)/etc/dbus-1/system.d/de.tvdr.vdr.conf
+ 	cp -pn etc/network.conf $(DESTDIR)$(PLGCONFDIR)/network.conf
+-	install -D bin/vdr-dbus-send.sh $(DESTDIR)/usr/share/vdr-plugin-dbus2vdr/vdr-dbus-send.sh
+-	install -D shutdown-wrapper $(DESTDIR)/usr/share/vdr-plugin-dbus2vdr/shutdown-wrapper
++	install -D bin/vdr-dbus-send.sh $(DESTDIR)$(call PKGCFG,bindir)/vdr-dbus-send.sh
++	install -D shutdown-wrapper $(DESTDIR)/usr/share/vdr/plugins/dbus2vdr/shutdown-wrapper
+ 
+ install: install-lib install-i18n install-cfg
+ 
