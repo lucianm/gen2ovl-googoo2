@@ -54,7 +54,8 @@ src_install() {
 	# install systemd unit file
 	systemd_dounit "${FILESDIR}/vdr.service"
 	# install systemd helper script which uses OpenRC-based framework
-	dosbin "${FILESDIR}/vdr-systemd_helper.sh"
+	exeinto "/usr/share/vdr/bin"
+	doexe "${FILESDIR}/vdr-systemd_helper.sh"
 	# create empty environment exchange file and set correct permissions
 	touch "${D}${VDR_HOME}/tmp/systemd_env"
 	fowners vdr:vdr "${VDR_HOME}/tmp/systemd_env"
@@ -125,9 +126,9 @@ pkg_postinst() {
 	ewarn "The only thing you have to take special care of is how to deal with running"
 	ewarn "the VDR service either as user 'vdr' or as user 'root'."
 	ewarn "If you have to set START_VDR_AS_ROOT=yes in /etc/conf.d/vdr, then"
-	ewarn "you HAVE TO comment out 'User=vdr' in"
+	ewarn "you need to set 'User=root' in"
 	ewarn "'/etc/systemd/system/vdr.service.d/00-gentoo-vdr-user.conf' and viceversa."
-	ewarn "Make sure you toggle these 2 user settings properly, in sync and"
+	ewarn "Make sure you toggle these 2 user settings in sync and"
 	ewarn "ONLY when the VDR service is STOPPED !!!!"
 }
 

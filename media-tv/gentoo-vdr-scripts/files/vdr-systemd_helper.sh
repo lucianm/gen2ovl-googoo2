@@ -38,9 +38,10 @@ common_init() {
 	. /usr/share/vdr/inc/functions.sh
 	include rc-functions
 	include plugin-functions
-	VDR_LOG_FILE=/var/vdr/tmp/vdr-start-log
+	init_tmp_dirs
+	VDR_LOG_FILE="${PL_TMP}/vdr-start-log"
 	# this is the environment file to pass user and parameters to the systemd unit file
-	SYSTEMD_ENV_FILE=/var/vdr/tmp/systemd_env
+	SYSTEMD_ENV_FILE="${PL_TMP}/systemd_env"
 }
 
 clear_logfile() {
