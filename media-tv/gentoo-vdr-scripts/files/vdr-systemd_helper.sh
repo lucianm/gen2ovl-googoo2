@@ -68,7 +68,7 @@ if [ "$1" = "--start-pre" ]; then
 	clear_logfile
 	init_params
 	init_plugin_loader start
-	load_addons_prefixed pre-start || return 1
+	load_addons_prefixed pre-start && exit 1
 	# these options are what we need to start VDR from the
 	# systemd unit file
 	echo "VDR_OPTS=\"${vdr_opts}\"" > ${SYSTEMD_ENV_FILE}
