@@ -29,4 +29,7 @@ src_install() {
 	# create the teletext directory
 	diropts -m755 -ovdr -gvdr
 	keepdir /var/cache/vdr/${VDRPLUGIN}
+	
+	insinto /etc/sudoers.d
+	newins "${FILESDIR}/sudoers" "${PN}"
 }
