@@ -12,15 +12,28 @@
 . /etc/conf.d/vdr
 . /etc/conf.d/vdr.watchdogd
 
+# inspired by the old OpenRC script /etc/init.d/vdr:
+cd /var/vdr
+unset MAIL
+. /usr/share/vdr/inc/functions.sh
+include rc-functions
+include plugin-functions
+init_tmp_dirs
+VDR_LOG_FILE="${PL_TMP}/vdr-start-log"
+# this is the environment file to pass user and parameters to the systemd unit file
+SYSTEMD_ENV_FILE="${PL_TMP}/systemd_env"
+
+#common_init
+
 # dummy functions to make the rest of gentoo-vdr-scripts happy,
 # as we do not want to rely on openrc's implementations of these
 # commands:
 ebegin() {
-	vdr_log "ACTION:$@"
+	vdr_log "ACTION: $@"
 }
 
 eend() {
-	vdr_log "RESULT:  $@"
+	vdr_log "RESULT: $@"
 }
 
 ewarn() {
@@ -28,21 +41,20 @@ ewarn() {
 }
 
 einfo() {
-	vdr_log "INFO:     $@"
+	vdr_log "INFO:   $@"
 }
 
-# inspired by the old OpenRC script /etc/init.d/vdr:
-common_init() {
-	cd /var/vdr
-	unset MAIL
-	. /usr/share/vdr/inc/functions.sh
-	include rc-functions
-	include plugin-functions
-	init_tmp_dirs
-	VDR_LOG_FILE="${PL_TMP}/vdr-start-log"
-	# this is the environment file to pass user and parameters to the systemd unit file
-	SYSTEMD_ENV_FILE="${PL_TMP}/systemd_env"
+
+# some additional logging functions
+eerror() {
+	vdr_log "ERROR:  $@"
 }
+
+eexitfail() {
+	eerror "$@"
+	exit 1
+}
+
 
 clear_logfile() {
 	rm -f "${VDR_LOG_FILE}"
@@ -56,33 +68,39 @@ clear_logfile() {
 
 vdr_log()
 {
-	echo "$@" >> ${VDR_LOG_FILE}
+	echo "$@" >> "${VDR_LOG_FILE}"
 }
 
 #
 #
 # Depending on $1, we execute the scripts needed
-# before/after starting, or before/after stopping VDR:
+# before/after starting, or before/after stopping VDR,
+# and exit with non-zero error code on failure, in such
+# way that the systemd unit will fail and the problems
+# have to be investigated in logs, journal, or even
+# by executing these parts of the script manually in
+# the console as user 'vdr'
 if [ "$1" = "--start-pre" ]; then
-	common_init
+	ebegin "--start-pre"
 	clear_logfile
 	init_params
-	init_plugin_loader start
-	load_addons_prefixed pre-start && exit 1
-	# these options are what we need to start VDR from the
-	# systemd unit file
+	init_plugin_loader start || eexitfail "init_plugin_loader start"
+	load_addons_prefixed pre-start || eexitfail "load_addons_prefixed pre-start"
+	# these options are what we need to start VDR from the systemd unit file
 	echo "VDR_OPTS=\"${vdr_opts}\"" > ${SYSTEMD_ENV_FILE}
 	sync
+	eend "--start-pre"
 elif [ "$1" = "--start-post" ]; then
-	common_init
-	#init_plugin_loader start
-	load_addons_prefixed post-start
+	ebegin "--start-post"
+	load_addons_prefixed post-start || eexitfail "load_addons_prefixed post-start"
+	eend "--start-post"
 elif [ "$1" = "--stop-pre" ]; then
-	common_init
-	init_plugin_loader stop
-	load_addons_prefixed pre-stop
+	ebegin "--stop-pre"
+	init_plugin_loader stop || eexitfail "init_plugin_loader stop"
+	load_addons_prefixed pre-stop || eexitfail "load_addons_prefixed pre-stop"
+	eend "--stop-pre"
 elif [ "$1" = "--stop-post" ]; then
-	common_init
-	#init_plugin_loader stop
-	load_addons_prefixed post-stop
+	ebegin "--stop-post"
+	load_addons_prefixed post-stop || eexitfail "load_addons_prefixed post-stop"
+	eend "--stop-post"
 fi

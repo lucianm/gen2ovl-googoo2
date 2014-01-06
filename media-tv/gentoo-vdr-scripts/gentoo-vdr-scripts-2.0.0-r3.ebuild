@@ -36,6 +36,7 @@ src_prepare() {
 	# moved into own package
 	sed -e '/SUBDIRS =/s# bin # #' -i usr/Makefile
 	sed -e '/all:/s#compile##' -i Makefile
+	epatch "${FILESDIR}/${P}_obsolete-check.diff"
 }
 
 src_install() {
