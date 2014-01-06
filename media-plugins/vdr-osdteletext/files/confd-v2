@@ -1,5 +1,5 @@
 # /etc/conf.d/vdr.osdteletext
-# $Header: /var/cvsroot/gentoo-x86/media-plugins/vdr-osdteletext/files/confd-v2,v 1.1 2012/04/18 17:33:35 hd_brummy Exp $
+# $Header: /var/cvsroot/gentoo-x86/media-plugins/vdr-osdteletext/files/confd-v2,v 1.3 2013/03/31 12:58:27 hd_brummy Exp $
 
 # ################################################
 #
@@ -20,8 +20,8 @@
 
 # set the dir of the tmpfs
 #	allowed values: directory names
-#	default: /var/cache/osdteletext
-#OSDTELETEXT_DIR=/var/cache/osdteletext
+#	default: /var/cache/vdr/osdteletext
+#OSDTELETEXT_DIR=/var/cache/vdr/osdteletext
 
 # store top text pages at cache. (unviewable pages)
 #	allowed values: yes no
