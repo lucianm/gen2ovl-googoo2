@@ -1,4 +1,4 @@
-# Copyright 1999-2013 Gentoo Foundation
+# Copyright 1999-2014 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
@@ -15,8 +15,9 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE=""
 
-DEPEND=">=media-video/vdr-1.7.30"
-RDEPEND="${DEPEND}"
+DEPEND=">=media-video/vdr-2.0.0"
+RDEPEND="${DEPEND}
+		net-misc/curl"
 
 src_prepare() {
 	vdr-plugin-2_src_prepare
