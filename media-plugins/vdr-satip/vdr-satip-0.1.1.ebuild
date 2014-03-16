@@ -16,5 +16,6 @@ LICENSE="GPL-2"
 IUSE=""
 
 DEPEND=">=media-video/vdr-2.1.4
-        net-misc/curl"
+        net-misc/curl
+        dev-libs/pugixml"
 RDEPEND="${DEPEND}"
