@@ -17,7 +17,7 @@ EXT_PATCH_FLAGS_RENAMED=""
 # names ext-patch uses internally, here only used for maintainer checks
 EXT_PATCH_FLAGS_RENAMED_EXT_NAME=""
 
-IUSE="bidi debug  html vanilla ${EXT_PATCH_FLAGS} ${EXT_PATCH_FLAGS_RENAMED}"
+IUSE="bidi debug  html systemd vanilla ${EXT_PATCH_FLAGS} ${EXT_PATCH_FLAGS_RENAMED}"
 
 MY_PV="${PV%_p*}"
 MY_P="${PN}-${MY_PV}"
@@ -48,7 +48,8 @@ RDEPEND="${COMMON_DEPEND}
 	dev-lang/perl
 	>=media-tv/gentoo-vdr-scripts-0.2.0
 	media-fonts/corefonts
-	bidi? ( dev-libs/fribidi )"
+	bidi? ( dev-libs/fribidi )
+	systemd? ( sys-apps/systemd )"
 
 CONF_DIR=/etc/vdr
 CAP_FILE=${S}/capabilities.sh
@@ -234,6 +235,14 @@ src_prepare() {
 	fi
 
 	strip-linguas ${LING_PO} en
+}
+
+src_compile() {
+	if use systemd; then
+		emake "SDNOTIFY=1" || die
+	else
+		emake || die
+	fi
 }
 
 src_install() {
