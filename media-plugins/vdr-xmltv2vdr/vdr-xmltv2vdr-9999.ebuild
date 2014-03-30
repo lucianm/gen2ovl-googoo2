@@ -34,9 +34,7 @@ DEPEND=">=media-video/vdr-1.6
 
 RDEPEND="${DEPEND}"
 
-PATCHES="${FILESDIR}/0001-${VDRPLUGIN}-Makefile-DESTDIR-leftovers-epgdata2xmltv.patch
-	${FILESDIR}/xmltv2vdr-vdr2.1.2compat.diff"
-
+PATCHES="${FILESDIR}/0001-${VDRPLUGIN}-Makefile-DESTDIR-leftovers-epgdata2xmltv.patch"
 
 src_compile() {
 	vdr-plugin-2_src_compile
