@@ -1,0 +1,31 @@
+#!/sbin/runscript
+# Copyright 1999-2014 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header: $
+
+depend() {
+	use net
+	before modules
+}
+
+start() {
+	ebegin "Starting usbipd server"
+
+	/sbin/modprobe usbip-host
+
+	start-stop-daemon   --start --quiet --pidfile /var/run/usbipd.pid \
+		--exec /usr/sbin/usbipd -- -D
+
+	eend $? "Failed to start usbipd"
+}
+
+stop() {
+	ebegin "Stopping usbipd server"
+
+	start-stop-daemon --stop --quiet --pidfile /var/run/usbipd.pid
+
+	/sbin/rmmod usbip-host
+	/sbin/rmmod usbip-core
+
+	eend $? "Failed to stop usbipd server"
+}
