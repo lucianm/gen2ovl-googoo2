@@ -4,20 +4,23 @@
 
 EAPI=5
 
-inherit eutils perl-module
+inherit eutils perl-module cvs
 
 DESCRIPTION="Set of utilities to manage TV listings stored in the XMLTV format"
 HOMEPAGE="http://xmltv.org"
-SRC_URI="mirror://sourceforge/xmltv/${P}.tar.bz2"
+ECVS_SERVER="${PN}.cvs.sourceforge.net:/cvsroot/${PN}"
+ECVS_MODULE="${PN}"
+
+S="${WORKDIR}/${PN}"
 
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~amd64 ~ppc ~x86 ~x86-linux"
 
-IUSE="ar ch uk_rt uk_bleb uk_guardian uk_tvguide uk_atlas is it na_dd fi es_laguiatv huro se_swedb hr no_gf fr pt eu_epg tv_combiner tv_pick_cgi tv_check na_dtv
+IUSE="ar ch dk_dr uk_rt uk_bleb uk_guardian uk_tvguide uk_atlas is it na_dd fi fi_sv es_laguiatv huro se_swedb hr no_gf fr pt eu_epg tv_combiner tv_pick_cgi tv_check na_dtv
 za il eu_egon se_tvzon fr_kazer"
 # removed upstream due to source site changes:
-# na_icons in es_miguiatv nl dk ee re dtvla
+# na_icons in es_miguiatv nl ee re dtvla
 
 # NOTE: you can customize the xmltv installation by
 #       defining USE FLAGS (custom ones in
@@ -131,6 +134,8 @@ src_configure() {
 		#usex na_icons
 		# Enable Finland
 		usex fi
+		# Enable Finland (Swedish)
+		usex fi_sv
 		# Enable Israel
 		usex il
 		# Enable Spain
@@ -150,7 +155,7 @@ src_configure() {
 		# Enable Hungary and Romania
 		usex huro
 		# Enable Denmark
-		#usex dk
+		usex dk_dr
 		# Enable Japan
 		#use jp  && echo "yes" || echo "no"
 		# Enable Sweden
