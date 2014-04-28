@@ -1,0 +1,41 @@
+#!/sbin/runscript
+
+
+description="This daemon is used to retrieve new EPG data into a mysql database, downloading the information from the Internet"
+
+depend() {
+    need mysql
+}
+
+
+start()
+{
+   ebegin "Starting $DESC"
+   [ $UTF8 -eq 1 ] && export LANG="de_DE.UTF-8"
+   start-stop-daemon --start --exec $DAEMON -- $CONFIG
+   eend 0
+}
+
+
+
+stop()
+{
+   ebegin "Stopping $DESC"
+   start-stop-daemon --stop --exec $DAEMON
+   sleep 1
+   if [ -n "$(pidof epgd)" ] ; then
+     ewarn "Waiting for $DESC termination ..."
+     for in in $(seq 1 10) ; do
+       if [ -z $(pidof epgd) ] ; then
+         break;
+       fi
+       sleep 1
+     done
+     if [ -n "$(pidof epgd)" ]; then
+       eerror  "$DESC does not terminate normally - killing $DESC"
+       killall -v -KILL epgd
+       sleep 1
+     fi
+   fi
+   eend 0
+}

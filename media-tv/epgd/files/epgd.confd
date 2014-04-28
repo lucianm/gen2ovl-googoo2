@@ -1,0 +1,5 @@
+NAME="EPGd"
+DESC="EPG Data Daemon"
+DAEMON="/usr/bin/epgd"
+CONFIG=" -c /etc/epgd/"
+UTF8="1"
