@@ -1,0 +1,8 @@
+# /etc/conf.d/vdr.scraper2vdr:
+
+#SCRAPER2VDR_IMGDIR="/var/cache/vdr/epgimages/"
+
+# mode can be 'headless' or 'client'
+#SCRAPER2VDR_MODE="headless"
+
+# _EXTRAOPTS=""
