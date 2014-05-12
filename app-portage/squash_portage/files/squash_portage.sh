@@ -22,6 +22,7 @@
 # 2009-11-22, v.0.2.0(3) morris <mauricioarozi@gmail.com>
 # 2013-05-02, v.0.3.0    lucianm <lucianm@users.sourceforge.net>
 # 2013-11-03, v.0.3.1    lucianm <lucianm@users.sourceforge.net>
+# 2014-05-12, v.0.3.2    lucianm <lucianm@users.sourceforge.net>
 
 
 #set -x
@@ -68,18 +69,18 @@ source_make_cfgs() {
 sync() {
 	source_make_cfgs
 
-	ebegin "Syncing portage tree"
-	if [ ${SYNC_CMD} ]; then
-		eval ${SYNC_CMD}
+	ebegin "Syncing portage tree and overlays by running the command"
+	if [ ! -z "${SYNC_CMD}" ]; then
+		local SYNC_CMD="${SYNC_CMD}"
 	else
 		[ -x '/usr/bin/emerge' ] && local SYNC_CMD='command emerge --sync'
 		[ -x '/usr/bin/paludis' ] && local SYNC_CMD='command paludis --sync'
 		[ -x '/usr/bin/eix' ] && local SYNC_CMD='command eix-sync'
 		# make eix-sync work with layman overlays shound't be default
-		# [ -x '/usr/bin/eix' ] && [ -x '/usr/bin/layman' ] && [ ! -f /etc/eix-sync.conf ] && `/bin/echo '*' > /etc/eix-sync.conf`
-
-		eval "${SYNC_CMD}"
+		# [ -x '/usr/bin/eix' ] && [ -x '/usr/bin/layman' ] && [ ! -f /etc/eix-sync.conf ] && `/bin/echo '*' > /etc/eix-sync.conf`	
 	fi
+	einfo "\${SYNC_CMD}=\"${SYNC_CMD}\""
+	eval "${SYNC_CMD}"
 	retuval ${?} "Error: ${SYNC_CMD}"
 	stop
 	start

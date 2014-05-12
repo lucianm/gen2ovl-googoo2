@@ -1,4 +1,4 @@
-# Copyright 1999-2013 Gentoo Foundation
+# Copyright 1999-2014 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
@@ -64,7 +64,9 @@ pkg_postinst() {
 	einfo "4. run 'sync portage'"
 	einfo "5. correct symlink '/etc/make.profile' to point to the new location"
 	einfo "6. add layman overlays"
-	einfo "5. run 'eix-update'"
+	einfo "7. run 'eix-update'"
+	einfo ""
+	einfo "8. If you need to tweak your configuration, do so in /etc/portage/${PN}.conf"
 	einfo ""
 	einfo "Now you can enable the ${PN} service in OpenRC or in systemd."
 	einfo "Every time you want to sync portage and layman, just run '${PN} sync'"
