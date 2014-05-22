@@ -17,10 +17,10 @@ LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~amd64 ~ppc ~x86 ~x86-linux"
 
-IUSE="ar ch dk_dr uk_rt uk_bleb uk_guardian uk_tvguide uk_atlas is it na_dd fi fi_sv es_laguiatv huro se_swedb hr no_gf fr pt eu_epg tv_combiner tv_pick_cgi tv_check na_dtv
+IUSE="ar ch dk_dr dtvla uk_rt uk_bleb uk_guardian uk_tvguide uk_atlas is it na_dd nl fi fi_sv es_laguiatv huro se_swedb hr no_gf fr pt pt_meo eu_epg tv_combiner tv_pick_cgi tv_check na_dtv
 za il eu_egon se_tvzon fr_kazer"
 # removed upstream due to source site changes:
-# na_icons in es_miguiatv nl ee re dtvla
+# na_icons in es_miguiatv ee re
 
 # NOTE: you can customize the xmltv installation by
 #       defining USE FLAGS (custom ones in
@@ -107,7 +107,7 @@ src_configure() {
 		# Enable Switzerland Search
 		usex ch
 		# Enable Latin America
-		#usex dtvla
+		usex dtvla
 		# Enable UK and Ireland (Radio Times)
 		usex uk_rt
 		# Enable Fast alternative grabber for the UK
@@ -149,7 +149,7 @@ src_configure() {
 		usex es_laguiatv
 		#usex es_miguiatv
 		# Enable Netherlands
-		#usex nl
+		usex nl
 		# Enable Alternate Netherlands
 		#use nl_wolf  && echo "yes" || echo "no"
 		# Enable Hungary and Romania
@@ -176,6 +176,8 @@ src_configure() {
 		#use no  && echo "yes" || echo "no"
 		# Enable Portugal
 		usex pt
+		# Enable Portugal (MEO)
+		usex pt_meo
 		# Enable South Africa
 		usex za
 		# Enable Europe epg
