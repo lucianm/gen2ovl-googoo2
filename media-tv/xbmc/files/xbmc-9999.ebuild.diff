@@ -1,15 +1,12 @@
---- /var/portage/portage/media-tv/xbmc/xbmc-9999.ebuild	2013-09-05 07:31:23.000000000 +0200
-+++ /var/portage/layman/gen2ovl-googoo2/media-tv/xbmc/xbmc-9999.ebuild	2013-11-01 22:44:23.278264000 +0100
-@@ -1,6 +1,6 @@
- # Copyright 1999-2013 Gentoo Foundation
- # Distributed under the terms of the GNU General Public License v2
--# $Header: /var/cvsroot/gentoo-x86/media-tv/xbmc/xbmc-9999.ebuild,v 1.151 2013/09/05 05:06:56 vapier Exp $
-+# Exp $
+--- xbmc-9999.ebuild.portage	2014-05-22 22:28:34.210000000 +0200
++++ xbmc-9999.ebuild	2014-05-22 22:26:39.000000000 +0200
+@@ -11,10 +11,13 @@
  
- EAPI="5"
+ inherit eutils python-single-r1 multiprocessing autotools
  
-@@ -13,7 +13,9 @@
- 
+-CODENAME="Helix"
++CODENAME="Gotham"
++#CODENAME="Helix"
  case ${PV} in
  9999)
 -	EGIT_REPO_URI="git://github.com/xbmc/xbmc.git"
@@ -17,9 +14,9 @@
 +	EGIT_PROJECT="${PN}${XBMC_EGIT_PROJECT:-}.git"
 +	EGIT_BRANCH="${XBMC_EGIT_BRANCH:-master}"
  	inherit git-2
- 	SRC_URI="!java? ( mirror://gentoo/${P}-20130413-generated-addons.tar.xz )"
+ 	#SRC_URI="!java? ( mirror://gentoo/${P}-20130413-generated-addons.tar.xz )"
  	;;
-@@ -213,6 +215,7 @@
+@@ -225,6 +228,7 @@
  		--disable-ccache \
  		--disable-optimizations \
  		--enable-external-libraries \
