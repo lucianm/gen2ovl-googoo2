@@ -27,7 +27,7 @@ SLOT="0"
 IUSE="pcre ssl"
 
 DEPEND="media-video/vdr
-	>=dev-libs/tntnet-2.0[ssl=,sdk]
+	>=dev-libs/tntnet-2.0[ssl=]
 	>=dev-libs/cxxtools-2.0
 	pcre? ( >=dev-libs/libpcre-8.12[cxx] )"
 RDEPEND="${DEPEND}"
