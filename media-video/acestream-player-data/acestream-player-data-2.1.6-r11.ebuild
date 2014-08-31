@@ -119,7 +119,7 @@ src_install(){
 	use portaudio || rm "${D}/usr/lib/acestreamplayer/plugins/audio_output/libportaudio_plugin.so"
 	use v4l || rm "${D}/usr/lib/acestreamplayer/plugins/access/libv4l2_plugin.so"
 	use cdda || rm "${D}/usr/lib/acestreamplayer/plugins/access/libcdda_plugin.so"
-	use modplug || rm "${D}/usr/lib/acestreamplayer/plugins/demux/libmod_plugin.so"
+#	use modplug || rm "${D}/usr/lib/acestreamplayer/plugins/demux/libmod_plugin.so"
 	use mpeg || rm "${D}/usr/lib/acestreamplayer/plugins/codec/liblibmpeg2_plugin.so"
 	use speex || rm "${D}/usr/lib/acestreamplayer/plugins/codec/libspeex_plugin.so"
 	use avahi || rm "${D}/usr/lib/acestreamplayer/plugins/services_discovery/libbonjour_plugin.so"
@@ -157,4 +157,9 @@ src_install(){
 		rm "${D}/usr/lib/acestreamplayer/plugins/access/libvcd_plugin.so"
 		rm "${D}/usr/lib/acestreamplayer/plugins/codec/libsvcdsub_plugin.so"
 	fi
+	
+	##
+	dosym "libavformat.so" "/usr/$(get_libdir)/libavformat.so.53"
+	dosym "libavcodec.so" "/usr/$(get_libdir)/libavcodec.so.53"
+	dosym "libavutil.so" "/usr/$(get_libdir)/libavutil.so.51"
 }
