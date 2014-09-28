@@ -1,4 +1,4 @@
-# Copyright 1999-2012 Gentoo Foundation
+# Copyright 1999-2014 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
@@ -15,5 +15,6 @@ RDEPEND="|| (
 		x11-themes/channel-logos-dvbviewer
 		x11-themes/channel-logos-picons
 		x11-themes/channel-logos-xbmcpvr
+		x11-themes/channel-logos-3po
 	)"
 DEPEND=""
