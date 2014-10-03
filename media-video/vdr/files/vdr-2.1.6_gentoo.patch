@@ -1,15 +1,7 @@
-disabled compile from included plugins, we dont support this way on gentoo
-support for linguas handling
-fixed install an multicore cpu
-
-changed path to install header files in own dir vdr, libsi
-
-Signed-of-by: Joerg Bornkessel <hd_brummy@gentoo.org> (2013/03/30)
-
-diff -Naur vdr-1.7.42.orig/Makefile vdr-1.7.42/Makefile
---- vdr-1.7.42.orig/Makefile	2013-03-30 21:19:19.000000000 +0100
-+++ vdr-1.7.42/Makefile	2013-03-30 21:24:47.000000000 +0100
-@@ -109,7 +109,7 @@
+diff -Naur vdr-2.1.6.orig/Makefile vdr-2.1.6/Makefile
+--- vdr-2.1.6.orig/Makefile	2014-09-26 17:29:18.000000000 +0200
++++ vdr-2.1.6/Makefile	2014-09-26 18:45:13.000000000 +0200
+@@ -114,7 +114,7 @@
  VDRVERSION = $(shell sed -ne '/define VDRVERSION/s/^.*"\(.*\)".*$$/\1/p' config.h)
  APIVERSION = $(shell sed -ne '/define APIVERSION/s/^.*"\(.*\)".*$$/\1/p' config.h)
  
@@ -18,7 +10,7 @@ diff -Naur vdr-1.7.42.orig/Makefile vdr-1.7.42/Makefile
  
  # Implicit rules:
  
-@@ -162,7 +162,7 @@
+@@ -167,7 +167,7 @@
  
  PODIR     = po
  LOCALEDIR = locale
@@ -27,7 +19,7 @@ diff -Naur vdr-1.7.42.orig/Makefile vdr-1.7.42/Makefile
  I18Nmo    = $(addsuffix .mo, $(foreach file, $(I18Npo), $(basename $(file))))
  I18Nmsgs  = $(addprefix $(LOCALEDIR)/, $(addsuffix /LC_MESSAGES/vdr.mo, $(notdir $(foreach file, $(I18Npo), $(basename $(file))))))
  I18Npot   = $(PODIR)/vdr.pot
-@@ -185,7 +185,7 @@
+@@ -190,7 +190,7 @@
  
  install-i18n: i18n
  	@mkdir -p $(DESTDIR)$(LOCDIR)
@@ -36,7 +28,7 @@ diff -Naur vdr-1.7.42.orig/Makefile vdr-1.7.42/Makefile
  
  # The 'include' directory (for plugins):
  
-@@ -247,7 +247,7 @@
+@@ -252,7 +252,7 @@
  
  # Install the files (note that 'install-pc' must be first!):
  
@@ -45,13 +37,14 @@ diff -Naur vdr-1.7.42.orig/Makefile vdr-1.7.42/Makefile
  
  # VDR binary:
  
-@@ -259,11 +259,12 @@
+@@ -264,11 +264,12 @@
  
  install-dirs:
  	@mkdir -p $(DESTDIR)$(VIDEODIR)
 -	@mkdir -p $(DESTDIR)$(CONFDIR)
+-	@mkdir -p $(DESTDIR)$(CACHEDIR)
 +#	@mkdir -p $(DESTDIR)$(CONFDIR)
- 	@mkdir -p $(DESTDIR)$(CACHEDIR)
++#	@mkdir -p $(DESTDIR)$(CACHEDIR)
  	@mkdir -p $(DESTDIR)$(RESDIR)
  
  install-conf:
@@ -59,7 +52,7 @@ diff -Naur vdr-1.7.42.orig/Makefile vdr-1.7.42/Makefile
  	@cp -pn *.conf $(DESTDIR)$(CONFDIR)
  
  # Documentation:
-@@ -290,8 +291,11 @@
+@@ -295,8 +296,11 @@
  # Includes:
  
  install-includes: include-dir

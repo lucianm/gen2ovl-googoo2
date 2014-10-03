@@ -8,7 +8,7 @@ inherit eutils flag-o-matic multilib toolchain-funcs
 
 # Switches supported by extensions-patch
 EXT_PATCH_FLAGS="alternatechannel binaryskip graphtft jumpingseconds jumpplay naludump permashift
-		pinplugin mainmenuhooks menuorg menuselection resumereset ttxtsubs wareagleicon yaepg"
+		permashift_v1 pinplugin mainmenuhooks menuorg menuselection resumereset ttxtsubs wareagleicon yaepg"
 # ddepgentry
 
 # names of the use-flags
@@ -17,14 +17,14 @@ EXT_PATCH_FLAGS_RENAMED=""
 # names ext-patch uses internally, here only used for maintainer checks
 EXT_PATCH_FLAGS_RENAMED_EXT_NAME=""
 
-IUSE="bidi debug  html systemd vanilla ${EXT_PATCH_FLAGS} ${EXT_PATCH_FLAGS_RENAMED}"
+IUSE="bidi debug html systemd vanilla ${EXT_PATCH_FLAGS} ${EXT_PATCH_FLAGS_RENAMED}"
 
 MY_PV="${PV%_p*}"
 MY_P="${PN}-${MY_PV}"
 S="${WORKDIR}/${MY_P}"
 
-#EXT_P="extpng-${P}-gentoo-edition-v1"
-EXT_P="extpng-${PN}-2.1.5-gentoo-edition-v1"
+EXT_P="extpng-${P}-gentoo-edition-v2"
+#EXT_P="extpng-${PN}-2.1.6-gentoo-edition-v1"
 
 DESCRIPTION="Video Disk Recorder - turns a pc into a powerful set top box for DVB"
 HOMEPAGE="http://www.tvdr.de/"
@@ -34,6 +34,10 @@ SRC_URI="ftp://ftp.tvdr.de/vdr/Developer/${MY_P}.tar.bz2
 KEYWORDS="~arm ~amd64 ~ppc ~x86"
 SLOT="0"
 LICENSE="GPL-2"
+
+REQUIRED_USE="
+	permashift? ( !permashift_v1 )
+	permashift_v1? ( !permashift )"
 
 COMMON_DEPEND="virtual/jpeg
 	sys-libs/libcap
@@ -46,7 +50,7 @@ DEPEND="${COMMON_DEPEND}
 
 RDEPEND="${COMMON_DEPEND}
 	dev-lang/perl
-	>=media-tv/gentoo-vdr-scripts-0.2.0
+	>=media-tv/gentoo-vdr-scripts-2.5_rc1
 	media-fonts/corefonts
 	bidi? ( dev-libs/fribidi )
 	systemd? ( sys-apps/systemd )"
@@ -106,7 +110,6 @@ lang_po() {
 
 src_prepare() {
 	# apply maintainace-patches
-
 	ebegin "Changing paths for gentoo"
 
 	local DVBDIR=/usr/include
@@ -156,8 +159,7 @@ src_prepare() {
 	# support languages, written from right to left
 	BUILD_PARAMS+=" BIDI=$(usex bidi 1 0)"
 
-	epatch "${FILESDIR}/${PN}-2.1.1_gentoo.patch"
-#	epatch "${WORKDIR}/${P}-gcc.patch" # tmp gcc fix from Rolf Ahrenberg
+	epatch "${FILESDIR}/${P}_gentoo.patch"
 
 	if ! use vanilla; then
 
@@ -248,18 +250,14 @@ src_compile() {
 src_install() {
 	# trick makefile not to create a videodir by supplying it with an existing
 	# directory
-	einstall \
+	emake \
 	VIDEODIR="/" \
-	DESTDIR="${D}" \
-	|| die "einstall failed"
+	DESTDIR="${D}" install || die "emake install failed"
 
 	keepdir "${PLUGIN_LIBDIR}"
 
 	keepdir "${CONF_DIR}"/plugins
 	keepdir "${CONF_DIR}"/themes
-
-	diropts -m0755 -ovdr -gvdr
-	keepdir /var/cache/vdr
 
 	if use html; then
 		dohtml *.html
