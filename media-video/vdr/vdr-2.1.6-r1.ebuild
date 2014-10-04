@@ -158,6 +158,9 @@ src_prepare() {
 
 	# support languages, written from right to left
 	BUILD_PARAMS+=" BIDI=$(usex bidi 1 0)"
+	
+	# systemd support
+	BUILD_PARAMS+=" SDNOTIFY=$(usex systemd 1 0)"
 
 	epatch "${FILESDIR}/${P}_gentoo.patch"
 
@@ -237,14 +240,6 @@ src_prepare() {
 	fi
 
 	strip-linguas ${LING_PO} en
-}
-
-src_compile() {
-	if use systemd; then
-		emake "SDNOTIFY=1" || die
-	else
-		emake || die
-	fi
 }
 
 src_install() {
