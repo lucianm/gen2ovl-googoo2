@@ -115,7 +115,7 @@ src_prepare() {
 	for logoname in ${SRC_URI}; do
 		logoname="$(echo ${logoname} | rev | cut -d/ -f1 | rev)"
 		logoname_new="${logoname}"
-		[[ ${logoname} == *sport_ro* ]] || logoname_new="${logoname//_ro/}"
+		[[ ${logoname} == *sport*_ro* ]] || logoname_new="${logoname//_ro/}"
 		[[ ${logoname_new} == *dolce_mooz* ]] && logoname_new="${logoname//dolce_/}"
 		logoname_new="${logoname_new//_/ }"
 		mv -f "${logoname}" "${logoname_new}"
