@@ -1,8 +1,8 @@
-# Copyright 1999-2013 Gentoo Foundation
+# Copyright 1999-2014 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/media-video/makemkv/makemkv-1.8.6-r1.ebuild,v 1.5 2013/11/22 09:52:39 mattm Exp $
+# $Header: /var/cvsroot/gentoo-x86/media-video/makemkv/makemkv-1.8.12-r2.ebuild,v 1.1 2014/08/22 23:06:31 beandog Exp $
 
-EAPI=4
+EAPI=5
 inherit eutils gnome2-utils multilib flag-o-matic
 
 MY_P=makemkv-oss-${PV}
@@ -16,18 +16,20 @@ SRC_URI="http://www.makemkv.com/download/${MY_P}.tar.gz
 LICENSE="LGPL-2.1 MPL-1.1 MakeMKV-EULA openssl"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
-IUSE="multilib"
+IUSE="multilib qt4"
 
 QA_PREBUILT="opt/bin/makemkvcon opt/bin/mmdtsdec"
-RESTRICT="mirror"
 
 RDEPEND="dev-libs/expat
 	dev-libs/openssl:0
 	sys-libs/zlib
-	virtual/opengl
-	dev-qt/qtcore:4
-	dev-qt/qtdbus:4
-	dev-qt/qtgui:4
+	qt4? (
+		virtual/opengl
+		dev-qt/qtcore:4
+		dev-qt/qtdbus:4
+		dev-qt/qtgui:4
+	)
+	>=sys-libs/glibc-2.12.0
 	|| ( >=media-video/ffmpeg-1.0.0 >=media-video/libav-0.8.9 )
 	amd64? ( multilib? ( app-emulation/emul-linux-x86-baselibs ) )"
 DEPEND="${RDEPEND}"
@@ -40,8 +42,10 @@ src_prepare() {
 
 src_configure() {
 	replace-flags -O* -Os
+	local args=""
+	use qt4 || args="--disable-gui"
 	if [[ -x ${ECONF_SOURCE:-.}/configure ]] ; then
-		econf
+		econf $args
 	fi
 }
 
@@ -53,19 +57,25 @@ src_install() {
 	# install oss package
 	dolib.so out/libdriveio.so.0
 	dolib.so out/libmakemkv.so.1
+	dolib.so out/libmmbd.so.0
 	dosym libdriveio.so.0 /usr/$(get_libdir)/libdriveio.so.0.${PV}
 	dosym libdriveio.so.0 /usr/$(get_libdir)/libdriveio.so
 	dosym libmakemkv.so.1 /usr/$(get_libdir)/libmakemkv.so.1.${PV}
 	dosym libmakemkv.so.1 /usr/$(get_libdir)/libmakemkv.so
+	dosym libmmbd.so.0    /usr/$(get_libdir)/libmmbd.so
+	dosym libmmbd.so.0    /usr/$(get_libdir)/libmmbd.so.0.${PV}
 	into /opt
-	dobin out/makemkv
 
-	local res
-	for res in 16 22 32 64 128; do
-		newicon -s ${res} makemkvgui/share/icons/${res}x${res}/makemkv.png ${PN}.png
-	done
+	if use qt4; then
+		dobin out/makemkv
 
-	make_desktop_entry ${PN} MakeMKV ${PN} 'Qt;AudioVideo;Video'
+		local res
+		for res in 16 22 32 64 128; do
+			newicon -s ${res} makemkvgui/share/icons/${res}x${res}/makemkv.png ${PN}.png
+		done
+
+		make_desktop_entry ${PN} MakeMKV ${PN} 'Qt;AudioVideo;Video'
+	fi
 
 	# install bin package
 	pushd "${WORKDIR}"/${MY_PB}/bin >/dev/null
