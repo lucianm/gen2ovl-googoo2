@@ -11,8 +11,12 @@ PYTHON_REQ_USE="sqlite"
 
 inherit eutils python-single-r1 multiprocessing autotools
 
-CODENAME="Gotham"
-#CODENAME="Helix"
+if [[ "${PV}" < "14.0" ]]; then
+	CODENAME="Gotham"
+else
+	CODENAME="Helix"
+fi
+
 case ${PV} in
 9999)
 	EGIT_REPO_URI="${XBMC_EGIT_REPO_URI:-git://github.com/xbmc/xbmc.git}"
