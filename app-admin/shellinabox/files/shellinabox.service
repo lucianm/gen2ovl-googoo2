@@ -1,0 +1,13 @@
+[Unit]
+Description=Shell in a box (Web based AJAX terminal emulator)
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/shellinaboxd --pidfile=/var/run/shellinabox.pid --disable-ssl-menu --cert=/var/lib/shellinabox --port=4200
+PIDFile=/var/run/shellinabox.pid
+User=shellinabox
+Group=shellinabox
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -3,11 +3,17 @@
 # Which port we should listen on
 SHELLINABOXD_PORT="4200"
 
+# data directory
+SHELLINABOXD_DATADIR="/var/lib/shellinabox"
+
+# server binary
+SHELLINABOXD_BINARY="/usr/bin/shellinaboxd"
+
+# PID file
+SHELLINABOXD_PIDFILE="/var/run/shellinaboxd.pid"
+
 # Additional parameters for shellinabox daemon
 SHELLINABOXD_OPTS=""
 
 # Example additional configuration
 # SHELLINABOXD_OPTS="--no-beep --disable-ssl --localhost-only"
-
-# vim: ft=gentoo-conf-d
-

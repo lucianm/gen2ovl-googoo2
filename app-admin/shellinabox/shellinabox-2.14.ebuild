@@ -1,10 +1,10 @@
-# Copyright 1999-2009 Gentoo Foundation
+# Copyright 1999-2014 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header$
 
-EAPI="2"
+EAPI="5"
 
-inherit eutils
+inherit eutils user systemd
 
 DESCRIPTION="Web based AJAX terminal emulator"
 HOMEPAGE="http://code.google.com/p/shellinabox"
@@ -21,8 +21,8 @@ DEPEND="${RDEPEND}"
 
 pkg_setup()
 {
-    enewgroup ${PN}
-    enewuser ${PN} -1 -1 -1 "${PN}"
+	enewgroup ${PN}
+	enewuser ${PN} -1 -1 -1 "${PN}"
 }
 
 src_configure()
@@ -36,10 +36,11 @@ src_install()
 {
 	emake DESTDIR="${D}" install || die "einstall failed"
 
-    dodir "/var/lib/${PN}"
-    fowners ${PN}:${PN} "/var/lib/${PN}"
+	dodir "/var/lib/${PN}"
+	fowners ${PN}:${PN} "/var/lib/${PN}"
 
-    newinitd "${FILESDIR}"/${PN}-init ${PN}
+	newinitd "${FILESDIR}"/${PN}-init ${PN}
 	newconfd "${FILESDIR}"/${PN}-conf ${PN}
-}
 
+	systemd_dounit "${FILESDIR}/${PN}.service"
+}
