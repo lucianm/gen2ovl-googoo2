@@ -17,10 +17,10 @@ LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~amd64 ~ppc ~x86 ~x86-linux"
 
-IUSE="ar ch dk_dr dtvla uk_rt uk_bleb uk_guardian uk_tvguide uk_atlas is it na_dd nl fi fi_sv es_laguiatv huro se_swedb hr no_gf fr pt pt_meo eu_epg tv_combiner tv_pick_cgi tv_check na_dtv
-za il eu_egon se_tvzon fr_kazer"
+IUSE="ar ch dk_dr dtvla uk_rt uk_bleb uk_tvguide uk_atlas is it na_dd nl fi fi_sv es_laguiatv huro se_swedb hr no_gf fr pt pt_meo eu_epg tv_combiner tv_pick_cgi tv_check na_dtv
+za il eu_egon se_tvzon fr_kazer tr na_tvmedia"
 # removed upstream due to source site changes:
-# na_icons in es_miguiatv ee re
+# na_icons in es_miguiatv ee re uk_guardian
 
 # NOTE: you can customize the xmltv installation by
 #       defining USE FLAGS (custom ones in
@@ -66,18 +66,20 @@ DEPEND="${RDEPEND}
 	uk_rt? ( dev-perl/HTTP-Cache-Transparent dev-perl/IO-stringy dev-perl/DateTime dev-perl/DateTime-TimeZone )
 	uk_bleb? ( dev-perl/Archive-Zip dev-perl/IO-stringy )
 	uk_atlas? ( dev-perl/DateTime )
-	uk_guardian? ( dev-perl/DateTime )
 	uk_tvguide? ( dev-perl/DateTime )
 	tv_combiner? ( dev-perl/XML-LibXML )
 	tv_check? ( dev-perl/perl-tk dev-perl/Tk-TableMatrix )
 	tv_pick_cgi? ( virtual/perl-CGI dev-perl/Lingua-EN-Numbers-Ordinate )
 	na_dtv? ( >=dev-perl/WWW-Mechanize-1.02 dev-perl/TimeDate dev-perl/IO-stringy dev-perl/XML-LibXML dev-perl/DateTime dev-perl/DateTime-Format-ISO8601 )
+	na_tvmedia? ( dev-perl/Data-Dump )
 	"
 #	na_icons? ( dev-perl/HTML-TableExtract >=dev-perl/WWW-Mechanize-1.02 )
 #	nl? ( dev-perl/HTML-Tree )
 #	dk? ( dev-perl/HTML-Tree dev-perl/DateTime dev-perl/Parse-RecDescent )
 #	ee? ( dev-perl/IO-stringy )
 #	re? ( dev-perl/Lingua-EN-Numbers-Ordinate )
+#	uk_guardian? ( dev-perl/DateTime )
+
 #REQUIRED_USE="na_icons? ( na_dd )"
 
 PREFIX="/usr"
@@ -115,7 +117,7 @@ src_configure() {
 		# Enable Fast grabber for UK and Ireland using Atlas database
 		usex uk_atlas
 		# Enable grabber for UK and Ireland using The Guardian website
-		usex uk_guardian
+		#usex uk_guardian
 		# Enable grabber for UK and Ireland using TV Guide website
 		usex uk_tvguide
 		# Enable Belgium and Luxemburg
@@ -196,6 +198,10 @@ src_configure() {
 		#use nc && echo "yes" || echo "no"
 		# Enable North America DirecTV
 		usex na_dtv
+		# Enable Turkey (Digiturk)
+		usex tr
+		# Enable North America (TVMedia)
+		usex na_tvmedia
 	}
 
 	pm_echovar=`make_config`
