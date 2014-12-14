@@ -1,4 +1,4 @@
-# Copyright 1999-2013 Gentoo Foundation
+# Copyright 1999-2014 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
@@ -16,7 +16,7 @@ LICENSE="GPL-2"
 SLOT="0"
 IUSE="debug"
 
-RDEPEND=">=media-tv/xbmc-12.0"
+RDEPEND=">=media-tv/kodi-13.9"
 DEPEND="${RDEPEND}"
 
 S=${WORKDIR}/${PN}
@@ -27,14 +27,14 @@ src_prepare() {
 }
 
 src_configure() {
-	econf --prefix=/usr/share/xbmc
+	econf --prefix=/usr/share/kodi
 }
 
 src_install() {
 	emake DESTDIR="${D}" install
-	dodir "/usr/$(get_libdir)/xbmc/addons/pvr.vdr.xvdr"
-	mv "${D}usr/share/xbmc/addons/pvr.vdr.xvdr/XBMC_VDR_xvdr.pvr" \
-		"${D}usr/$(get_libdir)/xbmc/addons/pvr.vdr.xvdr" || \
+	dodir "/usr/$(get_libdir)/kodi/addons/pvr.vdr.xvdr"
+	mv "${D}usr/share/kodi/addons/pvr.vdr.xvdr/XBMC_VDR_xvdr.pvr" \
+		"${D}usr/$(get_libdir)/kodi/addons/pvr.vdr.xvdr" || \
 		die "Could not move the addon shared object to the actual LIBDIR"
 }
 
