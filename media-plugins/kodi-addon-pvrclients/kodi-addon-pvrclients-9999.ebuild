@@ -1,4 +1,4 @@
-# Copyright 1999-2013 Gentoo Foundation
+# Copyright 1999-2014 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
@@ -24,7 +24,7 @@ done
 IUSE="${IUSE_PVRCLIENTS}"
 REQUIRED_USE="|| ( ${IUSE_PVRCLIENTS} )"
 
-RDEPEND=">=media-tv/xbmc-12.0"
+RDEPEND=">=media-tv/kodi-13.9"
 
 DEPEND="${RDEPEND}
 	pvrclient_mythtv? ( virtual/mysql
@@ -59,8 +59,8 @@ src_prepare() {
 
 src_configure() {
 	econf --prefix=/usr \
-		--libdir=/usr/$(get_libdir)/xbmc/addons \
-		--datadir=/usr/share/xbmc/addons \
+		--libdir=/usr/$(get_libdir)/kodi/addons \
+		--datadir=/usr/share/kodi/addons \
 		$(use_enable pvrclient_mythtv addons-with-dependencies)
 }
 
