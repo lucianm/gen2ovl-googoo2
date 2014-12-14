@@ -162,4 +162,6 @@ src_install(){
 	dosym "libavformat.so" "/usr/$(get_libdir)/libavformat.so.53"
 	dosym "libavcodec.so" "/usr/$(get_libdir)/libavcodec.so.53"
 	dosym "libavutil.so" "/usr/$(get_libdir)/libavutil.so.51"
+	dosym "libpostproc.so" "/usr/$(get_libdir)/libpostproc.so.52"
+	dosym "libswscale.so" "/usr/$(get_libdir)/libswscale.so.2"
 }
