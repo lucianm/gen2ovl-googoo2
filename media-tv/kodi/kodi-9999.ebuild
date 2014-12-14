@@ -20,24 +20,24 @@ fi
 case ${PV} in
 9999)
 	EGIT_REPO_URI="${XBMC_EGIT_REPO_URI:-git://github.com/xbmc/xbmc.git}"
-	EGIT_PROJECT="${PN}${XBMC_EGIT_PROJECT:-}.git"
+#	EGIT_PROJECT="${PN}${XBMC_EGIT_PROJECT:-}.git"
 	EGIT_BRANCH="${XBMC_EGIT_BRANCH:-master}"
-	inherit git-2
+	inherit git-r3
 	#SRC_URI="!java? ( mirror://gentoo/${P}-20130413-generated-addons.tar.xz )"
 	;;
 *_alpha*|*_beta*|*_rc*)
-	MY_PV="${CODENAME}_${PV#*_}"
+	MY_PV="${PV/_/}-${CODENAME}"
 	MY_P="${PN}-${MY_PV}"
-	SRC_URI="https://github.com/xbmc/xbmc/archive/${MY_PV}.tar.gz -> ${P}.tar.gz
-		!java? ( mirror://gentoo/${P}-generated-addons.tar.xz )"
+	SRC_URI="https://github.com/xbmc/xbmc/archive/${MY_PV}.tar.gz -> ${P}.tar.gz"
+#		!java? ( mirror://gentoo/${P}-generated-addons.tar.xz )"
 	KEYWORDS="~amd64 ~x86"
-	S=${WORKDIR}/${MY_P}
+	S="${WORKDIR}/xbmc-${MY_PV}"
 	;;
 *|*_p*)
 	MY_PV=${PV/_p/_r}
 	MY_P="${PN}-${MY_PV}"
-	SRC_URI="http://mirrors.xbmc.org/releases/source/${MY_P}.tar.gz
-		http://mirrors.xbmc.org/releases/source/${MY_P}-generated-addons.tar.xz"
+	SRC_URI="http://mirrors.xbmc.org/releases/source/${MY_P}.tar.gz"
+#		http://mirrors.xbmc.org/releases/source/${MY_P}-generated-addons.tar.xz"
 	KEYWORDS="~amd64 ~x86"
 
 	S=${WORKDIR}/${PN}-
@@ -47,12 +47,12 @@ case ${PV} in
 	;;
 esac
 
-DESCRIPTION="XBMC is a free and open source media-player and entertainment hub"
+DESCRIPTION="Kodi (previously known as XBMC) is a free and open source media-player and entertainment hub"
 HOMEPAGE="http://xbmc.org/"
 
 LICENSE="GPL-2"
 SLOT="0"
-IUSE="airplay alsa altivec avahi bluetooth bluray caps cec css debug +fishbmc gles goom java joystick midi mysql nfs +opengl profile +projectm pulseaudio pvr +rsxs rtmp +samba +sdl sse sse2 sftp test udisks upnp upower +usb vaapi vdpau webserver +X +xrandr"
+IUSE="airplay alsa altivec avahi bluetooth bluray caps cec css debug +ffmpeg +fishbmc gles goom java joystick midi mysql nfs +opengl profile +projectm pulseaudio pvr +rsxs rtmp +samba +sdl sse sse2 sftp test udisks upnp upower +usb vaapi vdpau webserver +X +xrandr"
 REQUIRED_USE="
 	pvr? ( mysql )
 	rsxs? ( X )
@@ -107,7 +107,7 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	media-libs/tiff
 	pulseaudio? ( media-sound/pulseaudio )
 	media-sound/wavpack
-	|| ( >=media-video/ffmpeg-1.2.1:0=[encode] ( media-libs/libpostproc >=media-video/libav-10_alpha:=[encode] ) )
+	ffmpeg? ( || ( >=media-video/ffmpeg-1.2.1:0=[encode,static-libs] ( media-libs/libpostproc[static-libs] >=media-video/libav-10_alpha:=[encode,static-libs] ) ) )
 	rtmp? ( media-video/rtmpdump )
 	avahi? ( net-dns/avahi )
 	nfs? ( net-fs/libnfs )
@@ -144,7 +144,9 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	)"
 RDEPEND="${COMMON_DEPEND}
 	udisks? ( sys-fs/udisks:0 )
-	upower? ( || ( sys-power/upower sys-power/upower-pm-utils ) )"
+	upower? ( || ( sys-power/upower sys-power/upower-pm-utils ) )
+	!media-tv/xbmc"
+
 DEPEND="${COMMON_DEPEND}
 	app-arch/xz-utils
 	dev-lang/swig
@@ -170,7 +172,7 @@ pkg_setup() {
 }
 
 src_unpack() {
-	[[ ${PV} == "9999" ]] && git-2_src_unpack || default
+	[[ ${PV} == "9999" ]] && git-r3_src_unpack || default
 }
 
 src_prepare() {
@@ -181,6 +183,7 @@ src_prepare() {
 
 	# some dirs ship generated autotools, some dont
 	multijob_init
+	emake --directory="tools/depends/native/JsonSchemaBuilder"
 	local d
 	for d in $(printf 'f:\n\t@echo $(BOOTSTRAP_TARGETS)\ninclude bootstrap.mk\n' | emake -f - f) ; do
 		[[ -e ${d} ]] && continue
@@ -231,11 +234,14 @@ src_configure() {
 	export ac_cv_lib_bluetooth_hci_devid=$(usex bluetooth)
 	# Requiring java is asine #434662
 	[[ ${PV} != "9999" ]] && export ac_cv_path_JAVA_EXE=$(which $(usex java java true))
+	
+	use ffmpeg && FFMPEG_FLAGS=" --with-ffmpeg=auto"
 
 	econf \
 		--docdir=/usr/share/doc/${PF} \
 		--disable-ccache \
 		--disable-optimizations \
+		$FFMPEG_FLAGS \
 		$(has_version 'media-video/libav' && echo "--enable-libav-compat") \
 		--enable-gl \
 		$(use_enable airplay) \
@@ -277,7 +283,7 @@ src_install() {
 	rm "${ED}"/usr/share/doc/*/{LICENSE.GPL,copying.txt}*
 
 	domenu tools/Linux/xbmc.desktop
-	newicon media/icon48x48.png xbmc.png
+	newicon media/icon48x48.png kodi.png
 
 	# Remove optional addons (platform specific and disabled by USE flag).
 	local disabled_addons=(
@@ -308,7 +314,14 @@ src_install() {
 		/usr/share/xbmc/addons/skin.confluence/fonts/Roboto-Bold.ttf
 
 	python_domodule tools/EventClients/lib/python/xbmcclient.py
-	python_newscript "tools/EventClients/Clients/Kodi Send/kodi-send.py" xbmc-send
+
+	doman docs/manpages/kodi.1
+	doman docs/manpages/kodi.bin.1
+	doman docs/manpages/kodi-send.1
+	doman docs/manpages/kodi-standalone.1
+
+	#python_newscript "tools/EventClients/Clients/Kodi Send/kodi-send.py" kodi-send
+	newbin "tools/EventClients/Clients/Kodi Send/kodi-send.py" kodi-send
 }
 
 pkg_postinst() {
