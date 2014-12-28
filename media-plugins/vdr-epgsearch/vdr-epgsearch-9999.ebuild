@@ -40,8 +40,6 @@ REQUIRED_USE="pcre? ( !tre )
 	tre? ( !pcre )"
 
 src_prepare() {
-	epatch "${FILESDIR}/epgsearch-vdr2.1.2compat.diff"
-
 	# for our new Makefile detection to work:
 	sed -i Makefile -e 's:ALL:SOFILE:'
 
