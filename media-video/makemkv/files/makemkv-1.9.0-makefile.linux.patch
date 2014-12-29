@@ -1,0 +1,21 @@
+diff -Naur makemkv-oss-1.9.0_orig/Makefile.in makemkv-oss-1.9.0/Makefile.in
+--- makemkv-oss-1.9.0_orig/Makefile.in	2014-11-16 16:38:49.000000000 +0100
++++ makemkv-oss-1.9.0/Makefile.in	2014-12-29 12:16:11.402967000 +0100
+@@ -2,7 +2,7 @@
+ include makefile.common
+ 
+ GCC=@CC@
+-MOC=$(strip $(shell which moc-qt4))
++MOC=$(strip $(shell which moc))
+ ifeq ($(MOC),)
+ MOC=moc
+ endif
+@@ -50,7 +50,7 @@
+ endif
+ 
+ out/%: out/%.full
+-	$(OBJCOPY) --strip-all --strip-debug --strip-unneeded --discard-all $< $@ 
++	$(OBJCOPY) --discard-all $< $@ 
+ 
+ out/libdriveio.so.0.full:
+ 	mkdir -p out
