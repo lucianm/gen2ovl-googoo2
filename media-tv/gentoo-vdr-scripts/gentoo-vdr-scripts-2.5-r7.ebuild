@@ -1,6 +1,6 @@
-# Copyright 1999-2014 Gentoo Foundation
+# Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/media-tv/gentoo-vdr-scripts/gentoo-vdr-scripts-2.5_rc4.ebuild,v 1.1 2014/10/22 10:59:08 hd_brummy Exp $
+# $Header: Exp $
 
 EAPI=5
 
@@ -41,7 +41,7 @@ src_prepare() {
 
 src_install() {
 	emake -s install DESTDIR="${D}" || die "make install failed"
-	dodoc README TODO ChangeLog README.grub2
+	dodoc README TODO ChangeLog README.grub2 README.shutdown README.shutdown-jobs README.systemd README.vdrcaps
 
 	# create necessary directories
 	diropts -ovdr -gvdr
@@ -110,11 +110,8 @@ pkg_postinst() {
 		ewarn "VDR_DVDBURNSPEED in /etc/conf.d/vdr.cd-dvd"
 	fi
 
-	einfo "Up from this version systemd is supported by gentoo-vdr-scripts"
-	einfo "Please see for detailed info on this:"
-	einfo "Also please report problems with systemd on gentoo-vdr-scripts direct in this bug"
-	einfo "https://bugs.gentoo.org/show_bug.cgi?id=353492"
-
+	einfo "systemd is now supported by gentoo-vdr-scripts"
+	einfo "Please read for detailed info on this vdr's README.systemd"
 }
 
 pkg_config() {

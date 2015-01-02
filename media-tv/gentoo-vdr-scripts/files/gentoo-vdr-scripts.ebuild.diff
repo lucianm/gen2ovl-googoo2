@@ -1,0 +1,10 @@
+--- gentoo-vdr-scripts-2.5.ebuild	2015-01-02 11:04:59.831121000 +0100
++++ gentoo-vdr-scripts-2.5-r7.ebuild	2015-01-02 11:02:07.715039000 +0100
+@@ -36,6 +36,7 @@
+ 	# moved into own package
+ 	sed -e '/SUBDIRS =/s# bin # #' -i usr/Makefile
+ 	sed -e '/all:/s#compile##' -i Makefile
++	epatch_user
+ }
+ 
+ src_install() {
