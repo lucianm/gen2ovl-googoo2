@@ -30,6 +30,10 @@ RDEPEND=${DEPEND}
 
 IUSE="debug"
 
+src_prepare() {
+	epatch_user
+}
+
 src_compile() {
 	if use debug; then
 		filter-flags -O2 -O1
