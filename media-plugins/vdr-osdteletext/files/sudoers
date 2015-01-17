@@ -1,2 +1,0 @@
-vdr ALL=NOPASSWD:/bin/mount
-vdr ALL=NOPASSWD:/bin/umount
