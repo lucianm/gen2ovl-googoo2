@@ -1,4 +1,4 @@
-# Copyright 1999-2014 Gentoo Foundation
+# Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
@@ -41,12 +41,11 @@ SKINDESIGNER_CACHEDIR="/var/cache/vdr/plugins/${VDRPLUGIN}"
 src_prepare() {
 	vdr-plugin-2_src_prepare
 
-	chmod -R ugo+x ${S}/scripts/temperatures*
-	
-	for script in $(ls ${S}/scripts/temperatures*); do
+	# adjust plugin cache ND SCRIPT directories:
+	chmod -R ugo+x ${S}/scripts/temperatures*	
+	for script in config.h $(ls ${S}/scripts/temperatures*); do
 		sed -i "s:/tmp/${VDRPLUGIN}:${SKINDESIGNER_CACHEDIR}:" $script || die
 	done
-
 	BUILD_PARAMS+=" SKINDESIGNER_SCRIPTDIR=/etc/vdr/plugins/${VDRPLUGIN}/scripts"
 }
 
