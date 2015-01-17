@@ -36,21 +36,31 @@ RDEPEND="${DEPEND}
 
 #PATCHES="${FILESDIR}/${PN}_..."
 
+SKINDESIGNER_CACHEDIR="/var/cache/vdr/plugins/${VDRPLUGIN}"
+
 src_prepare() {
 	vdr-plugin-2_src_prepare
 
 	chmod -R ugo+x ${S}/scripts/temperatures*
+	
+	for script in $(ls ${S}/scripts/temperatures*); do
+		sed -i "s:/tmp/${VDRPLUGIN}:${SKINDESIGNER_CACHEDIR}:" $script || die
+	done
 
 	BUILD_PARAMS+=" SKINDESIGNER_SCRIPTDIR=/etc/vdr/plugins/${VDRPLUGIN}/scripts"
 }
 
 src_install() {
 	vdr-plugin-2_src_install
-	chown vdr:vdr -R "${D}"/etc/vdr
+	fowners -R vdr:vdr /etc/vdr	
+	dodir "${SKINDESIGNER_CACHEDIR}"
+	fowners -R vdr:vdr "${SKINDESIGNER_CACHEDIR}"
 }
 
 pkg_postinst() {
 	einfo "Please check and ajust your settings in \"/etc/conf.d/vdr.${VDRPLUGIN}\","
 	einfo "especially for the channel logos path, and in general, make sure"
 	einfo "they end with an \"/\""
+	einfo ""
+	einfo "Please also check /etc/vdr/plugins/${VDRPLUGIN}/scripts/README !!!"
 }
