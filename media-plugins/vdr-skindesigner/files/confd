@@ -4,4 +4,6 @@
 
 #SKINDESIGNER_SKINSDIR="/usr/share/vdr/plugins/skindesigner/skins/"
 
+#SKINDESIGNER_LOGOPATH="/usr/share/vdr/plugins/skindesigner/logos/"
+
 # _EXTRAOPTS=""

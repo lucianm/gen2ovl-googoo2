@@ -4,6 +4,6 @@
 #
 
 plugin_pre_vdr_start() {
-  add_plugin_param "--logodir=${TVGUIDE_LOGODIR:=/usr/share/channel-logos/dvbviewer/}"
+  add_plugin_param "--logodir=${TVGUIDE_LOGODIR:=/usr/share/vdr/plugins/tvguide/channellogos/}"
   add_plugin_param "--epgimages=${TVGUIDE_EPGIMGDIR:=/var/cache/vdr/epgimages/}"
 }

@@ -36,6 +36,14 @@ RDEPEND="${DEPEND}
 
 #PATCHES="${FILESDIR}/${PN}_..."
 
+src_prepare() {
+	vdr-plugin-2_src_prepare
+
+	chmod -R ugo+x ${S}/scripts/temperatures*
+
+	BUILD_PARAMS+=" SKINDESIGNER_SCRIPTDIR=/etc/vdr/plugins/${VDRPLUGIN}/scripts"
+}
+
 src_install() {
 	vdr-plugin-2_src_install
 	chown vdr:vdr -R "${D}"/etc/vdr
