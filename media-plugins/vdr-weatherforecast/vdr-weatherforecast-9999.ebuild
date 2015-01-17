@@ -38,7 +38,9 @@ RDEPEND="${DEPEND}"
 src_install() {
 	vdr-plugin-2_src_install
 	#chown vdr:vdr -R "${D}"/etc/vdr
-	dodir "/var/cache/vdr/plugins/${VDRPLUGIN}"
+	WEATHERFORECAST_CACHEDIR="/var/cache/vdr/plugins/${VDRPLUGIN}"
+	dodir "${WEATHERFORECAST_CACHEDIR}"
+	fowners -R vdr:vdr "${WEATHERFORECAST_CACHEDIR}"
 }
 
 #pkg_postinst() {
