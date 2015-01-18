@@ -6,10 +6,10 @@
 
 plugin_pre_vdr_start() {
 
-    : ${RADIO_FILES_DIR:=/usr/share/vdr/plugins/radio}
-    : ${RADIO_DATA_DIR:=/var/cache/vdr-radio}
-    : ${RADIO_LIVE_FILE:=radio.mpg}
-    : ${RADIO_REPLAY_FILE:=replay.mpg}
+    : ${RADIO_FILES_DIR:=/etc/vdr/plugins/radio}
+    : ${RADIO_DATA_DIR:=/var/cache/vdr/plugins/radio}
+    : ${RADIO_LIVE_FILE:=radio-Tubes1080.mpg}
+    : ${RADIO_REPLAY_FILE:=rtextUnten-kleo2-replay.mpg}
     : ${RADIO_ENCRYPTED:=0}
     : ${RADIO_LOG_LEVEL:=1}
 

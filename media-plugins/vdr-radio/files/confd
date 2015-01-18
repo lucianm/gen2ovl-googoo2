@@ -5,16 +5,16 @@
 
 
 # image directory
-RADIO_FILES_DIR="/usr/share/vdr/plugins/radio"
+RADIO_FILES_DIR="/etc/vdr/plugins/radio"
 
 # temp. data directory
-RADIO_DATA_DIR="/var/cache/vdr-radio"
+RADIO_DATA_DIR="/var/cache/vdr/plugins/radio"
 
 # default mpegfile in livemode
-RADIO_LIVE_FILE="radio.mpg"
+RADIO_LIVE_FILE="radio-Tubes1080.mpg"
 
 # default mpegfile in replaymode
-RADIO_REPLAY_FILE="replay.mpg"
+RADIO_REPLAY_FILE="rtextUnten-kleo2-replay.mpg"
 
 # use transfermode/backgroundimage @ encrypted radiochannels
 RADIO_ENCRYPTED="0"
