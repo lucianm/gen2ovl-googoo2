@@ -7,7 +7,6 @@ Before=vdr.service
 EnvironmentFile=/etc/conf.d/oscam
 ExecStart=/usr/bin/oscam $_OSCAM_OPTS
 PIDFile=/tmp/.oscam/oscam.pid
-ControlGroup=cpu:/
 Restart=always
 
 [Install]
