@@ -1,4 +1,4 @@
-# Copyright 1999-2014 Gentoo Foundation
+# Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: /var/cvsroot/gentoo-x86/media-video/vdr/vdr-2.0.2-r1.ebuild,v 1.2 2013/07/07 09:52:20 hd_brummy Exp $
 
@@ -17,14 +17,13 @@ EXT_PATCH_FLAGS_RENAMED=""
 # names ext-patch uses internally, here only used for maintainer checks
 EXT_PATCH_FLAGS_RENAMED_EXT_NAME=""
 
-IUSE="bidi debug html systemd vanilla ${EXT_PATCH_FLAGS} ${EXT_PATCH_FLAGS_RENAMED}"
+IUSE="bidi debug  html systemd vanilla ${EXT_PATCH_FLAGS} ${EXT_PATCH_FLAGS_RENAMED}"
 
 MY_PV="${PV%_p*}"
 MY_P="${PN}-${MY_PV}"
 S="${WORKDIR}/${MY_P}"
 
 EXT_P="extpng-${P}-gentoo-edition-v2"
-#EXT_P="extpng-${PN}-2.1.6-gentoo-edition-v1"
 
 DESCRIPTION="Video Disk Recorder - turns a pc into a powerful set top box for DVB"
 HOMEPAGE="http://www.tvdr.de/"
@@ -158,7 +157,7 @@ src_prepare() {
 
 	# support languages, written from right to left
 	BUILD_PARAMS+=" BIDI=$(usex bidi 1 0)"
-	
+
 	# systemd support
 	BUILD_PARAMS+=" SDNOTIFY=$(usex systemd 1 0)"
 
@@ -302,5 +301,5 @@ pkg_postinst() {
 	elog "\t2. select font VDRSymbolsSans in Setup"
 	elog ""
 	elog "To get an idea how to proceed now, have a look at our vdr-guide:"
-	elog "\thttp://www.gentoo.org/doc/en/vdr-guide.xml"
+	elog "\thttps://wiki.gentoo.org/wiki/VDR"
 }
