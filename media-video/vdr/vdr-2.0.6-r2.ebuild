@@ -17,7 +17,7 @@ EXT_PATCH_FLAGS_RENAMED=""
 # names ext-patch uses internally, here only used for maintainer checks
 EXT_PATCH_FLAGS_RENAMED_EXT_NAME=""
 
-IUSE="bidi debug html vanilla ${EXT_PATCH_FLAGS} ${EXT_PATCH_FLAGS_RENAMED}"
+IUSE="bidi debug html systemd vanilla ${EXT_PATCH_FLAGS} ${EXT_PATCH_FLAGS_RENAMED}"
 
 MY_PV="${PV%_p*}"
 MY_P="${PN}-${MY_PV}"
@@ -51,7 +51,8 @@ RDEPEND="${COMMON_DEPEND}
 	dev-lang/perl
 	>=media-tv/gentoo-vdr-scripts-2.5_rc1
 	media-fonts/corefonts
-	bidi? ( dev-libs/fribidi )"
+	bidi? ( dev-libs/fribidi )
+	systemd? ( sys-apps/systemd )"
 
 CONF_DIR=/etc/vdr
 CAP_FILE=${S}/capabilities.sh
@@ -155,6 +156,9 @@ src_prepare() {
 
 	# support languages, written from right to left
 	BUILD_PARAMS+=" BIDI=$(usex bidi 1 0)"
+	
+	# systemd support
+	use systemd && BUILD_PARAMS+=" SDNOTIFY=$(usex systemd 1 0)"
 
 	epatch "${FILESDIR}/${PN}-2.0.6_gentoo.patch"
 
@@ -209,6 +213,8 @@ src_prepare() {
 		emake .dependencies >/dev/null
 		eend $? "make depend failed"
 	fi
+	
+	use systemd && epatch "${FILESDIR}/${PN}-2.0.6_systemd.patch"
 
 	epatch_user
 
