@@ -15,7 +15,7 @@ _EXTRAOPTS="${_EXTRAOPTS} --configdir cdplayer"
 _EXTRAOPTS="${_EXTRAOPTS} --cddbserver freedb.freedb.org"
 
 # -C  --cddbcache <dir>     CDDB cache directory
-_EXTRAOPTS="${_EXTRAOPTS} --cddbcache /etc/vdr/plugins/cdplayer/cddbcache"
+_EXTRAOPTS="${_EXTRAOPTS} --cddbcache /var/cache/vdr/plugins/cdplayer/cddbcache"
 
 # -N  --disablecddbcache    Disable CDDB cache
 #_EXTRAOPTS="${_EXTRAOPTS} --disablecddbcache"

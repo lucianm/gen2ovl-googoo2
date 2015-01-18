@@ -32,9 +32,13 @@ src_install() {
 	vdr-plugin-2_src_install
 
 	insinto /etc/vdr/plugins/${VDRPLUGIN}
-	dodir /etc/vdr/plugins/${VDRPLUGIN}/cddbcache
 	doins "${S}"/contrib/cd.mpg
+
 	dodoc "${S}"/contrib/cd.jpg
 	dodoc "${S}"/contrib/convert.sh
+
 	fowners -R vdr:vdr /etc/vdr/plugins/${VDRPLUGIN}
+
+	dodir /var/cache/vdr/plugins/${VDRPLUGIN}/cddbcache
+	fowners -R vdr:vdr /var/cache/vdr/plugins/${VDRPLUGIN}/cddbcache
 }
