@@ -215,6 +215,8 @@ src_prepare() {
 	fi
 	
 	use systemd && epatch "${FILESDIR}/${PN}-2.0.6_systemd.patch"
+	
+	epatch "${FILESDIR}/${PN}-2.0.6_argsdir.patch"
 
 	epatch_user
 
@@ -254,6 +256,7 @@ src_install() {
 
 	keepdir "${CONF_DIR}"/plugins
 	keepdir "${CONF_DIR}"/themes
+	keepdir "${CONF_DIR}"/conf.d
 
 	if use html; then
 		dohtml *.html
