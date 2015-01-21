@@ -1,0 +1,74 @@
+diff -Naur vdr-2.0.7_orig/HISTORY vdr-2.0.7/HISTORY
+--- vdr-2.0.7_orig/HISTORY	2015-01-20 10:13:08.000000000 +0100
++++ vdr-2.0.7/HISTORY	2015-01-21 22:16:14.448729000 +0100
+@@ -7934,3 +7934,8 @@
+   frames at their very end, which probably doesn't matter. At any rate, if you have
+   generated an index file with VDR version 2.0.6 you may want to do so again with this
+   version to make sure the index is OK.
++
++2015-01-21: Version 2.0.7 + backport of systemd support from versions 2.1.6 and 2.1.7
++
++- Added support for systemd (thanks to Christopher Reimer). To activate this you
++  need to add "SDNOTIFY=1" to the 'make' call.
+diff -Naur vdr-2.0.7_orig/interface.c vdr-2.0.7/interface.c
+--- vdr-2.0.7_orig/interface.c	2012-11-19 13:21:43.000000000 +0100
++++ vdr-2.0.7/interface.c	2015-01-21 22:14:32.555551000 +0100
+@@ -10,6 +10,9 @@
+ #include "interface.h"
+ #include <ctype.h>
+ #include <stdlib.h>
++#ifdef SDNOTIFY
++#include <systemd/sd-daemon.h>
++#endif
+ #include <unistd.h>
+ #include "i18n.h"
+ #include "status.h"
+@@ -159,6 +162,9 @@
+       bool known = Keys.KnowsRemote(Remote->Name());
+       dsyslog("remote control %s - %s", Remote->Name(), known ? "keys known" : "learning keys");
+       if (!known) {
++#ifdef SDNOTIFY
++         sd_notify(0, "READY=1\nSTATUS=Learning keys...");
++#endif
+          cSkinDisplayMenu *DisplayMenu = Skins.Current()->DisplayMenu();
+          DisplayMenu->SetMenuCategory(mcUnknown);
+          char Headline[256];
+diff -Naur vdr-2.0.7_orig/Makefile vdr-2.0.7/Makefile
+--- vdr-2.0.7_orig/Makefile	2015-01-21 22:14:03.000000000 +0100
++++ vdr-2.0.7/Makefile	2015-01-21 22:14:32.555551000 +0100
+@@ -111,6 +111,11 @@
+ DEFINES += -DBIDI
+ LIBS += $(shell pkg-config --libs fribidi)
+ endif
++ifdef SDNOTIFY
++INCLUDES += $(shell pkg-config --cflags libsystemd-daemon)
++DEFINES += -DSDNOTIFY
++LIBS += $(shell pkg-config --libs libsystemd-daemon)
++endif
+ 
+ LIRC_DEVICE ?= /var/run/lirc/lircd
+ 
+diff -Naur vdr-2.0.7_orig/vdr.c vdr-2.0.7/vdr.c
+--- vdr-2.0.7_orig/vdr.c	2015-01-21 22:14:03.000000000 +0100
++++ vdr-2.0.7/vdr.c	2015-01-21 22:14:32.556551000 +0100
+@@ -34,6 +34,9 @@
+ #include <stdlib.h>
+ #include <sys/capability.h>
+ #include <sys/prctl.h>
++#ifdef SDNOTIFY
++#include <systemd/sd-daemon.h>
++#endif
+ #include <termios.h>
+ #include <unistd.h>
+ #include "audio.h"
+@@ -848,6 +851,10 @@
+      alarm(WatchdogTimeout); // Initial watchdog timer start
+      }
+ 
++#ifdef SDNOTIFY
++  sd_notify(0, "READY=1\nSTATUS=Ready");
++#endif
++
+   // Main program loop:
+ 
+ #define DELETE_MENU ((IsInfoMenu &= (Menu == NULL)), delete Menu, Menu = NULL)
