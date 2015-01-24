@@ -162,6 +162,7 @@ src_prepare() {
 	BUILD_PARAMS+=" SDNOTIFY=$(usex systemd 1 0)"
 
 	epatch "${FILESDIR}/${P}_gentoo.patch"
+	epatch "${FILESDIR}/${P}_C++11.patch"
 
 	if ! use vanilla; then
 
