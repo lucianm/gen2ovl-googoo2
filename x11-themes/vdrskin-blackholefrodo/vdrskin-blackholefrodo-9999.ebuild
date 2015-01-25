@@ -29,6 +29,7 @@ src_install() {
 	insinto /usr/share/vdr/plugins/skindesigner/skins/${SKIN_NAME}
 	doins -r themes
 	doins -r xmlfiles
+	doins globals.xml
 	doins setup.xml
 	insinto /etc/vdr/themes
 	doins vdr-themes/*

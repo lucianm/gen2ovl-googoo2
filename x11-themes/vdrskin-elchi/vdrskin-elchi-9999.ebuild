@@ -30,6 +30,7 @@ src_install() {
 	insinto ${SKIN_DIR}
 	doins -r themes
 	doins -r xmlfiles
+	doins globals.xml
 #	doins setup.xml
 	insinto /etc/vdr/themes
 	for themename in $(ls themes); do
