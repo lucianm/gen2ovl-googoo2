@@ -7,9 +7,8 @@ EAPI=5
 inherit eutils flag-o-matic multilib toolchain-funcs
 
 # Switches supported by extensions-patch
-EXT_PATCH_FLAGS="alternatechannel binaryskip graphtft jumpingseconds jumpplay naludump permashift
-		permashift_v1 pinplugin mainmenuhooks menuorg menuselection resumereset ttxtsubs wareagleicon yaepg"
-# ddepgentry
+EXT_PATCH_FLAGS="alternatechannel graphtft naludump permashift
+		permashift_v1 pinplugin mainmenuhooks menuorg menuselection resumereset ttxtsubs wareagleicon"
 
 # names of the use-flags
 EXT_PATCH_FLAGS_RENAMED=""
@@ -23,7 +22,7 @@ MY_PV="${PV%_p*}"
 MY_P="${PN}-${MY_PV}"
 S="${WORKDIR}/${MY_P}"
 
-EXT_P="extpng-${PN}-2.1.6-gentoo-edition-v2"
+EXT_P="extpng-${P}-gentoo-edition-v2"
 
 DESCRIPTION="Video Disk Recorder - turns a pc into a powerful set top box for DVB"
 HOMEPAGE="http://www.tvdr.de/"
@@ -161,9 +160,6 @@ src_prepare() {
 	# systemd support
 	BUILD_PARAMS+=" SDNOTIFY=$(usex systemd 1 0)"
 
-	epatch "${FILESDIR}/${P}_gentoo.patch"
-	epatch "${FILESDIR}/${P}_C++11.patch"
-
 	if ! use vanilla; then
 
 		# Now apply extensions patch
@@ -214,6 +210,8 @@ src_prepare() {
 		emake .dependencies >/dev/null
 		eend $? "make depend failed"
 	fi
+
+	epatch "${FILESDIR}/${P}_gentoo.patch"
 
 	epatch_user
 

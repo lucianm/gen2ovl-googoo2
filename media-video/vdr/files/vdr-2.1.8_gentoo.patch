@@ -1,6 +1,6 @@
-diff -Naur vdr-2.1.7_orig/Makefile vdr-2.1.7/Makefile
---- vdr-2.1.7_orig/Makefile	2015-01-01 14:52:07.000000000 +0100
-+++ vdr-2.1.7/Makefile	2015-01-21 22:48:19.805198000 +0100
+diff -Naur vdr-2.1.7.orig/Makefile vdr-2.1.7/Makefile
+--- vdr-2.1.7.orig/Makefile	2015-01-18 12:37:45.506034673 +0100
++++ vdr-2.1.7/Makefile	2015-01-18 12:38:34.086037162 +0100
 @@ -116,7 +116,7 @@
  VDRVERSION = $(shell sed -ne '/define VDRVERSION/s/^.*"\(.*\)".*$$/\1/p' config.h)
  APIVERSION = $(shell sed -ne '/define APIVERSION/s/^.*"\(.*\)".*$$/\1/p' config.h)
