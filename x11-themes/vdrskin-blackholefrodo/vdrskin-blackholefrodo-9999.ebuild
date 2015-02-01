@@ -25,6 +25,11 @@ RDEPEND="${DEPEND}
 
 S="${WORKDIR}/${PN}"
 
+src_prepare() {
+	rm themes/dark/logos
+	rm themes/default/logos
+}
+
 src_install() {
 	insinto /usr/share/vdr/plugins/skindesigner/skins/${SKIN_NAME}
 	doins -r themes
