@@ -1,0 +1,12 @@
+diff --git a/media/mediaManager.cpp b/media/mediaManager.cpp
+index 96b7024..98c8771 100644
+--- a/media/mediaManager.cpp
++++ b/media/mediaManager.cpp
+@@ -143,7 +143,7 @@ void cMediaManager::OnContainerUpdate(const string& uri, long updateID, const St
+   } else {
+     stringstream ss;
+     for(StringList::const_iterator it = target.begin(); it != target.end(); ++it){
+-      ss.str();
++      ss.str(string());
+       ss << uri << *it;
+       scanTargets.push_back(ss.str());

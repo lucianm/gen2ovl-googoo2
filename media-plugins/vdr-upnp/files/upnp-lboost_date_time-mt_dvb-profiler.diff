@@ -1,0 +1,26 @@
+From 909498b1cf0ef600fb0b34c75bb9cc6214b80a8f Mon Sep 17 00:00:00 2001
+From: Lucian Muresan <lucianm@users.sourceforge.net>
+Date: Mon, 5 Jan 2015 23:27:29 +0100
+Subject: [PATCH] added -lboost_date_time-mt when linking the dvb profiler
+ plugin
+
+---
+ plugins/profiler/vdrDVBProfiler/Makefile | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/plugins/profiler/vdrDVBProfiler/Makefile b/plugins/profiler/vdrDVBProfiler/Makefile
+index a1d5c7e..48b1675 100644
+--- a/plugins/profiler/vdrDVBProfiler/Makefile
++++ b/plugins/profiler/vdrDVBProfiler/Makefile
+@@ -11,6 +11,8 @@ TARGET    = $(SUBPLUGIN)-$(CATEGORY)
+ OBJS      = $(SUBPLUGIN)$(CATEGORY).o
+ DOCS      = README
+ 
++LIBS     += -lboost_date_time-mt
++
+ 
+ ROOTBUILDDIR = ../../..
+ -include ../../../Make.config
+-- 
+2.2.1
+

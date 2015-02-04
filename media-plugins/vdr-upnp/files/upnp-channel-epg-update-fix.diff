@@ -1,0 +1,64 @@
+diff --git a/plugins/provider/vdrProvider/vdrProvider.cpp b/plugins/provider/vdrProvider/vdrProvider.cpp
+index 3090583..b99336b 100644
+--- a/plugins/provider/vdrProvider/vdrProvider.cpp
++++ b/plugins/provider/vdrProvider/vdrProvider.cpp
+@@ -181,8 +181,6 @@ public:
+
+   virtual void Action(){
+
+-#define SLEEP_TIMEOUT 120
+-
+     const cSchedules* Schedules;
+     cSchedule* Schedule;
+
+@@ -204,22 +202,26 @@ public:
+         // it to the media manager. If we found an entry, there's no need to continue searching.
+         for(Schedule = Schedules->First(); Schedule; Schedule = Schedules->Next(Schedule))
+         {
+-          // Get the next event of the schedule...
+-          event = Schedule->GetFollowingEvent();
+-          if(event){
+-            // and check if it starts after the last modification and in two minutes from now.
+-            // This causes an update only if there is at least one element in the schedule
+-            // which starts within the next two minutes. Other elements, which will start later,
+-            // will be skipped.
+-            if(event->StartTime() > lastModified && event->StartTime() < now + SLEEP_TIMEOUT){
++          // Get the present event of the schedule...
++          event = Schedule->GetPresentEvent();
++          if(event) {
++            // and check if it starts after the last modification till now.
++            // This causes an update only if there is at least one element in the schedule.
++            if(event->StartTime() > lastModified && event->StartTime() < now){
+               modified = true;
+-              targets.push_back(*event->ChannelID().ToString());
+-              break;
++              cChannel* channel = Channels.GetByChannelID(event->ChannelID());
++              if(channel && (channel=Channels.Get(Channels.GetPrevGroup(channel->Index()))))
++                targets.push_back(*cString::sprintf("%s/%s",tools::ToUTF8String(channel->Name()).c_str(),*event->ChannelID().ToString()));
++              else
++                targets.push_back(*event->ChannelID().ToString());
+             }
+           } else if(Schedule->Modified() > lastModified){
+-            targets.push_back(*Schedule->ChannelID().ToString());
++              cChannel* channel = Channels.GetByChannelID(Schedule->ChannelID());
++              if(channel && (channel=Channels.Get(Channels.GetPrevGroup(channel->Index()))))
++                targets.push_back(*cString::sprintf("%s/%s",tools::ToUTF8String(channel->Name()).c_str(),*Schedule->ChannelID().ToString()));
++              else
++                targets.push_back(*Schedule->ChannelID().ToString());
+             modified = true;
+-            break;
+           }
+         }
+
+@@ -232,8 +234,8 @@ public:
+         lastModified = now;
+       }
+
+-      // Sleep 2 minutes
+-      sleep.Wait(SLEEP_TIMEOUT * 1000);
++      // Sleep 1 minute
++      sleep.Wait(60000);
+     }
+
+   }
+

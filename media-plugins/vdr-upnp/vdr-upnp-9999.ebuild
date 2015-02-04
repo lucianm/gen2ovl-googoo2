@@ -1,4 +1,4 @@
-# Copyright 1999-2013 Gentoo Foundation
+# Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
@@ -29,7 +29,10 @@ DEPEND=">=media-video/vdr-1.7.27
 RDEPEND="${DEPEND}
 	>=media-plugins/vdr-streamdev-0.6.0[server,upnp]"
 
-PATCHES="${FILESDIR}/upnp-vdr2.1.2compat.diff"
+PATCHES="${FILESDIR}/${VDRPLUGIN}-vdr2.1.2compat.diff
+	${FILESDIR}/${VDRPLUGIN}-lboost_date_time-mt_dvb-profiler.diff
+	${FILESDIR}/${VDRPLUGIN}-channel-epg-update-fix.diff
+	${FILESDIR}/${VDRPLUGIN}-stringstream-init.diff"
 
 src_prepare() {
 
@@ -46,4 +49,3 @@ src_install() {
 	vdr-plugin-2_src_install
 
 }
-
