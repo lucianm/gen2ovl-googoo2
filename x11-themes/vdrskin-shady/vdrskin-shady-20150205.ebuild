@@ -26,18 +26,12 @@ RDEPEND="${DEPEND}
 
 S="${WORKDIR}/${SKIN_NAME}"
 
-#src_prepare() {
-#	# do some cleanup
-#	rm themes/default/menuicons/standardicons/customicons
-#	rm themes/default/menuicons/standardicons/pluginicons
-#	rm xmlfiles/*.save
-#}
-
 src_install() {
 	SKIN_DIR="/usr/share/vdr/plugins/skindesigner/skins/${SKIN_NAME}"
 	insinto ${SKIN_DIR}
 	doins -r themes
 	doins -r xmlfiles
+	doins -r skinparts
 	doins globals.xml
 	doins setup.xml
 	insinto /etc/vdr/themes
