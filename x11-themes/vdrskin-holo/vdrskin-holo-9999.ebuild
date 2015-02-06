@@ -6,7 +6,7 @@ EAPI=5
 
 inherit eutils git-2
 
-SKIN_NAME="${PN/vdrskin-/}"
+#SKIN_NAME="${PN/vdrskin-/}"
 SKIN_NAME="Holo"
 
 DESCRIPTION="VDR skindesigner: ${SKIN_NAME}"
