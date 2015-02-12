@@ -26,8 +26,8 @@ LICENSE="GPL-2"
 SLOT="0"
 IUSE="pcre ssl"
 
-DEPEND="media-video/vdr
-	>=dev-libs/tntnet-2.0[ssl=]
+DEPEND=">=media-video/vdr-2.0.0
+	>=dev-libs/tntnet-2.0[ssl]
 	>=dev-libs/cxxtools-2.0
 	pcre? ( >=dev-libs/libpcre-8.12[cxx] )"
 RDEPEND="${DEPEND}"
@@ -61,11 +61,6 @@ make_live_cert() {
 }
 
 src_prepare() {
-	epatch "${FILESDIR}/live-vdr2.1.2compat.diff"
-
-	# remove untranslated language files
-	rm "${S}"/po/{ca_ES,da_DK,el_GR,et_EE,hr_HR,hu_HU,nl_NL,nn_NO,pt_PT,ro_RO,ru_RU,sl_SI,sv_SE,tr_TR}.po
-
 	vdr-plugin-2_src_prepare
 
 	if ! use pcre; then
