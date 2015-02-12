@@ -1,0 +1,261 @@
+From 877e7095b7955d7a95dfac196c33d0bf87d4b64a Mon Sep 17 00:00:00 2001
+From: Lucian Muresan <lucianm@users.sourceforge.net>
+Date: Thu, 12 Feb 2015 21:48:08 +0100
+Subject: [PATCH 1/2] CommandLineHelp relocated
+
+---
+ vdr.c | 214 ++++++++++++++++++++++++++++++++++--------------------------------
+ 1 file changed, 111 insertions(+), 103 deletions(-)
+
+diff --git a/vdr.c b/vdr.c
+index 71a72f2..1abbc86 100644
+--- a/vdr.c
++++ b/vdr.c
+@@ -173,23 +173,16 @@ static void Watchdog(int signum)
+   exit(1);
+ }
+ 
+-int main(int argc, char *argv[])
+-{
+-  // Save terminal settings:
+-
+-  struct termios savedTm;
+-  bool HasStdin = (tcgetpgrp(STDIN_FILENO) == getpid() || getppid() != (pid_t)1) && tcgetattr(STDIN_FILENO, &savedTm) == 0;
+-
+-  // Initiate locale:
+-
+-  setlocale(LC_ALL, "");
+-
+-  // Command line options:
++// Command line options, some global variables:
+ 
+ #define dd(a, b) (*a ? a : b)
+ #define DEFAULTSVDRPPORT 6419
+ #define DEFAULTWATCHDOG     0 // seconds
+ #define DEFAULTVIDEODIR VIDEODIR
++
++const char *ConfigDirectory = NULL;
++const char *VideoDirectory = DEFAULTVIDEODIR;
++
+ #define DEFAULTCONFDIR dd(CONFDIR, VideoDirectory)
+ #define DEFAULTARGSDIR dd(ARGSDIR, "/etc/vdr/conf.d")
+ #define DEFAULTCACHEDIR dd(CACHEDIR, VideoDirectory)
+@@ -198,13 +191,115 @@ int main(int argc, char *argv[])
+ #define DEFAULTLOCDIR LOCDIR
+ #define DEFAULTEPGDATAFILENAME "epg.data"
+ 
++const char *CommandLineHelp(void)
++{
++  // Return a string that describes all known VDR core command line options.
++  const cString sCliHelp(cString::sprintf(
++    "Usage: vdr [OPTIONS]\n\n"          // for easier orientation, this is column 80|
++    "  -a CMD,   --audio=CMD    send Dolby Digital audio to stdin of command CMD\n"
++    "            --cachedir=DIR save cache files in DIR (default: %s)\n"
++    "            --chartab=CHARACTER_TABLE\n"
++    "                           set the character table to use for strings in the\n"
++    "                           DVB data stream that don't begin with a character\n"
++    "                           table indicator, but don't use the standard default\n"
++    "                           character table (for instance ISO-8859-9)\n"
++    "  -c DIR,   --config=DIR   read config files from DIR (default: %s)\n"
++    "  -d,       --daemon       run in daemon mode\n"
++    "  -D NUM,   --device=NUM   use only the given DVB device (NUM = 0, 1, 2...)\n"
++    "                           there may be several -D options (default: all DVB\n"
++    "                           devices will be used)\n"
++    "            --dirnames=PATH[,NAME[,ENC]]\n"
++    "                           set the maximum directory path length to PATH\n"
++    "                           (default: %d); if NAME is also given, it defines\n"
++    "                           the maximum directory name length (default: %d);\n"
++    "                           the optional ENC can be 0 or 1, and controls whether\n"
++    "                           special characters in directory names are encoded as\n"
++    "                           hex values (default: 0); if PATH or NAME are left\n"
++    "                           empty (as in \",,1\" to only set ENC), the defaults\n"
++    "                           apply\n"
++    "            --edit=REC     cut recording REC and exit\n"
++    "  -E FILE,  --epgfile=FILE write the EPG data into the given FILE (default is\n"
++    "                           '%s' in the cache directory)\n"
++    "                           '-E-' disables this\n"
++    "                           if FILE is a directory, the default EPG file will be\n"
++    "                           created in that directory\n"
++    "            --filesize=SIZE limit video files to SIZE bytes (default is %dM)\n"
++    "                           only useful in conjunction with --edit\n"
++    "            --genindex=REC generate index for recording REC and exit\n"
++    "  -g DIR,   --grab=DIR     write images from the SVDRP command GRAB into the\n"
++    "                           given DIR; DIR must be the full path name of an\n"
++    "                           existing directory, without any \"..\", double '/'\n"
++    "                           or symlinks (default: none, same as -g-)\n"
++    "  -h,       --help         print this help and exit\n"
++    "  -i ID,    --instance=ID  use ID as the id of this VDR instance (default: 0)\n"
++    "  -l LEVEL, --log=LEVEL    set log level (default: 3)\n"
++    "                           0 = no logging, 1 = errors only,\n"
++    "                           2 = errors and info, 3 = errors, info and debug\n"
++    "                           if logging should be done to LOG_LOCALn instead of\n"
++    "                           LOG_USER, add '.n' to LEVEL, as in 3.7 (n=0..7)\n"
++    "  -L DIR,   --lib=DIR      search for plugins in DIR (default is %s)\n"
++    "            --lirc[=PATH]  use a LIRC remote control device, attached to PATH\n"
++    "                           (default: %s)\n"
++    "            --localedir=DIR search for locale files in DIR (default is\n"
++    "                           %s)\n"
++    "  -m,       --mute         mute audio of the primary DVB device at startup\n"
++    "            --no-kbd       don't use the keyboard as an input device\n"
++    "  -p PORT,  --port=PORT    use PORT for SVDRP (default: %d)\n"
++    "                           0 turns off SVDRP\n"
++    "  -P OPT,   --plugin=OPT   load a plugin defined by the given options\n"
++    "  -r CMD,   --record=CMD   call CMD before and after a recording, and after\n"
++    "                           a recording has been edited or deleted\n"
++    "            --resdir=DIR   read resource files from DIR (default: %s)\n"
++    "  -s CMD,   --shutdown=CMD call CMD to shutdown the computer\n"
++    "            --split        split edited files at the editing marks (only\n"
++    "                           useful in conjunction with --edit)\n"
++    "            --showargs[=DIR] print the arguments read from DIR and exit\n"
++    "                           (default: %s)\n"
++    "  -t TTY,   --terminal=TTY controlling tty\n"
++    "  -u USER,  --user=USER    run as user USER; only applicable if started as\n"
++    "                           root\n"
++    "            --updindex=REC update index for recording REC and exit\n"
++    "            --userdump     allow coredumps if -u is given (debugging)\n"
++    "  -v DIR,   --video=DIR    use DIR as video directory (default: %s)\n"
++    "  -V,       --version      print version information and exit\n"
++    "            --vfat         for backwards compatibility (same as\n"
++    "                           --dirnames=250,40,1)\n"
++    "  -w SEC,   --watchdog=SEC activate the watchdog timer with a timeout of SEC\n"
++    "                           seconds (default: %d); '0' disables the watchdog\n"
++    "\n",
++    DEFAULTCACHEDIR,
++    DEFAULTCONFDIR,
++    PATH_MAX - 1,
++    NAME_MAX,
++    DEFAULTEPGDATAFILENAME,
++    MAXVIDEOFILESIZEDEFAULT,
++    DEFAULTPLUGINDIR,
++    LIRC_DEVICE,
++    DEFAULTLOCDIR,
++    DEFAULTSVDRPPORT,
++    DEFAULTRESDIR,
++    DEFAULTARGSDIR,
++    DEFAULTVIDEODIR,
++    DEFAULTWATCHDOG));
++    return sCliHelp;
++}
++
++int main(int argc, char *argv[])
++{
++  // Save terminal settings:
++
++  struct termios savedTm;
++  bool HasStdin = (tcgetpgrp(STDIN_FILENO) == getpid() || getppid() != (pid_t)1) && tcgetattr(STDIN_FILENO, &savedTm) == 0;
++
++  // Initiate locale:
++
++  setlocale(LC_ALL, "");
++
+   bool StartedAsRoot = false;
+   const char *VdrUser = NULL;
+   bool UserDump = false;
+   int SVDRPport = DEFAULTSVDRPPORT;
+   const char *AudioCommand = NULL;
+-  const char *VideoDirectory = DEFAULTVIDEODIR;
+-  const char *ConfigDirectory = NULL;
+   const char *CacheDirectory = NULL;
+   const char *ResourceDirectory = NULL;
+   const char *LocaleDirectory = DEFAULTLOCDIR;
+@@ -523,95 +618,8 @@ int main(int argc, char *argv[])
+      if (!PluginManager.HasPlugins())
+         PluginManager.AddPlugin("*"); // adds all available plugins
+      PluginManager.LoadPlugins();
+-     if (DisplayHelp) {
+-        printf("Usage: vdr [OPTIONS]\n\n"          // for easier orientation, this is column 80|
+-               "  -a CMD,   --audio=CMD    send Dolby Digital audio to stdin of command CMD\n"
+-               "            --cachedir=DIR save cache files in DIR (default: %s)\n"
+-               "            --chartab=CHARACTER_TABLE\n"
+-               "                           set the character table to use for strings in the\n"
+-               "                           DVB data stream that don't begin with a character\n"
+-               "                           table indicator, but don't use the standard default\n"
+-               "                           character table (for instance ISO-8859-9)\n"
+-               "  -c DIR,   --config=DIR   read config files from DIR (default: %s)\n"
+-               "  -d,       --daemon       run in daemon mode\n"
+-               "  -D NUM,   --device=NUM   use only the given DVB device (NUM = 0, 1, 2...)\n"
+-               "                           there may be several -D options (default: all DVB\n"
+-               "                           devices will be used)\n"
+-               "            --dirnames=PATH[,NAME[,ENC]]\n"
+-               "                           set the maximum directory path length to PATH\n"
+-               "                           (default: %d); if NAME is also given, it defines\n"
+-               "                           the maximum directory name length (default: %d);\n"
+-               "                           the optional ENC can be 0 or 1, and controls whether\n"
+-               "                           special characters in directory names are encoded as\n"
+-               "                           hex values (default: 0); if PATH or NAME are left\n"
+-               "                           empty (as in \",,1\" to only set ENC), the defaults\n"
+-               "                           apply\n"
+-               "            --edit=REC     cut recording REC and exit\n"
+-               "  -E FILE,  --epgfile=FILE write the EPG data into the given FILE (default is\n"
+-               "                           '%s' in the cache directory)\n"
+-               "                           '-E-' disables this\n"
+-               "                           if FILE is a directory, the default EPG file will be\n"
+-               "                           created in that directory\n"
+-               "            --filesize=SIZE limit video files to SIZE bytes (default is %dM)\n"
+-               "                           only useful in conjunction with --edit\n"
+-               "            --genindex=REC generate index for recording REC and exit\n"
+-               "  -g DIR,   --grab=DIR     write images from the SVDRP command GRAB into the\n"
+-               "                           given DIR; DIR must be the full path name of an\n"
+-               "                           existing directory, without any \"..\", double '/'\n"
+-               "                           or symlinks (default: none, same as -g-)\n"
+-               "  -h,       --help         print this help and exit\n"
+-               "  -i ID,    --instance=ID  use ID as the id of this VDR instance (default: 0)\n"
+-               "  -l LEVEL, --log=LEVEL    set log level (default: 3)\n"
+-               "                           0 = no logging, 1 = errors only,\n"
+-               "                           2 = errors and info, 3 = errors, info and debug\n"
+-               "                           if logging should be done to LOG_LOCALn instead of\n"
+-               "                           LOG_USER, add '.n' to LEVEL, as in 3.7 (n=0..7)\n"
+-               "  -L DIR,   --lib=DIR      search for plugins in DIR (default is %s)\n"
+-               "            --lirc[=PATH]  use a LIRC remote control device, attached to PATH\n"
+-               "                           (default: %s)\n"
+-               "            --localedir=DIR search for locale files in DIR (default is\n"
+-               "                           %s)\n"
+-               "  -m,       --mute         mute audio of the primary DVB device at startup\n"
+-               "            --no-kbd       don't use the keyboard as an input device\n"
+-               "  -p PORT,  --port=PORT    use PORT for SVDRP (default: %d)\n"
+-               "                           0 turns off SVDRP\n"
+-               "  -P OPT,   --plugin=OPT   load a plugin defined by the given options\n"
+-               "  -r CMD,   --record=CMD   call CMD before and after a recording, and after\n"
+-               "                           a recording has been edited or deleted\n"
+-               "            --resdir=DIR   read resource files from DIR (default: %s)\n"
+-               "  -s CMD,   --shutdown=CMD call CMD to shutdown the computer\n"
+-               "            --split        split edited files at the editing marks (only\n"
+-               "                           useful in conjunction with --edit)\n"
+-               "            --showargs[=DIR] print the arguments read from DIR and exit\n"
+-               "                           (default: %s)\n"
+-               "  -t TTY,   --terminal=TTY controlling tty\n"
+-               "  -u USER,  --user=USER    run as user USER; only applicable if started as\n"
+-               "                           root\n"
+-               "            --updindex=REC update index for recording REC and exit\n"
+-               "            --userdump     allow coredumps if -u is given (debugging)\n"
+-               "  -v DIR,   --video=DIR    use DIR as video directory (default: %s)\n"
+-               "  -V,       --version      print version information and exit\n"
+-               "            --vfat         for backwards compatibility (same as\n"
+-               "                           --dirnames=250,40,1)\n"
+-               "  -w SEC,   --watchdog=SEC activate the watchdog timer with a timeout of SEC\n"
+-               "                           seconds (default: %d); '0' disables the watchdog\n"
+-               "\n",
+-               DEFAULTCACHEDIR,
+-               DEFAULTCONFDIR,
+-               PATH_MAX - 1,
+-               NAME_MAX,
+-               DEFAULTEPGDATAFILENAME,
+-               MAXVIDEOFILESIZEDEFAULT,
+-               DEFAULTPLUGINDIR,
+-               LIRC_DEVICE,
+-               DEFAULTLOCDIR,
+-               DEFAULTSVDRPPORT,
+-               DEFAULTRESDIR,
+-               DEFAULTARGSDIR,
+-               DEFAULTVIDEODIR,
+-               DEFAULTWATCHDOG
+-               );
+-        }
++     if (DisplayHelp)
++        printf("%s", CommandLineHelp());
+      if (DisplayVersion)
+         printf("vdr (%s/%s) - The Video Disk Recorder\n", VDRVERSION, APIVERSION);
+      if (PluginManager.HasPlugins()) {
+-- 
+2.2.2
+

@@ -7,22 +7,22 @@ EAPI=5
 inherit eutils flag-o-matic multilib toolchain-funcs
 
 # Switches supported by extensions-patch
-EXT_PATCH_FLAGS="alternatechannel graphtft naludump permashift
-		permashift_v1 pinplugin mainmenuhooks menuorg menuselection resumereset ttxtsubs wareagleicon"
+EXT_PATCH_FLAGS="alternatechannel graphtft naludump permashift_v1 pinplugin
+				mainmenuhooks menuorg menuselection resumereset ttxtsubs"
 
 # names of the use-flags
 EXT_PATCH_FLAGS_RENAMED=""
 
 # names ext-patch uses internally, here only used for maintainer checks
-EXT_PATCH_FLAGS_RENAMED_EXT_NAME=""
+EXT_PATCH_FLAGS_RENAMED_EXT_NAME="bidi no_kbd sdnotify"
 
-IUSE="bidi debug  html systemd vanilla ${EXT_PATCH_FLAGS} ${EXT_PATCH_FLAGS_RENAMED}"
+IUSE="bidi debug kbd html systemd vanilla ${EXT_PATCH_FLAGS} ${EXT_PATCH_FLAGS_RENAMED}"
 
 MY_PV="${PV%_p*}"
 MY_P="${PN}-${MY_PV}"
 S="${WORKDIR}/${MY_P}"
 
-EXT_P="extpng-${P}-gentoo-edition-v2"
+EXT_P="extpng-${P}-gentoo-edition-v1"
 
 DESCRIPTION="Video Disk Recorder - turns a pc into a powerful set top box for DVB"
 HOMEPAGE="http://www.tvdr.de/"
@@ -32,10 +32,6 @@ SRC_URI="ftp://ftp.tvdr.de/vdr/Developer/${MY_P}.tar.bz2
 KEYWORDS="~arm ~amd64 ~ppc ~x86"
 SLOT="0"
 LICENSE="GPL-2"
-
-REQUIRED_USE="
-	permashift? ( !permashift_v1 )
-	permashift_v1? ( !permashift )"
 
 COMMON_DEPEND="virtual/jpeg
 	sys-libs/libcap
@@ -106,6 +102,15 @@ lang_po() {
 	LING_PO=$( ls ${S}/po | sed -e "s:.po::g" | cut -d_ -f1 | tr \\\012 ' ' )
 }
 
+src_configure() {
+	# support languages, written from right to left
+	export "BIDI=$(usex bidi 1 0)"
+	# systemd notification support
+	export "SDNOTIFY=$(usex systemd 1 0)"
+	# with/without keyboard
+	export "USE_KBD=$(usex kbd 1 0)"
+}
+
 src_prepare() {
 	# apply maintainace-patches
 	ebegin "Changing paths for gentoo"
@@ -151,14 +156,9 @@ src_prepare() {
 		# PLUGINLIBDIR (plugin Makefile old) = LIBDIR (plugin Makefile new)
 		LIBDIR			= ${PLUGIN_LIBDIR}
 		PCDIR			= /usr/$(get_libdir)/pkgconfig
+
 	EOT
 	eend 0
-
-	# support languages, written from right to left
-	BUILD_PARAMS+=" BIDI=$(usex bidi 1 0)"
-
-	# systemd support
-	BUILD_PARAMS+=" SDNOTIFY=$(usex systemd 1 0)"
 
 	if ! use vanilla; then
 
@@ -211,7 +211,15 @@ src_prepare() {
 		eend $? "make depend failed"
 	fi
 
+	epatch "${FILESDIR}/${P}_CommandLineHelp-relocated.patch"
+	epatch "${FILESDIR}/${P}_generate-arg-file-templates-to-DIR.patch"
 	epatch "${FILESDIR}/${P}_gentoo.patch"
+
+	# fix some makefile issues
+	sed -e "s:ifndef NO_KBD:ifeq (\$(USE_KBD),1):" \
+		-e "s:ifdef BIDI:ifeq (\$(BIDI),1):" \
+		-e "s:ifdef SDNOTIFY:ifeq (\$(SDNOTIFY),1):" \
+		-i "${S}"/Makefile
 
 	epatch_user
 
@@ -243,15 +251,14 @@ src_prepare() {
 src_install() {
 	# trick makefile not to create a videodir by supplying it with an existing
 	# directory
-	emake \
+	einstall \
 	VIDEODIR="/" \
 	DESTDIR="${D}" install || die "emake install failed"
 
 	keepdir "${PLUGIN_LIBDIR}"
 
+	# backup for plugins they don't be able to create this dir
 	keepdir "${CONF_DIR}"/plugins
-	keepdir "${CONF_DIR}"/themes
-	keepdir "${CONF_DIR}"/conf.d
 
 	if use html; then
 		dohtml *.html
@@ -270,29 +277,19 @@ src_install() {
 	chown -R vdr:vdr "${D}/${CONF_DIR}"
 }
 
-#pkg_preinst() {
+pkg_preinstall() {
 
-#	example syntax...
-#	has_version "<${CATEGORY}/${PN}-1.7.36"
-#	previous_less_than_1_7_36=$?
-#}
+	has_version "<${CATEGORY}/${PN}-2.2"
+	previous_less_than_2_2=$
+}
 
 pkg_postinst() {
 
-	elog "This is a *developer* version."
-	elog "We strongly recommend that you only use it under controlled"
-	elog "conditions and for testing and debugging."
-
-	# correct wrong permission from earlier install
-	CACHEOWNER="$(stat -c %U /var/cache/vdr)"
-	if [ ! ${CACHEOWNER} == vdr ]; then
-		chown -R vdr:vdr "${ROOT}/var/cache/vdr"
+	if [[ $previous_less_than_2_2 = 0 ]] ; then
+		elog "\n\t---- 15 YEARS ANNIVERSARY EDITON ----\n"
+		elog "\tA lot of thanks to Klaus Schmiedinger"
+		elog "\tfor this nice piece of Software...\n"
 	fi
-
-#	example syntax
-#	if [[ previous_less_than_1_7_36=$? = 0 ]] ; then
-	#elog "bla foo"
-#	fi
 
 	elog "It is a good idea to run vdrplugin-rebuild now."
 
