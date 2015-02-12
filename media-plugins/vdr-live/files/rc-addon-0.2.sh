@@ -23,4 +23,10 @@ plugin_pre_vdr_start() {
 	for ip in ${LIVE_BIND_IPS:=`hostname -i`}; do
 		add_plugin_param "-i ${ip}"
 	done
+
+	add_plugin_param "--epgimages=${LIVE_EPGIMGDIR}"
+
+	if [ -n "${LIVE_TNTNET_LOGLEVEL}" ]; then
+		add_plugin_param "--log=${LIVE_TNTNET_LOGLEVEL}"
+	fi
 }
