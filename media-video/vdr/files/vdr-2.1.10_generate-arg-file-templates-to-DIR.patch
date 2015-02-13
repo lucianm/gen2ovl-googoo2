@@ -1,83 +1,17 @@
-From f8202c90b484fa804bffbbe51ac9497db4bc73d0 Mon Sep 17 00:00:00 2001
+From bff54bf1f2477b27d1eab4502e987f5bc85703d8 Mon Sep 17 00:00:00 2001
 From: Lucian Muresan <lucianm@users.sourceforge.net>
 Date: Thu, 12 Feb 2015 22:38:05 +0100
 Subject: [PATCH] generate arg file templates to DIR
 
 ---
- Make.config.template |  2 ++
- Makefile             |  4 ++++
- vdr.c                | 64 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 70 insertions(+)
+ vdr.c | 64 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 64 insertions(+)
 
-diff --git a/Make.config.template b/Make.config.template
-index 8768f3b..e4c43ab 100644
---- a/Make.config.template
-+++ b/Make.config.template
-@@ -39,6 +39,7 @@ endif
- #VIDEODIR  = /srv/vdr/video
- #CONFDIR   = /var/lib/vdr
- #ARGSDIR   = /etc/vdr/conf.d
-+#TPLARGDIR = $(ARGSDIR)/templates
- #CACHEDIR  = /var/cache/vdr
- 
- # Overrides for preset/legacy configurations:
-@@ -59,6 +60,7 @@ VIDEODIR     = /video
- CACHEDIR     = $(VIDEODIR)
- CONFDIR      = $(VIDEODIR)
- ARGSDIR      = $(VIDEODIR)/conf.d
-+TPLARGDIR   = $(ARGSDIR)/templates
- RESDIR       = $(VIDEODIR)
- endif
- 
-diff --git a/Makefile b/Makefile
-index 9722036..292cec2 100644
---- a/Makefile
-+++ b/Makefile
-@@ -32,6 +32,7 @@ DESTDIR   ?=
- VIDEODIR  ?= /srv/vdr/video
- CONFDIR   ?= /var/lib/vdr
- ARGSDIR   ?= /etc/vdr/conf.d
-+TPLARGDIR ?= $(ARGSDIR)/templates
- CACHEDIR  ?= /var/cache/vdr
- 
- PREFIX    ?= /usr/local
-@@ -106,6 +107,7 @@ DEFINES += -DLIRC_DEVICE=\"$(LIRC_DEVICE)\"
- DEFINES += -DVIDEODIR=\"$(VIDEODIR)\"
- DEFINES += -DCONFDIR=\"$(CONFDIR)\"
- DEFINES += -DARGSDIR=\"$(ARGSDIR)\"
-+DEFINES += -DTPLARGDIR=\"$(TPLARGDIR)\"
- DEFINES += -DCACHEDIR=\"$(CACHEDIR)\"
- DEFINES += -DRESDIR=\"$(RESDIR)\"
- DEFINES += -DPLUGINDIR=\"$(LIBDIR)\"
-@@ -152,6 +154,7 @@ vdr.pc:
- 	@echo "videodir=$(VIDEODIR)" >> $@
- 	@echo "configdir=$(CONFDIR)" >> $@
- 	@echo "argsdir=$(ARGSDIR)" >> $@
-+	@echo "tplargsdir=$(TPLARGDIR)" >> $@
- 	@echo "cachedir=$(CACHEDIR)" >> $@
- 	@echo "resdir=$(RESDIR)" >> $@
- 	@echo "libdir=$(LIBDIR)" >> $@
-@@ -270,6 +273,7 @@ install-dirs:
- 	@mkdir -p $(DESTDIR)$(VIDEODIR)
- 	@mkdir -p $(DESTDIR)$(CONFDIR)
- 	@mkdir -p $(DESTDIR)$(ARGSDIR)
-+	@mkdir -p $(DESTDIR)$(TPLARGDIR)
- 	@mkdir -p $(DESTDIR)$(CACHEDIR)
- 	@mkdir -p $(DESTDIR)$(RESDIR)
- 
 diff --git a/vdr.c b/vdr.c
-index 1abbc86..d04c9ff 100644
+index 1abbc86..d667d3d 100644
 --- a/vdr.c
 +++ b/vdr.c
-@@ -185,6 +185,7 @@ const char *VideoDirectory = DEFAULTVIDEODIR;
- 
- #define DEFAULTCONFDIR dd(CONFDIR, VideoDirectory)
- #define DEFAULTARGSDIR dd(ARGSDIR, "/etc/vdr/conf.d")
-+#define DEFAULTTPLARGDIR dd(TPLARGDIR, "/etc/vdr/conf.d/templates")
- #define DEFAULTCACHEDIR dd(CACHEDIR, VideoDirectory)
- #define DEFAULTRESDIR dd(RESDIR, ConfigDirectory)
- #define DEFAULTPLUGINDIR PLUGINDIR
-@@ -255,6 +256,9 @@ const char *CommandLineHelp(void)
+@@ -255,6 +255,9 @@ const char *CommandLineHelp(void)
      "                           useful in conjunction with --edit)\n"
      "            --showargs[=DIR] print the arguments read from DIR and exit\n"
      "                           (default: %s)\n"
@@ -87,38 +21,42 @@ index 1abbc86..d04c9ff 100644
      "  -t TTY,   --terminal=TTY controlling tty\n"
      "  -u USER,  --user=USER    run as user USER; only applicable if started as\n"
      "                           root\n"
-@@ -279,11 +283,39 @@ const char *CommandLineHelp(void)
+@@ -279,11 +282,43 @@ const char *CommandLineHelp(void)
      DEFAULTSVDRPPORT,
      DEFAULTRESDIR,
      DEFAULTARGSDIR,
-+    DEFAULTTPLARGDIR,
++    DEFAULTARGSDIR,
      DEFAULTVIDEODIR,
      DEFAULTWATCHDOG));
      return sCliHelp;
  }
  
 +bool WriteArgsTemplate(const char* dir, const char* name, const char* version, const char* description, const char* cliHelp) {
-+   const cString templatePath = cString::sprintf("%s/%s.conf", dir, name);
++   const cString templatePath = cString::sprintf("%s/%s.conf.tmpl", dir, name);
 +   FILE* f = fopen((const char*)(templatePath), "w");
 +   if (!f) {
 +       fprintf(stderr, "vdr: failed to generate config template: %s\n", (const char*)(templatePath));
 +       return false;
 +       }
-+   fprintf(f, "# Please copy this file to argsdir and edit it with one option per line as needed.\n\n" );
-+   fprintf(f, "# %s (%s) - %s\n", name, version, description);
++   fprintf(f, "# Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.\n\n" );
++   fprintf(f, "# %s (%s) - %s\n\n", name, version, description);
 +   fprintf(f, "[%s]\n\n", name);
-+   fprintf(f, "#");
-+   for (unsigned int i = 0; i < strlen(cliHelp); i++) {
-+       if (i < strlen(cliHelp) - 1 && cliHelp[i] == '\n') {
-+          fprintf(f, "\n#");
-+          if (cliHelp[i + 1] != '\n') {
++   if (cliHelp) {
++      fprintf(f, "#");
++      for (unsigned int i = 0; i < strlen(cliHelp); i++) {
++         if (i < strlen(cliHelp) - 1 && cliHelp[i] == '\n') {
++           fprintf(f, "\n#");
++           if (cliHelp[i + 1] != '\n') {
 +              i++;
 +              }
-+          }
-+       if (cliHelp[i] != '\n') {
-+           fprintf(f, "%c", cliHelp[i]);
 +           }
-+       }
++         if (cliHelp[i] != '\n') {
++            fprintf(f, "%c", cliHelp[i]);
++            }
++         }
++      } else {
++      fprintf(f, "# This plugin has no command line arguments!\n");
++      }
 +   fclose(f);
 +   fprintf(stdout, "vdr: successfully generated config template: %s\n", (const char*)(templatePath));
 +   return true;
@@ -127,7 +65,7 @@ index 1abbc86..d04c9ff 100644
  int main(int argc, char *argv[])
  {
    // Save terminal settings:
-@@ -305,6 +337,8 @@ int main(int argc, char *argv[])
+@@ -305,6 +340,8 @@ int main(int argc, char *argv[])
    const char *LocaleDirectory = DEFAULTLOCDIR;
    const char *EpgDataFileName = DEFAULTEPGDATAFILENAME;
    bool DisplayHelp = false;
@@ -136,7 +74,7 @@ index 1abbc86..d04c9ff 100644
    bool DisplayVersion = false;
    bool DaemonMode = false;
    int SysLogTarget = LOG_USER;
-@@ -368,6 +402,7 @@ int main(int argc, char *argv[])
+@@ -368,6 +405,7 @@ int main(int argc, char *argv[])
        { "record",   required_argument, NULL, 'r' },
        { "resdir",   required_argument, NULL, 'r' | 0x100 },
        { "showargs", optional_argument, NULL, 's' | 0x200 },
@@ -144,38 +82,35 @@ index 1abbc86..d04c9ff 100644
        { "shutdown", required_argument, NULL, 's' },
        { "split",    no_argument,       NULL, 's' | 0x100 },
        { "terminal", required_argument, NULL, 't' },
-@@ -557,6 +592,10 @@ int main(int argc, char *argv[])
+@@ -557,6 +595,10 @@ int main(int argc, char *argv[])
                          printf("%s\n", v[i]);
                      return 0;
                      }
 +          case 't' | 0x100:
 +                    GenerateConfTemplates = true;
-+                    ArgTemplatesDirectory = optarg ? optarg : DEFAULTTPLARGDIR;
++                    ArgTemplatesDirectory = optarg ? optarg : DEFAULTARGSDIR;
 +                    break;
            case 't': Terminal = optarg;
                      if (access(Terminal, R_OK | W_OK) < 0) {
                         fprintf(stderr, "vdr: can't access terminal: %s\n", Terminal);
-@@ -642,6 +681,31 @@ int main(int argc, char *argv[])
+@@ -642,6 +684,28 @@ int main(int argc, char *argv[])
       return 0;
       }
  
-+  // args template file generation (for distribution maintainers and advanced users)
++  // args template file generation
 +  if (GenerateConfTemplates) {
 +     if (!PluginManager.HasPlugins()) {
 +        // generate template for VDR
 +        if (!WriteArgsTemplate(ArgTemplatesDirectory, "vdr", VDRVERSION, "The Video Disk Recorder", CommandLineHelp()))
 +            return 2;
 +        } else {
-+            // generate template(s) for specified plugin(s)
 +            PluginManager.LoadPlugins();
++            // generate template(s) for specified plugin(s)
 +            for (int i = 0; ; i++) {
 +                cPlugin *p = PluginManager.GetPlugin(i);
 +                if (p) {
-+                    const char *help = p->CommandLineHelp();
-+                    if (help) {
-+                        if (!WriteArgsTemplate(ArgTemplatesDirectory, p->Name(), p->Version(), p->Description(), help))
-+                            return 2;
-+                        }
++                    if (!WriteArgsTemplate(ArgTemplatesDirectory, p->Name(), p->Version(), p->Description(), p->CommandLineHelp()))
++                        return 2;
 +                    }
 +                else
 +                   break;
