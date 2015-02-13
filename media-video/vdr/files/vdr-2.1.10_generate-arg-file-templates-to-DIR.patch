@@ -1,13 +1,13 @@
-From 25feeb721e9f9dd5bf7ca44e675f2aec1e1e10d7 Mon Sep 17 00:00:00 2001
+From f8202c90b484fa804bffbbe51ac9497db4bc73d0 Mon Sep 17 00:00:00 2001
 From: Lucian Muresan <lucianm@users.sourceforge.net>
 Date: Thu, 12 Feb 2015 22:38:05 +0100
-Subject: [PATCH 2/2] generate arg file templates to DIR
+Subject: [PATCH] generate arg file templates to DIR
 
 ---
  Make.config.template |  2 ++
  Makefile             |  4 ++++
- vdr.c                | 61 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 67 insertions(+)
+ vdr.c                | 64 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 70 insertions(+)
 
 diff --git a/Make.config.template b/Make.config.template
 index 8768f3b..e4c43ab 100644
@@ -66,7 +66,7 @@ index 9722036..292cec2 100644
  	@mkdir -p $(DESTDIR)$(RESDIR)
  
 diff --git a/vdr.c b/vdr.c
-index 1abbc86..0c11b17 100644
+index 1abbc86..d04c9ff 100644
 --- a/vdr.c
 +++ b/vdr.c
 @@ -185,6 +185,7 @@ const char *VideoDirectory = DEFAULTVIDEODIR;
@@ -87,7 +87,7 @@ index 1abbc86..0c11b17 100644
      "  -t TTY,   --terminal=TTY controlling tty\n"
      "  -u USER,  --user=USER    run as user USER; only applicable if started as\n"
      "                           root\n"
-@@ -279,11 +283,37 @@ const char *CommandLineHelp(void)
+@@ -279,11 +283,39 @@ const char *CommandLineHelp(void)
      DEFAULTSVDRPPORT,
      DEFAULTRESDIR,
      DEFAULTARGSDIR,
@@ -98,15 +98,16 @@ index 1abbc86..0c11b17 100644
  }
  
 +bool WriteArgsTemplate(const char* dir, const char* name, const char* version, const char* description, const char* cliHelp) {
-+   FILE* f = fopen(cString::sprintf("%s/%s.conf", dir, name), "w");
++   const cString templatePath = cString::sprintf("%s/%s.conf", dir, name);
++   FILE* f = fopen((const char*)(templatePath), "w");
 +   if (!f) {
-+       fprintf(stderr, "vdr: failed to generate config template: %s/%s.conf\n", dir, name);
++       fprintf(stderr, "vdr: failed to generate config template: %s\n", (const char*)(templatePath));
 +       return false;
 +       }
-+   fprintf(f, "# Please copy this file to argsdir and edit it with one option per line as needed.\n" );
-+   fprintf(f, "# %s (%s) - %s\n\n", name, version, description);
++   fprintf(f, "# Please copy this file to argsdir and edit it with one option per line as needed.\n\n" );
++   fprintf(f, "# %s (%s) - %s\n", name, version, description);
 +   fprintf(f, "[%s]\n\n", name);
-+   fprintf(f, "# ");
++   fprintf(f, "#");
 +   for (unsigned int i = 0; i < strlen(cliHelp); i++) {
 +       if (i < strlen(cliHelp) - 1 && cliHelp[i] == '\n') {
 +          fprintf(f, "\n#");
@@ -119,13 +120,14 @@ index 1abbc86..0c11b17 100644
 +           }
 +       }
 +   fclose(f);
++   fprintf(stdout, "vdr: successfully generated config template: %s\n", (const char*)(templatePath));
 +   return true;
 +}
 +
  int main(int argc, char *argv[])
  {
    // Save terminal settings:
-@@ -305,6 +335,8 @@ int main(int argc, char *argv[])
+@@ -305,6 +337,8 @@ int main(int argc, char *argv[])
    const char *LocaleDirectory = DEFAULTLOCDIR;
    const char *EpgDataFileName = DEFAULTEPGDATAFILENAME;
    bool DisplayHelp = false;
@@ -134,7 +136,7 @@ index 1abbc86..0c11b17 100644
    bool DisplayVersion = false;
    bool DaemonMode = false;
    int SysLogTarget = LOG_USER;
-@@ -368,6 +400,7 @@ int main(int argc, char *argv[])
+@@ -368,6 +402,7 @@ int main(int argc, char *argv[])
        { "record",   required_argument, NULL, 'r' },
        { "resdir",   required_argument, NULL, 'r' | 0x100 },
        { "showargs", optional_argument, NULL, 's' | 0x200 },
@@ -142,7 +144,7 @@ index 1abbc86..0c11b17 100644
        { "shutdown", required_argument, NULL, 's' },
        { "split",    no_argument,       NULL, 's' | 0x100 },
        { "terminal", required_argument, NULL, 't' },
-@@ -557,6 +590,10 @@ int main(int argc, char *argv[])
+@@ -557,6 +592,10 @@ int main(int argc, char *argv[])
                          printf("%s\n", v[i]);
                      return 0;
                      }
@@ -153,7 +155,7 @@ index 1abbc86..0c11b17 100644
            case 't': Terminal = optarg;
                      if (access(Terminal, R_OK | W_OK) < 0) {
                         fprintf(stderr, "vdr: can't access terminal: %s\n", Terminal);
-@@ -642,6 +679,30 @@ int main(int argc, char *argv[])
+@@ -642,6 +681,31 @@ int main(int argc, char *argv[])
       return 0;
       }
  
@@ -165,13 +167,14 @@ index 1abbc86..0c11b17 100644
 +            return 2;
 +        } else {
 +            // generate template(s) for specified plugin(s)
++            PluginManager.LoadPlugins();
 +            for (int i = 0; ; i++) {
 +                cPlugin *p = PluginManager.GetPlugin(i);
 +                if (p) {
 +                    const char *help = p->CommandLineHelp();
 +                    if (help) {
 +                        if (!WriteArgsTemplate(ArgTemplatesDirectory, p->Name(), p->Version(), p->Description(), help))
-+                        return 2;
++                            return 2;
 +                        }
 +                    }
 +                else
