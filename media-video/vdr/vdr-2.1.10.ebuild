@@ -213,6 +213,7 @@ src_prepare() {
 
 	epatch "${FILESDIR}/${P}_CommandLineHelp-relocated.patch"
 	epatch "${FILESDIR}/${P}_generate-arg-file-templates-to-DIR.patch"
+	epatch "${FILESDIR}/${P}_generate-arg-file-templates-to-tmp.patch"
 	epatch "${FILESDIR}/${P}_gentoo.patch"
 
 	# fix some makefile issues
