@@ -1,0 +1,6 @@
+# /etc/conf.d/vdr.cecremote
+
+### cecremote (0.0.3) - Send/Receive CEC commands
+
+# -c  --configdir <dir>     Directory for config files : cecremote
+_EXTRAOPTS="--configdir /etc/vdr/plugins/cecremote"
