@@ -1,0 +1,21 @@
+diff -Naur upnp_orig/media/pluginManager.cpp upnp/media/pluginManager.cpp
+--- upnp_orig/media/pluginManager.cpp	2015-03-28 15:48:27.000000000 +0100
++++ upnp/media/pluginManager.cpp	2015-03-28 15:50:39.345488018 +0100
+@@ -316,7 +316,7 @@
+ 
+ bool cUPnPResourceProvider::HasRootContainer(const string& uri){
+   if(uri.find(GetRootContainer(), 0) != 0){
+-    isyslog("RecProvider\tUri does not contain the root.");
++    isyslog("UPnP\tUri does not contain the root.");
+     return false;
+   } else {
+     return true;
+@@ -331,7 +331,7 @@
+ {
+   string filename = cMediaServer::GetInstance()->GetConfigDirectory() + "/" + fn;
+   if (access(filename.c_str(), F_OK) == 0) {
+-    isyslog("loading %s", filename.c_str());
++    isyslog("UPnP\tloading %s", filename.c_str());
+     ifstream file;
+     file.open(filename.c_str(), ifstream::in);
+     if(!file.is_open())

@@ -35,7 +35,8 @@ PATCHES="${FILESDIR}/${VDRPLUGIN}-vdr2.1.2compat.diff
 	${FILESDIR}/${VDRPLUGIN}-stringstream-init.diff
 	${FILESDIR}/${VDRPLUGIN}-virtual-method.diff
 	${FILESDIR}/${VDRPLUGIN}-db-connection-flag.diff
-	${FILESDIR}/${VDRPLUGIN}-no-initial-rec-scan.diff"
+	${FILESDIR}/${VDRPLUGIN}-no-initial-rec-scan.diff
+	${FILESDIR}/${VDRPLUGIN}-logging-consistent.diff"
 
 src_prepare() {
 
