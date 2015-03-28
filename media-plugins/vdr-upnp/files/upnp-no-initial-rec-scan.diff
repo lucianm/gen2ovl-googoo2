@@ -1,0 +1,17 @@
+diff -Naur upnp_orig/plugins/provider/recProvider/recProvider.cpp upnp/plugins/provider/recProvider/recProvider.cpp
+--- upnp_orig/plugins/provider/recProvider/recProvider.cpp	2015-03-28 12:38:24.000000000 +0100
++++ upnp/plugins/provider/recProvider/recProvider.cpp	2015-03-28 12:39:35.069362664 +0100
+@@ -120,11 +120,11 @@
+ #endif
+     int pos = 0, vl = videoDir.length(), ul = uri.length(), vul = vl + ul + 1;
+ 
+-    if(!initialScan){
++/*    if(!initialScan){
+       if(!Recordings.Update(true)) return list;
+       initialScan = true;
+     }
+-
++*/
+     for(cRecording* rec = Recordings.First(); rec; rec = Recordings.Next(rec)){
+       char* file = strdup(rec->Name());
+       file = ExchangeChars(file, true);
