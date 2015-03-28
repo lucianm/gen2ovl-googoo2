@@ -1,17 +1,16 @@
-diff --git a/plugins/provider/vdrProvider/vdrProvider.cpp b/plugins/provider/vdrProvider/vdrProvider.cpp
-index 3090583..b99336b 100644
---- a/plugins/provider/vdrProvider/vdrProvider.cpp
-+++ b/plugins/provider/vdrProvider/vdrProvider.cpp
-@@ -181,8 +181,6 @@ public:
-
+diff -Naur upnp_orig/plugins/provider/vdrProvider/vdrProvider.cpp upnp/plugins/provider/vdrProvider/vdrProvider.cpp
+--- upnp_orig/plugins/provider/vdrProvider/vdrProvider.cpp	2015-03-28 11:33:35.000000000 +0100
++++ upnp/plugins/provider/vdrProvider/vdrProvider.cpp	2015-03-28 11:36:37.343518408 +0100
+@@ -181,8 +181,6 @@
+ 
    virtual void Action(){
-
+ 
 -#define SLEEP_TIMEOUT 120
 -
      const cSchedules* Schedules;
      cSchedule* Schedule;
-
-@@ -204,22 +202,26 @@ public:
+ 
+@@ -204,22 +202,26 @@
          // it to the media manager. If we found an entry, there's no need to continue searching.
          for(Schedule = Schedules->First(); Schedule; Schedule = Schedules->Next(Schedule))
          {
@@ -49,16 +48,15 @@ index 3090583..b99336b 100644
 -            break;
            }
          }
-
-@@ -232,8 +234,8 @@ public:
+ 
+@@ -232,8 +234,8 @@
          lastModified = now;
        }
-
+ 
 -      // Sleep 2 minutes
 -      sleep.Wait(SLEEP_TIMEOUT * 1000);
 +      // Sleep 1 minute
 +      sleep.Wait(60000);
      }
-
+ 
    }
-

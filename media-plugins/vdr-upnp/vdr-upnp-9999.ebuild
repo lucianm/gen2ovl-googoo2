@@ -32,7 +32,9 @@ RDEPEND="${DEPEND}
 PATCHES="${FILESDIR}/${VDRPLUGIN}-vdr2.1.2compat.diff
 	${FILESDIR}/${VDRPLUGIN}-lboost_date_time-mt_dvb-profiler.diff
 	${FILESDIR}/${VDRPLUGIN}-channel-epg-update-fix.diff
-	${FILESDIR}/${VDRPLUGIN}-stringstream-init.diff"
+	${FILESDIR}/${VDRPLUGIN}-stringstream-init.diff
+	${FILESDIR}/${VDRPLUGIN}-virtual-method.diff
+	${FILESDIR}/${VDRPLUGIN}-db-connection-flag.diff"
 
 src_prepare() {
 

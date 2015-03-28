@@ -1,0 +1,50 @@
+diff -Naur upnp_orig/include/server.h upnp/include/server.h
+--- upnp_orig/include/server.h	2015-03-28 11:53:08.000000000 +0100
++++ upnp/include/server.h	2015-03-28 11:57:17.392249703 +0100
+@@ -97,7 +97,8 @@
+ 	Description         mServerDescription;
+ 	iconList            mServerIcons;
+ 	upnp::cConfig       mCurrentConfiguration;
+-  tntdb::Connection   mConnection;
++	tntdb::Connection   mConnection;
++	bool                mbConnected;
+ 	string              mConfigDirectory;
+ 	UpnpDevice_Handle   mDeviceHandle;
+ 	int                 mAnnounceMaxAge;
+diff -Naur upnp_orig/server/server.cpp upnp/server/server.cpp
+--- upnp_orig/server/server.cpp	2015-03-28 11:53:08.000000000 +0100
++++ upnp/server/server.cpp	2015-03-28 11:56:02.109186240 +0100
+@@ -35,6 +35,7 @@
+ , mMaxContentLength(KB(20))
+ , mWebserver(NULL)
+ , mMediaManager(NULL)
++, mbConnected(false)
+ {
+   char tmp[255];
+ 
+@@ -64,11 +65,12 @@
+     delete mMediaManager;
+     mMediaManager = NULL;
+   }
+-
+-  try {
+-    mConnection.execute("VACUUM");
+-  } catch (const std::exception& e) {
+-    esyslog("UPnP\tFailed to vacuum database: '%s'", e.what());
++  if (mbConnected) {
++    try {
++       mConnection.execute("VACUUM");
++    } catch (const std::exception& e) {
++       esyslog("UPnP\tFailed to vacuum database: '%s'", e.what());
++    }
+   }
+ }
+ 
+@@ -259,6 +261,7 @@
+     mConnection.execute("PRAGMA temp_store = MEMORY");
+     mConnection.execute("PRAGMA synchronous = NORMAL");
+     mConnection.execute("PRAGMA locking_mode = EXCLUSIVE");
++    mbConnected = true;
+ 
+     isyslog("UPnP\tSuccessfully connected to %s.", ss.str().c_str());
+   } catch (const std::exception& e) {

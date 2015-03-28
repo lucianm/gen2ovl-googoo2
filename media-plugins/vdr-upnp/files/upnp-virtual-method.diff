@@ -1,0 +1,12 @@
+diff -Naur upnp_orig/include/plugin.h upnp/include/plugin.h
+--- upnp_orig/include/plugin.h	2015-03-28 11:33:35.000000000 +0100
++++ upnp/include/plugin.h	2015-03-28 11:34:40.549916908 +0100
+@@ -515,7 +515,7 @@
+    * This function must be overriden if the sub plugin wants to read
+    * a configuration file.
+    */
+-  bool Parse(const string& uri);
++  virtual bool Parse(const string& uri);
+ 
+ };
+ 
