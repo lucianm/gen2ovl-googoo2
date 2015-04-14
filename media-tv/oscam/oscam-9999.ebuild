@@ -167,7 +167,7 @@ src_install() {
 
 	systemd_dounit "${FILESDIR}/${PN}.service"
 
-	dodir "/var/log/${PN}"
+	dodir "/var/log/${PN}/emm"
 }
 
 pkg_postinst() {
