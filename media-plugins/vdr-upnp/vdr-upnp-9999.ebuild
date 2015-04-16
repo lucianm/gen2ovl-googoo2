@@ -29,20 +29,20 @@ DEPEND=">=media-video/vdr-1.7.27
 RDEPEND="${DEPEND}
 	>=media-plugins/vdr-streamdev-0.6.0[server,upnp]"
 
-PATCHES="${FILESDIR}/${VDRPLUGIN}-vdr2.1.2compat.diff
-	${FILESDIR}/${VDRPLUGIN}-lboost_date_time-mt_dvb-profiler.diff
-	${FILESDIR}/${VDRPLUGIN}-channel-epg-update-fix.diff
-	${FILESDIR}/${VDRPLUGIN}-stringstream-init.diff
-	${FILESDIR}/${VDRPLUGIN}-virtual-method.diff
-	${FILESDIR}/${VDRPLUGIN}-db-connection-flag.diff
-	${FILESDIR}/${VDRPLUGIN}-no-initial-rec-scan.diff
-	${FILESDIR}/${VDRPLUGIN}-logging-consistent.diff"
-
 src_prepare() {
 
 	vdr-plugin-2_src_prepare
 	# no need to install the license file on gentoo
 	sed -i Makefile -e "s: COPYING::"
+
+	epatch ${FILESDIR}/${VDRPLUGIN}-vdr2.1.2compat.diff
+	epatch ${FILESDIR}/${VDRPLUGIN}-lboost_date_time-mt_dvb-profiler.diff
+	epatch ${FILESDIR}/${VDRPLUGIN}-channel-epg-update-fix.diff
+	epatch ${FILESDIR}/${VDRPLUGIN}-stringstream-init.diff
+	epatch ${FILESDIR}/${VDRPLUGIN}-virtual-method.diff
+	epatch ${FILESDIR}/${VDRPLUGIN}-db-connection-flag.diff
+	epatch ${FILESDIR}/${VDRPLUGIN}-no-initial-rec-scan.diff
+	epatch ${FILESDIR}/${VDRPLUGIN}-logging-consistent.diff
 
 }
 
