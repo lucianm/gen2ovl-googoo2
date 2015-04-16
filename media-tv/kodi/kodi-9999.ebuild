@@ -36,7 +36,7 @@ case ${PV} in
 *|*_p*)
 	MY_PV=${PV/_p/_r}
 	MY_P="${PN}-${MY_PV}"
-	SRC_URI="http://mirrors.kodi.tv/releases/source/${PV}-${CODENAME}.tar.gz"
+	SRC_URI="https://github.com/xbmc/xbmc/archive/${PV}-${CODENAME}.tar.gz"
 #		http://mirrors.xbmc.org/releases/source/${MY_P}-generated-addons.tar.xz"
 	KEYWORDS="~amd64 ~x86"
 
