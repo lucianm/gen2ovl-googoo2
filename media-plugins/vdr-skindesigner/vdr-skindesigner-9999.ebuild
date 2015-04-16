@@ -46,7 +46,7 @@ src_prepare() {
 	for script in config.h $(ls ${S}/scripts/temperatures*); do
 		sed -i "s:/tmp/${VDRPLUGIN}:${SKINDESIGNER_CACHEDIR}:" $script || die
 	done
-	BUILD_PARAMS+=" SKINDESIGNER_SCRIPTDIR=/etc/vdr/plugins/${VDRPLUGIN}/scripts"
+	BUILD_PARAMS+=" PREFIX=/usr SKINDESIGNER_SCRIPTDIR=/etc/vdr/plugins/${VDRPLUGIN}/scripts"
 }
 
 src_install() {
