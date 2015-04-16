@@ -1,29 +1,28 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/eclass/vdr-plugin-2.eclass,v 1.32 2015/03/31 18:43:33 ulm Exp $
+# $Header: /var/cvsroot/gentoo-x86/eclass/vdr-plugin-2.eclass,v 1.21 2013/01/27 13:32:44 hd_brummy Exp $
 
 # @ECLASS: vdr-plugin-2.eclass
 # @MAINTAINER:
-# Gentoo VDR Project <vdr@gentoo.org>
-# @AUTHOR:
+# vdr@gentoo.org
+# @BLURB: common vdr plugin ebuild functions
+# @DESCRIPTION:
+# Eclass for easing maitenance of vdr plugin ebuilds
+
+# Authors:
 # Matthias Schwarzott <zzam@gentoo.org>
 # Joerg Bornkessel <hd_brummy@gentoo.org>
 # Christian Ruppert <idl0r@gentoo.org>
-# (undisclosed contributors)
-# @BLURB: common vdr plugin ebuild functions
-# @DESCRIPTION:
-# Eclass for easing maintenance of vdr plugin ebuilds
 
-# @ECLASS-VARIABLE: VDR_CONFD_FILE
-# @DEFAULT_UNSET
-# @DESCRIPTION:
+# Plugin config file installation:
+#
 # A plugin config file can be specified through the $VDR_CONFD_FILE variable, it
 # defaults to ${FILESDIR}/confd. Each config file will be installed as e.g.
 # ${D}/etc/conf.d/vdr.${VDRPLUGIN}
 
-# @ECLASS-VARIABLE: VDR_RCADDON_FILE
-# @DEFAULT_UNSET
-# @DESCRIPTION:
+# Installation of rc-addon files:
+# NOTE: rc-addon files must be valid shell scripts!
+#
 # Installing rc-addon files is basically the same as for plugin config files
 # (see above), it's just using the $VDR_RCADDON_FILE variable instead.
 # The default value when $VDR_RCADDON_FILE is undefined is:
@@ -34,75 +33,21 @@
 # has been enabled.
 # rc-addon files may be used to prepare everything that is necessary for the
 # plugin start/stop, like passing extra command line options and so on.
-#
-# NOTE: rc-addon files must be valid shell scripts!
-
-# @ECLASS-VARIABLE: GENTOO_VDR_CONDITIONAL
-# @DEFAULT_UNSET
-# @DESCRIPTION:
-# This is a hack for ebuilds like vdr-xineliboutput that want to
-# conditionally install a vdr-plugin
-
-# @ECLASS-VARIABLE: PO_SUBDIR
-# @DEFAULT_UNSET
-# @DESCRIPTION:
-# By default, translation are found in"${S}"/po but this
-# default can be overridden by defining PO_SUBDIR.
-#
-# Example:
-# @CODE
-# PO_SUBDIR="bla foo/bla"
-# @CODE
-
-# @ECLASS-VARIABLE: VDR_MAINTAINER_MODE
-# @DEFAULT_UNSET
-# @DESCRIPTION:
-# Output from function dev_check if it is defined in ebuild or eclass,
-# helpfull for gentoo ebuild developer
-#
-# This will also install any debug files in /usr/share/vdr/maintainer-data
-#
-# This is intended to be set by user in make.conf. Ebuilds must not set
-# it.
-#
-# VDR_MAINTAINER_MODE=1
-
-# @FUNCTION: fix_vdr_libsi_include
-# @DESCRIPTION:
-# Plugins failed on compile with wrong path of libsi includes,
-# this can be fixed by 'function + space separated list of files'
-#
-# Example:
-# @CODE
-# fix_vdr_libsi_include bla.c foo.c
-# @CODE
-
-# @FUNCTION: remove_i18n_include
-# @DESCRIPTION:
-# Compile will fail if plugin still use the old i18n language handling,
-# most parts are fixed by vdr-plugin-2.eclass internal functions itself.
-# Remove unneeded i18.n includes from files, if they are still wrong there,
-# this can be fixed by 'function + space separated list of files"
-#
-# Example:
-# @CODE
-# remove_i18n_include bla.n foo.n
-# @CODE
 
 # Applying your own local/user patches:
 # This is done by using the epatch_user() function of the eutils.eclass.
-# Simply add your patches into one of these directories:
+# Simply put your patches into one of these directories:
 # /etc/portage/patches/<CATEGORY>/<PF|P|PN>/
 # Quote: where the first of these three directories to exist will be the one to
 # use, ignoring any more general directories which might exist as well.
 #
 # For more details about it please take a look at the eutils.class.
 
-inherit eutils flag-o-matic multilib toolchain-funcs unpacker
+inherit base eutils flag-o-matic multilib toolchain-funcs
 
 case ${EAPI:-0} in
-	4|5) ;;
-	*) die "EAPI ${EAPI} unsupported."
+    4|5) ;;
+    *) die "EAPI ${EAPI} unsupported."
 esac
 
 EXPORT_FUNCTIONS pkg_setup src_unpack src_prepare src_compile src_install pkg_postinst pkg_postrm pkg_config
@@ -127,6 +72,8 @@ DEPEND="${COMMON_DEPEND}
 RDEPEND="${COMMON_DEPEND}
 	>=app-eselect/eselect-vdr-0.0.2"
 
+# This is a hack for ebuilds like vdr-xineliboutput that want to
+# conditionally install a vdr-plugin
 if [[ "${GENTOO_VDR_CONDITIONAL:-no}" = "yes" ]]; then
 	IUSE="${IUSE} vdr"
 	DEPEND="vdr? ( ${DEPEND} )"
@@ -155,6 +102,30 @@ create_plugindb_file() {
 		echo "EBUILD_V=${PVR}"
 		echo "PLUGINS=\"$@\""
 	} > "${D}/${DB_FILE}"
+}
+
+# Delete files created outside of vdr-plugin-2.eclass
+#   vdrplugin-rebuild.ebuild converted plugindb and files are
+#   not deleted by portage itself - should only be needed as
+#   long as not every system has switched over to
+#   vdrplugin-rebuild-0.2 / gentoo-vdr-scripts-0.4.2
+delete_orphan_plugindb_file() {
+	#elog Testing for orphaned plugindb file
+	local NEW_VDRPLUGINDB_DIR=/usr/share/vdr/vdrplugin-rebuild/
+	local DB_FILE="${ROOT}/${NEW_VDRPLUGINDB_DIR}/${CATEGORY}-${PF}"
+
+	# file exists
+	[[ -f ${DB_FILE} ]] || return
+
+	# will portage handle the file itself
+	if grep -q CREATOR=ECLASS "${DB_FILE}"; then
+		#elog file owned by eclass - don't touch it
+		return
+	fi
+
+	elog "Removing orphaned plugindb-file."
+	elog "\t#rm ${DB_FILE}"
+	rm "${DB_FILE}"
 }
 
 create_header_checksum_file() {
@@ -266,11 +237,12 @@ vdr_patchmakefile() {
 	fi
 }
 
+# Begin new vdr-plugin-2.eclass content
 dev_check() {
 	# A lot useful debug infos
 	# set VDR_MAINTAINER_MODE="1" in make.conf
 	if [[ -n ${VDR_MAINTAINER_MODE} ]]; then
-		eerror "\t Gentoo Developer Debug: $@"
+		eerror "\t Maintainer Info: $@"
 	fi
 }
 
@@ -284,7 +256,10 @@ gettext_missing() {
 }
 
 detect_po_dir() {
-	# helper function
+#	Some plugins have /po in a subdir
+#	set PO_SUBDIR in .ebuild
+#	i.e media-plugins/vdr-streamdev
+#	PO_SUBDIR="client server"
 
 	[[ -f po ]] && local po_dir="${S}"
 	local po_subdir=( ${S}/${PO_SUBDIR} )
@@ -356,6 +331,7 @@ vdr_i18n() {
 
 remove_i18n_include() {
 	# remove uneeded i18.n includes
+	# call 'remove_i18n_include bla foo'
 
 	local f
 	for f; do
@@ -363,8 +339,9 @@ remove_i18n_include() {
 		-e "s:^#include[[:space:]]*\"i18n.h\"://:"
 	done
 
-	dev_check "removed i18n.h include in ${@}"
+	dev_check "removed i18n.h for ${@}"
 }
+# end new vdr-plugin-2.eclass content
 
 vdr-plugin-2_print_enable_command() {
 	local p_name c=0 l=""
@@ -406,7 +383,6 @@ vdr-plugin-2_pkg_setup() {
 	if has_version ">=media-video/vdr-1.7.34"; then
 		VDR_PLUGIN_DIR=$(pkg-config --variable=libdir vdr)
 	else
-		# obsolete, as we have only >=media-video/vdr-2
 		VDR_PLUGIN_DIR="/usr/$(get_libdir)/vdr/plugins"
 	fi
 
@@ -425,7 +401,6 @@ vdr-plugin-2_pkg_setup() {
 	if has_version ">=media-video/vdr-1.7.34"; then
 		LOCDIR=$(pkg-config --variable=locdir vdr)
 	else
-		# obsolete, as we have only >=media-video/vdr-2
 		LOCDIR="/usr/share/locale"
 	fi
 
@@ -444,10 +419,8 @@ vdr-plugin-2_pkg_setup() {
 	fi
 
 	if has_version ">=media-video/vdr-1.7.34"; then
-		VDRVERSION=$(awk -F'"' '/define VDRVERSION/ {print $2}' "${VDR_INCLUDE_DIR}"/config.h)
 		APIVERSION=$(pkg-config --variable=apiversion vdr)
 	else
-		# obsolete, as we have only >=media-video/vdr-2
 		VDRVERSION=$(awk -F'"' '/define VDRVERSION/ {print $2}' "${VDR_INCLUDE_DIR}"/config.h)
 		APIVERSION=$(awk -F'"' '/define APIVERSION/ {print $2}' "${VDR_INCLUDE_DIR}"/config.h)
 	[[ -z ${APIVERSION} ]] && APIVERSION="${VDRVERSION}"
@@ -475,7 +448,7 @@ vdr-plugin-2_src_util() {
 			vdr-plugin-2_src_util add_local_patch patchmakefile linguas_patch i18n
 			;;
 		unpack)
-			unpacker_src_unpack
+			base_src_unpack
 			;;
 		add_local_patch)
 			cd "${S}" || die "Could not change to plugin-source-directory!"
@@ -514,6 +487,9 @@ vdr-plugin-2_src_unpack() {
 }
 
 vdr-plugin-2_src_prepare() {
+
+	einfo "using vdr-plugin-2.eclass from main portage"
+
 	if [[ -z ${VDR_INCLUDE_DIR} ]]; then
 		eerror "Wrong use of vdr-plugin-2.eclass."
 		eerror "An ebuild for a vdr-plugin will not work without calling vdr-plugin-2_src_prepare."
@@ -522,9 +498,7 @@ vdr-plugin-2_src_prepare() {
 		die "vdr-plugin-2_src_prepare not called!"
 	fi
 
-	[[ ${PATCHES[@]} ]] && epatch "${PATCHES[@]}"
-	debug-print "$FUNCNAME: applying user patches"
-
+	base_src_prepare
 	vdr-plugin-2_src_util prepare
 }
 
@@ -592,6 +566,7 @@ vdr-plugin-2_src_install() {
 
 	local SOFILE_STRING=$(grep SOFILE Makefile)
 	if [[ -n ${SOFILE_STRING} ]]; then
+		dev_check "einstall with new Makefile handling"
 		BUILD_TARGETS=${BUILD_TARGETS:-${VDRPLUGIN_MAKE_TARGET:-install }}
 		einstall ${BUILD_PARAMS} \
 			${BUILD_TARGETS} \
@@ -599,7 +574,6 @@ vdr-plugin-2_src_install() {
 			DESTDIR="${D}" \
 			|| die "einstall (makefile target) failed"
 	else
-		dev_check "Plugin use still the old Makefile handling"
 		insinto "${VDR_PLUGIN_DIR}"
 		doins libvdr-*.so.*
 	fi
@@ -663,7 +637,7 @@ vdr-plugin-2_pkg_postinst() {
 }
 
 vdr-plugin-2_pkg_postrm() {
-:
+	delete_orphan_plugindb_file
 }
 
 vdr-plugin-2_pkg_config() {

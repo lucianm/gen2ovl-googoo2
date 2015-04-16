@@ -249,21 +249,6 @@ vdr_patchmakefile() {
 	# Use a file instead of a variable as single-stepping via ebuild
 	# destroys environment.
 	touch "${WORKDIR}"/.vdr-plugin_makefile_patched
-
-	# remove inclusion of Make.global
-	sed -i Makefile \
-		-e "s:-include \$(VDRDIR)/Make.global::" \
-		-e "s:include \$(VDRDIR)/Make.global::" \
-		-e "s:-include \$(VDRSRC)/Make.global::" \
-		-e "s:include \$(VDRSRC)/Make.global::" \
-		-e "s:-include \$(VDRSRC)/Make.config::" \
-		-e "s:include \$(VDRSRC)/Make.config::"
-
-	# include Make.config if not included at all (even via PLGCFG)
-	if ! grep -q '\-include \$(VDRDIR)/Make.config' Makefile && ! grep -q '\-include \$(VDRSRC)/Make.config' Makefile && ! grep -q '\-include \$(PLGCFG)' Makefile; then
-		sed -i Makefile \
-			-e "/^### The object files (add further files here)\:/a -include \$(VDRDIR)/Make.config"
-	fi
 }
 
 dev_check() {
