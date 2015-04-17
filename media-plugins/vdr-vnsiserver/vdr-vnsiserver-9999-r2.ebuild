@@ -1,4 +1,4 @@
-# Copyright 1999-2013 Gentoo Foundation
+# Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
@@ -6,41 +6,29 @@ EAPI="5"
 
 inherit vdr-plugin-2 git-2
 
-EGIT_REPO_URI="${PVRADDONS_EGIT_REPO_URI:-git://github.com/opdenkamp/xbmc-pvr-addons.git}"
-EGIT_PROJECT="xbmc-pvr-addons${PVRADDONS_EGIT_PROJECT:-}.git"
-EGIT_BRANCH="${PVRADDONS_EGIT_BRANCH:-master}"
-
+EGIT_REPO_URI="git://github.com/FernetMenta/vdr-plugin-vnsiserver.git"
 
 DESCRIPTION="VDR plugin: VNSI Streamserver Plugin"
-HOMEPAGE="https://github.com/FernetMenta/xbmc-pvr-addons"
+HOMEPAGE="https://github.com/FernetMenta/vdr-plugin-vnsiserver"
 SRC_URI=""
 KEYWORDS=""
 LICENSE="GPL-2"
 SLOT="0"
 IUSE=""
 
-DEPEND=">=media-video/vdr-1.7.22"
+DEPEND=">=media-video/vdr-2.2.0"
 RDEPEND="${DEPEND}"
-
-S=${WORKDIR}/${PN}-plugin
-
-PATCHES="${FILESDIR}/vnsiserver-VDR-API-2.1.2-compatibility.patch"
-
-src_unpack() {
-	git-2_src_unpack
-
-	S="${S}/addons/pvr.vdr.vnsi/vdr-plugin-${VDRPLUGIN}"
-}
 
 src_prepare() {
 	vdr-plugin-2_src_prepare
 
 	fix_vdr_libsi_include videoinput.c
 	fix_vdr_libsi_include demuxer.c
-}
-
-src_compile() {
-	vdr-plugin-2_src_compile
+	
+	if has_version ">=media-plugins/vdr-wirbelscan-0.0.9"; then
+		rm wirbelscan_services.h
+		ln -s /usr/include/wirbelscan_services.h wirbelscan_services.h
+	fi
 }
 
 src_install() {
