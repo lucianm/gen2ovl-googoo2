@@ -30,3 +30,9 @@ src_prepare() {
 	fix_vdr_libsi_include caDescriptor.h
 	fix_vdr_libsi_include si_ext.h
 }
+
+src_install() {
+	vdr-plugin-2_src_install
+	
+	doheader wirbelscan_services.h
+}
