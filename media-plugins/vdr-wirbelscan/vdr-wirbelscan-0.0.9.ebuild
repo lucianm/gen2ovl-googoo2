@@ -1,4 +1,4 @@
-# Copyright 1999-2014 Gentoo Foundation
+# Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
@@ -23,11 +23,10 @@ DEPEND="media-video/vdr
 RDEPEND="${DEPEND}"
 
 src_prepare() {
-	has_version ">=media-video/vdr-1.7.27" && epatch "${FILESDIR}/receiver-api-fixes.patch"
-
 	vdr-plugin-2_src_prepare
 
 	fix_vdr_libsi_include scanfilter.h
 	fix_vdr_libsi_include scanfilter.c
 	fix_vdr_libsi_include caDescriptor.h
+	fix_vdr_libsi_include si_ext.h
 }
