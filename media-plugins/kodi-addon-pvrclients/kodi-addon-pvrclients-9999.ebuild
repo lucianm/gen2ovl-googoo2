@@ -17,7 +17,7 @@ KEYWORDS=""
 LICENSE="GPL-2"
 SLOT="0"
 
-PVRCLIENTS="argustv demo dvbviewer tvheadend mediaportal mythtv nextpvr njoy vnsi vuplus"
+PVRCLIENTS="argustv demo dvbviewer tvheadend mediaportal mythtv nextpvr njoy vnsi vuplus dvblink filmon iptvsimple wmc"
 for pvrclient in ${PVRCLIENTS}; do
 	IUSE_PVRCLIENTS+=" pvrclient_${pvrclient}"
 done
@@ -38,16 +38,26 @@ src_prepare() {
 	use pvrclient_argustv || sed -i "s:pvr.argustv::" addons/Makefile.am
 	use pvrclient_demo || sed -i "s:pvr.demo::" addons/Makefile.am
 	use pvrclient_dvbviewer || sed -i "s:pvr.dvbviewer::" addons/Makefile.am
+	if ! use pvrclient_dvblink; then
+		sed -i "s:pvr.dvblink::" addons/Makefile.am
+		sed -i "s: libdvblinkremote::" lib/Makefile.am
+		sed -i "s: tinyxml2::" lib/Makefile.am
+	fi
 	if ! use pvrclient_tvheadend; then
 		sed -i "s:pvr.hts::" addons/Makefile.am
 		sed -i "s: libhts::" lib/Makefile.am
 	fi
 	use pvrclient_mediaportal || sed -i "s:pvr.mediaportal.tvserver::" addons/Makefile.am
+	if ! use pvrclient_mythtv; then
+		sed -i "s:pvr.mythtv::" addons/Makefile.am
+		sed -i "s: cppmyth::" lib/Makefile.am
+	fi
 	use pvrclient_nextpvr || sed -i "s:pvr.nextpvr::" addons/Makefile.am
 	use pvrclient_njoy || sed -i "s:pvr.njoy::" addons/Makefile.am
 	use pvrclient_vnsi || sed -i "s:pvr.vdr.vnsi::" addons/Makefile.am
 	use pvrclient_vuplus || sed -i "s:pvr.vuplus::" addons/Makefile.am
-	if ! use pvrclient_vuplus && ! use pvrclient_nextpvr && ! use pvrclient_njoy && ! use pvrclient_demo && ! use pvrclient_mediaportal; then
+	use pvrclient_wmc || sed -i "s:pvr.wmc::" addons/Makefile.am
+	if ! use pvrclient_vuplus && ! use pvrclient_nextpvr && ! use pvrclient_njoy && ! use pvrclient_demo && ! use pvrclient_mediaportal && ! use pvrclient_wmc; then
 		sed -i "s: tinyxml::" lib/Makefile.am
 	fi
 	if ! use pvrclient_argustv; then
@@ -58,10 +68,15 @@ src_prepare() {
 }
 
 src_configure() {
+	use pvrclient_filmon && BUILD_PARAMS="ADDON_FILMON=TRUE"
+	use pvrclient_iptvsimple && BUILD_PARAMS="ADDON_IPTVSIMPLE=TRUE"
 	econf --prefix=/usr \
 		--libdir=/usr/$(get_libdir)/kodi/addons \
 		--datadir=/usr/share/kodi/addons \
-		$(use_enable pvrclient_mythtv addons-with-dependencies)
+		$(use_enable pvrclient_mythtv addons-with-dependencies) \
+		$(use_enable pvrclient_filmon addons-with-dependencies) \
+		$(use_enable pvrclient_iptvsimple addons-with-dependencies) \
+		$BUILD_PARAMS
 }
 
 src_install() {
