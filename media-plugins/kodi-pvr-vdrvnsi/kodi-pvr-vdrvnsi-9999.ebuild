@@ -38,3 +38,12 @@ src_configure() {
 
 	cmake-utils_src_configure
 }
+
+pkg_info() {
+	einfo "The VNSI PVR client requires "media-plugins/vdr-vnsiserver" plugin on the VDR server."
+	einfo "(or similar, depending on the distribution used on the VDR server machine)."
+	einfo "VDR itself doesn't need any patches or modification to use all the current features."
+	einfo "IMPORTANT:"
+	einfo "Please disable *all* PVR addons *before* running the VNSI addon!"
+	einfo "Of course, if using another PVR client than VNSI, another TV backend than VDR is required"
+}
