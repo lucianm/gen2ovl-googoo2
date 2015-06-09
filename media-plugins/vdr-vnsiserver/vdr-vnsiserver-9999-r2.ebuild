@@ -16,7 +16,9 @@ LICENSE="GPL-2"
 SLOT="0"
 IUSE=""
 
-DEPEND=">=media-video/vdr-2.2.0"
+DEPEND=">=media-video/vdr-2.2.0
+	sys-libs/zlib"
+
 RDEPEND="${DEPEND}"
 
 src_prepare() {
