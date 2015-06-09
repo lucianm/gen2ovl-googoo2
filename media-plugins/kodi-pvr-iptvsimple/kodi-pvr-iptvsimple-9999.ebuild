@@ -30,3 +30,11 @@ src_prepare() {
 
 	cmake-utils_prepare
 }
+
+src_configure() {
+	local mycmakeargs=(
+		-DCMAKE_INSTALL_LIBDIR=$(get_libdir)/kodi
+		)
+
+	cmake-utils_src_configure
+}
