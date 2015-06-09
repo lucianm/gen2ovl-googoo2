@@ -1,4 +1,4 @@
-# Copyright 1999-2014 Gentoo Foundation
+# Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
@@ -6,10 +6,12 @@ EAPI="5"
 
 inherit git-2 autotools multilib eutils
 
-EGIT_REPO_URI="git://github.com/pipelka/xbmc-addon-xvdr.git"
+ADDON="${PN/kodi-pvr-/}"
+
+EGIT_REPO_URI="git://github.com/pipelka/xbmc-addon-${ADDON}.git"
 
 DESCRIPTION="XBMC addon: add VDR (http://www.cadsoft.de/vdr) as a TV/PVR Backend"
-HOMEPAGE="https://github.com/pipelka/xbmc-addon-xvdr"
+HOMEPAGE="https://github.com/pipelka/xbmc-addon-${ADDON}"
 SRC_URI=""
 KEYWORDS=""
 LICENSE="GPL-2"
@@ -39,7 +41,7 @@ src_install() {
 }
 
 pkg_info() {
-	einfo "This add-on requires the "media-lugins/vdr-xvdr" plugin on the VDR server"
+	einfo "This add-on requires the "media-plugins/vdr-xvdr" plugin on the VDR server"
 	einfo "(or similar, depending on the distribution used on the VDR backend machine)"
 	einfo "VDR itself doesn't need any patches or modification to use all the current features."
 	einfo "IMPORTANT:"
