@@ -28,7 +28,7 @@ S=${WORKDIR}/${PN}
 src_prepare() {
 	epatch_user
 
-	cmake-utils_prepare
+	cmake-utils_src_prepare
 }
 
 src_configure() {
