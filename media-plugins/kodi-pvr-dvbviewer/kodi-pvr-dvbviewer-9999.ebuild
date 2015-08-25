@@ -9,6 +9,7 @@ inherit git-2 autotools multilib cmake-utils
 ADDON="${PN/kodi-pvr-/pvr.}"
 
 EGIT_REPO_URI="git://github.com/kodi-pvr/${ADDON}.git"
+EGIT_BRANCH="${KODI_PVR_GIT_BRANCH:-master}"
 
 DESCRIPTION="Kodi Isengard PVR Addon: DVBViewer PVR Client"
 HOMEPAGE="https://github.com/kodi-pvr/${ADDON}"

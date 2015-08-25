@@ -9,6 +9,7 @@ inherit git-2 autotools multilib eutils
 ADDON="${PN/kodi-pvr-/}"
 
 EGIT_REPO_URI="git://github.com/pipelka/xbmc-addon-${ADDON}.git"
+EGIT_BRANCH="${KODI_PVR_GIT_BRANCH:-master}"
 
 DESCRIPTION="XBMC addon: add VDR (http://www.cadsoft.de/vdr) as a TV/PVR Backend"
 HOMEPAGE="https://github.com/pipelka/xbmc-addon-${ADDON}"
