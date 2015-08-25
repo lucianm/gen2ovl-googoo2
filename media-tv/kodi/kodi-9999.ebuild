@@ -20,8 +20,8 @@ case ${PV} in
 *|*_p*)
 	MY_PV=${PV/_p/_r}
 	MY_P="${PN}-${MY_PV}"
-	SRC_URI="http://mirrors.kodi.tv/releases/source/${MY_PV}-${CODENAME}.tar.gz -> ${P}.tar.gz
-		http://mirrors.kodi.tv/releases/source/${MY_P}-generated-addons.tar.xz"
+	SRC_URI="https://github.com/xbmc/xbmc/archive/${MY_PV}-${CODENAME}.tar.gz -> ${P}.tar.gz"
+#		http://mirrors.kodi.tv/releases/source/${MY_P}-generated-addons.tar.xz"
 	KEYWORDS="~amd64 ~x86"
 
 	S=${WORKDIR}/xbmc-${PV}-${CODENAME}
@@ -33,9 +33,11 @@ HOMEPAGE="http://kodi.tv/ http://kodi.wiki/"
 
 LICENSE="GPL-2"
 SLOT="0"
-IUSE="airplay alsa avahi bluetooth bluray caps cec css debug +fishbmc gles goom java joystick midi mysql nfs +opengl profile +projectm pulseaudio +rsxs rtmp +samba sftp +spectrum test +texturepacker udisks upnp upower +usb vaapi vdpau +waveform webserver +X +xrandr"
+IUSE="airplay alsa avahi bluetooth bluray caps cec css dbus debug +fishbmc gles goom java joystick midi mysql nfs +opengl profile +projectm pulseaudio +rsxs rtmp +samba sftp +spectrum test +texturepacker udisks upnp upower +usb vaapi vdpau +waveform webserver +X +xrandr"
 REQUIRED_USE="
 	rsxs? ( X )
+	udisks? ( dbus )
+	upower? ( dbus )
 	xrandr? ( X )
 "
 
@@ -49,7 +51,7 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	dev-libs/expat
 	dev-libs/fribidi
 	dev-libs/libcdio[-minimal]
-	cec? ( >=dev-libs/libcec-2.2 )
+	cec? ( >=dev-libs/libcec-3.0 )
 	dev-libs/libpcre[cxx]
 	dev-libs/libxml2
 	dev-libs/libxslt
@@ -90,7 +92,7 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	net-misc/curl
 	samba? ( >=net-fs/samba-3.4.6[smbclient(+)] )
 	bluetooth? ( net-wireless/bluez )
-	sys-apps/dbus
+	dbus? ( sys-apps/dbus )
 	caps? ( sys-libs/libcap )
 	sys-libs/zlib
 	virtual/jpeg
@@ -148,6 +150,7 @@ src_prepare() {
 	# some dirs ship generated autotools, some dont
 	multijob_init
 	local d
+	make -C tools/depends/native/JsonSchemaBuilder/
 	for d in $(printf 'f:\n\t@echo $(BOOTSTRAP_TARGETS)\ninclude bootstrap.mk\n' | emake -f - f) ; do
 		[[ -e ${d} ]] && continue
 		pushd ${d/%configure/.} >/dev/null || die
@@ -201,6 +204,7 @@ src_configure() {
 		$(use_enable caps libcap) \
 		$(use_enable cec libcec) \
 		$(use_enable css dvdcss) \
+		$(use_enable dbus) \
 		$(use_enable debug) \
 		$(use_enable fishbmc) \
 		$(use_enable gles) \

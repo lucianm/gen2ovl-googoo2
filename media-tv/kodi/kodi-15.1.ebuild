@@ -11,53 +11,33 @@ PYTHON_REQ_USE="sqlite"
 
 inherit eutils python-single-r1 multiprocessing autotools
 
-if [[ "${PV}" < "14.0" ]]; then
-	CODENAME="Gotham"
-else
-	CODENAME="Helix"
-fi
-
+CODENAME="Isengard"
 case ${PV} in
 9999)
-	EGIT_REPO_URI="${XBMC_EGIT_REPO_URI:-git://github.com/xbmc/xbmc.git}"
-#	EGIT_PROJECT="${PN}${XBMC_EGIT_PROJECT:-}.git"
-	EGIT_BRANCH="${XBMC_EGIT_BRANCH:-master}"
+	EGIT_REPO_URI="git://github.com/xbmc/xbmc.git"
 	inherit git-r3
-	#SRC_URI="!java? ( mirror://gentoo/${P}-20130413-generated-addons.tar.xz )"
-	;;
-*_alpha*|*_beta*|*_rc*)
-	MY_PV="${PV/_/}-${CODENAME}"
-	MY_P="${PN}-${MY_PV}"
-	SRC_URI="https://github.com/xbmc/xbmc/archive/${MY_PV}.tar.gz -> ${P}.tar.gz"
-#		!java? ( mirror://gentoo/${P}-generated-addons.tar.xz )"
-	KEYWORDS="~amd64 ~x86"
-	S="${WORKDIR}/xbmc-${MY_PV}"
 	;;
 *|*_p*)
 	MY_PV=${PV/_p/_r}
 	MY_P="${PN}-${MY_PV}"
-	SRC_URI="https://github.com/xbmc/xbmc/archive/${PV}-${CODENAME}.tar.gz"
-#		http://mirrors.xbmc.org/releases/source/${MY_P}-generated-addons.tar.xz"
+	SRC_URI="https://github.com/xbmc/xbmc/archive/${MY_PV}-${CODENAME}.tar.gz -> ${P}.tar.gz"
+#		http://mirrors.kodi.tv/releases/source/${MY_P}-generated-addons.tar.xz"
 	KEYWORDS="~amd64 ~x86"
 
-#	S=${WORKDIR}/${PN}-
-	S=${WORKDIR}/xbmc-
-	[[ ${PV} == *_p* ]] \
-		&& S+=${PV/_p/-${CODENAME}_r} \
-		|| S+=${MY_PV}-${CODENAME}
+	S=${WORKDIR}/xbmc-${PV}-${CODENAME}
 	;;
 esac
 
-DESCRIPTION="Kodi (previously known as XBMC) is a free and open source media-player and entertainment hub"
-HOMEPAGE="http://xbmc.org/"
+DESCRIPTION="Kodi is a free and open source media-player and entertainment hub"
+HOMEPAGE="http://kodi.tv/ http://kodi.wiki/"
 
 LICENSE="GPL-2"
 SLOT="0"
-IUSE="airplay alsa altivec avahi bluetooth bluray caps cec css debug +ffmpeg +fishbmc gles goom java joystick midi mysql nfs +opengl profile +projectm pulseaudio pvr +rsxs rtmp +samba +sdl sse sse2 sftp test udisks upnp upower +usb vaapi vdpau webserver +X +xrandr"
+IUSE="airplay alsa avahi bluetooth bluray caps cec css dbus debug +fishbmc gles goom java joystick midi mysql nfs +opengl profile +projectm pulseaudio +rsxs rtmp +samba sftp +spectrum test +texturepacker udisks upnp upower +usb vaapi vdpau +waveform webserver +X +xrandr"
 REQUIRED_USE="
-	pvr? ( mysql )
 	rsxs? ( X )
-	X? ( sdl )
+	udisks? ( dbus )
+	upower? ( dbus )
 	xrandr? ( X )
 "
 
@@ -68,21 +48,23 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	app-i18n/enca
 	airplay? ( app-pda/libplist )
 	dev-libs/boost
+	dev-libs/expat
 	dev-libs/fribidi
 	dev-libs/libcdio[-minimal]
-	cec? ( >=dev-libs/libcec-2.1 )
+	cec? ( >=dev-libs/libcec-3.0 )
 	dev-libs/libpcre[cxx]
+	dev-libs/libxml2
+	dev-libs/libxslt
 	>=dev-libs/lzo-2.04
 	dev-libs/tinyxml[stl]
 	dev-libs/yajl
 	dev-python/simplejson[${PYTHON_USEDEP}]
 	media-fonts/corefonts
 	media-fonts/roboto
-	media-libs/alsa-lib
+	alsa? ( media-libs/alsa-lib )
 	media-libs/flac
 	media-libs/fontconfig
 	media-libs/freetype
-	>=media-libs/glew-1.5.6
 	media-libs/jasper
 	media-libs/jbigkit
 	>=media-libs/libass-0.9.7
@@ -95,20 +77,13 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	media-libs/libpng
 	projectm? ( media-libs/libprojectm )
 	media-libs/libsamplerate
-	sdl? ( media-libs/libsdl[sound,opengl,video,X] )
-	alsa? ( media-libs/libsdl[alsa] )
+	joystick? ( media-libs/libsdl2 )
 	>=media-libs/taglib-1.8
 	media-libs/libvorbis
-	sdl? (
-		media-libs/sdl-gfx
-		>=media-libs/sdl-image-1.2.10[gif,jpeg,png]
-		media-libs/sdl-mixer
-		media-libs/sdl-sound
-	)
 	media-libs/tiff
 	pulseaudio? ( media-sound/pulseaudio )
 	media-sound/wavpack
-	ffmpeg? ( || ( >=media-video/ffmpeg-1.2.1:0=[encode,static-libs] ( media-libs/libpostproc[static-libs] >=media-video/libav-10_alpha:=[encode,static-libs] ) ) )
+	>=media-video/ffmpeg-2.6:=[encode]
 	rtmp? ( media-video/rtmpdump )
 	avahi? ( net-dns/avahi )
 	nfs? ( net-fs/libnfs )
@@ -117,7 +92,7 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	net-misc/curl
 	samba? ( >=net-fs/samba-3.4.6[smbclient(+)] )
 	bluetooth? ( net-wireless/bluez )
-	sys-apps/dbus
+	dbus? ( sys-apps/dbus )
 	caps? ( sys-libs/libcap )
 	sys-libs/zlib
 	virtual/jpeg
@@ -126,15 +101,15 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	opengl? (
 		virtual/glu
 		virtual/opengl
+		>=media-libs/glew-1.5.6
 	)
 	gles? (
-		virtual/opengl
 		media-libs/mesa[gles2]
 	)
 	vaapi? ( x11-libs/libva[opengl] )
 	vdpau? (
 		|| ( x11-libs/libvdpau >=x11-drivers/nvidia-drivers-180.51 )
-		|| ( >=media-video/ffmpeg-1.2.1:0=[vdpau] >=media-video/libav-10_alpha:=[vdpau] )
+		media-video/ffmpeg[vdpau]
 	)
 	X? (
 		x11-apps/xdpyinfo
@@ -144,10 +119,9 @@ COMMON_DEPEND="${PYTHON_DEPS}
 		x11-libs/libXrender
 	)"
 RDEPEND="${COMMON_DEPEND}
+	!media-tv/xbmc
 	udisks? ( sys-fs/udisks:0 )
-	upower? ( || ( sys-power/upower sys-power/upower-pm-utils ) )
-	!media-tv/xbmc"
-
+	upower? ( || ( sys-power/upower sys-power/upower-pm-utils ) )"
 DEPEND="${COMMON_DEPEND}
 	app-arch/xz-utils
 	dev-lang/swig
@@ -163,13 +137,6 @@ DEPEND="${COMMON_DEPEND}
 
 pkg_setup() {
 	python-single-r1_pkg_setup
-
-	if has_version 'media-video/libav' ; then
-		ewarn "Building ${PN} against media-video/libav is not supported upstream."
-		ewarn "It requires building a (small) wrapper library with some code"
-		ewarn "from media-video/ffmpeg."
-		ewarn "If you experience issues, please try with media-video/ffmpeg."
-	fi
 }
 
 src_unpack() {
@@ -177,15 +144,13 @@ src_unpack() {
 }
 
 src_prepare() {
-	epatch "${FILESDIR}"/${PN}-9999-nomythtv.patch
-	epatch "${FILESDIR}"/${PN}-9999-no-arm-flags.patch #400617
-	# The mythtv patch touches configure.ac, so force a regen
-	rm -f configure
+	epatch "${FILESDIR}"/${P}-no-arm-flags.patch #400617
+	epatch "${FILESDIR}"/${P}-texturepacker.patch
 
 	# some dirs ship generated autotools, some dont
 	multijob_init
-	emake --directory="tools/depends/native/JsonSchemaBuilder"
 	local d
+	make -C tools/depends/native/JsonSchemaBuilder/
 	for d in $(printf 'f:\n\t@echo $(BOOTSTRAP_TARGETS)\ninclude bootstrap.mk\n' | emake -f - f) ; do
 		[[ -e ${d} ]] && continue
 		pushd ${d/%configure/.} >/dev/null || die
@@ -202,16 +167,7 @@ src_prepare() {
 	# stuff handles this just fine already #408395
 	export ac_cv_lib_avcodec_ff_vdpau_vc1_decode_picture=yes
 
-	local squish #290564
-	use altivec && squish="-DSQUISH_USE_ALTIVEC=1 -maltivec"
-	use sse && squish="-DSQUISH_USE_SSE=1 -msse"
-	use sse2 && squish="-DSQUISH_USE_SSE=2 -msse2"
-	sed -i \
-		-e '/^CXXFLAGS/{s:-D[^=]*=.::;s:-m[[:alnum:]]*::}' \
-		-e "1iCXXFLAGS += ${squish}" \
-		lib/libsquish/Makefile.in || die
-
-	# Fix XBMC's final version string showing as "exported"
+	# Fix the final version string showing as "exported"
 	# instead of the SVN revision number.
 	export HAVE_GIT=no GIT_REV=${EGIT_VERSION:-exported}
 
@@ -235,22 +191,20 @@ src_configure() {
 	export ac_cv_lib_bluetooth_hci_devid=$(usex bluetooth)
 	# Requiring java is asine #434662
 	[[ ${PV} != "9999" ]] && export ac_cv_path_JAVA_EXE=$(which $(usex java java true))
-	
-	use ffmpeg && FFMPEG_FLAGS=" --with-ffmpeg=auto"
 
 	econf \
 		--docdir=/usr/share/doc/${PF} \
 		--disable-ccache \
 		--disable-optimizations \
-		$FFMPEG_FLAGS \
-		$(has_version 'media-video/libav' && echo "--enable-libav-compat") \
-		--enable-gl \
+		--with-ffmpeg=shared \
+		$(use_enable alsa) \
 		$(use_enable airplay) \
 		$(use_enable avahi) \
 		$(use_enable bluray libbluray) \
 		$(use_enable caps libcap) \
 		$(use_enable cec libcec) \
 		$(use_enable css dvdcss) \
+		$(use_enable dbus) \
 		$(use_enable debug) \
 		$(use_enable fishbmc) \
 		$(use_enable gles) \
@@ -263,68 +217,58 @@ src_configure() {
 		$(use_enable profile profiling) \
 		$(use_enable projectm) \
 		$(use_enable pulseaudio pulse) \
-		$(use_enable pvr mythtv) \
 		$(use_enable rsxs) \
 		$(use_enable rtmp) \
 		$(use_enable samba) \
-		$(use_enable sdl) \
 		$(use_enable sftp ssh) \
+		$(use_enable spectrum) \
 		$(use_enable usb libusb) \
 		$(use_enable test gtest) \
+		$(use_enable texturepacker) \
 		$(use_enable upnp) \
 		$(use_enable vaapi) \
 		$(use_enable vdpau) \
+		$(use_enable waveform) \
 		$(use_enable webserver) \
 		$(use_enable X x11) \
 		$(use_enable xrandr)
+}
+
+src_compile() {
+	emake V=1
 }
 
 src_install() {
 	default
 	rm "${ED}"/usr/share/doc/*/{LICENSE.GPL,copying.txt}*
 
-	domenu tools/Linux/xbmc.desktop
+	domenu tools/Linux/kodi.desktop
 	newicon media/icon48x48.png kodi.png
 
-	# Remove optional addons (platform specific and disabled by USE flag).
+	# Remove optional addons (platform specific).
 	local disabled_addons=(
 		repository.pvr-{android,ios,osx{32,64},win32}.xbmc.org
 		visualization.dxspectrum
+		visualization.vortex
 	)
-	use fishbmc  || disabled_addons+=( visualization.fishbmc )
-	use projectm || disabled_addons+=( visualization.{milkdrop,projectm} )
-	use rsxs     || disabled_addons+=( screensaver.rsxs.{euphoria,plasma,solarwinds} )
-	rm -rf "${disabled_addons[@]/#/${ED}/usr/share/xbmc/addons/}"
+	rm -rf "${disabled_addons[@]/#/${ED}/usr/share/kodi/addons/}"
 
-	# Punt simplejson bundle, we use the system one anyway.
-	rm -rf "${ED}"/usr/share/xbmc/addons/script.module.simplejson/lib
 	# Remove fonconfig settings that are used only on MacOSX.
 	# Can't be patched upstream because they just find all files and install
 	# them into same structure like they have in git.
-	rm -rf "${ED}"/usr/share/xbmc/system/players/dvdplayer/etc
+	rm -rf "${ED}"/usr/share/kodi/system/players/dvdplayer/etc
 
 	# Replace bundled fonts with system ones
 	# teletext.ttf: unknown
 	# bold-caps.ttf: unknown
 	# roboto: roboto-bold, roboto-regular
 	# arial.ttf: font mashed from droid/roboto, not removed wrt bug#460514
-	rm -rf "${ED}"/usr/share/xbmc/addons/skin.confluence/fonts/Roboto-*
+	rm -rf "${ED}"/usr/share/kodi/addons/skin.confluence/fonts/Roboto-*
 	dosym /usr/share/fonts/roboto/Roboto-Regular.ttf \
-		/usr/share/xbmc/addons/skin.confluence/fonts/Roboto-Regular.ttf
+		/usr/share/kodi/addons/skin.confluence/fonts/Roboto-Regular.ttf
 	dosym /usr/share/fonts/roboto/Roboto-Bold.ttf \
-		/usr/share/xbmc/addons/skin.confluence/fonts/Roboto-Bold.ttf
+		/usr/share/kodi/addons/skin.confluence/fonts/Roboto-Bold.ttf
 
 	python_domodule tools/EventClients/lib/python/xbmcclient.py
-
-	doman docs/manpages/kodi.1
-	doman docs/manpages/kodi.bin.1
-	doman docs/manpages/kodi-send.1
-	doman docs/manpages/kodi-standalone.1
-
-	#python_newscript "tools/EventClients/Clients/Kodi Send/kodi-send.py" kodi-send
-	newbin "tools/EventClients/Clients/Kodi Send/kodi-send.py" kodi-send
-}
-
-pkg_postinst() {
-	elog "Visit http://wiki.xbmc.org/?title=XBMC_Online_Manual"
+	python_newscript "tools/EventClients/Clients/Kodi Send/kodi-send.py" kodi-send
 }
