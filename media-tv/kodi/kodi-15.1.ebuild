@@ -25,7 +25,7 @@ case ${PV} in
 #		http://mirrors.kodi.tv/releases/source/${MY_P}-generated-addons.tar.xz"
 	KEYWORDS="~amd64 ~x86"
 
-	S=${WORKDIR}/xbmc-${PV}-${CODENAME}
+	S=${WORKDIR}/xbmc-${MY_PV}-${CODENAME}
 	;;
 esac
 

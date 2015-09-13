@@ -6,29 +6,31 @@ set -eux
 
 PV=$1
 PN=kodi
-P="${PN}-${PV}"
-DISTDIR="/usr/portage/distfiles"
-GITDIR="/usr/local/src/kodi/git"
+MY_PV=${PV/_p/_r}
+MY_PV=${PV/_rc/rc}
+MY_P="${PN}-${MY_PV}"
+CODENAME=$2
 
-if [[ ${PV} != "9999" ]] ; then
-	rm -rf xbmc-*/
-	tar xf ${DISTDIR}/${P}.tar.gz
-	d=$(echo xbmc-*/)
-else
-	stamp=$(date --date="$(git log -n1 --pretty=format:%ci master)" -u +%Y%m%d)
-	P+="-${stamp}"
-	cd ${GITDIR}
-	d=.
-fi
-#cd ${d} && git init . && git add . && git commit -qmm && cd ..
-make -C ${d} -j -f codegenerator.mk
-tar="${DISTDIR}/${P}-generated-addons.tar.xz"
+P="${PN}-${MY_PV}"
+MY_S_SUBDIR="xbmc-${MY_PV}-${CODENAME}"
+S="/var/tmp/portage/media-tv/${PN}-${PV}/work/${MY_S_SUBDIR}"
+
+FILESDIR=$(pwd)
+
+cd ${S}
+make -C . -j -f codegenerator.mk
+
+cd ..
+
+tar="${MY_P}-generated-addons.tar.xz"
 tar cf - \
-	${d}/xbmc/interfaces/python/generated/*.cpp \
-	${d}/xbmc/interfaces/json-rpc/ServiceDescription.h \
+	${MY_S_SUBDIR}/xbmc/interfaces/python/generated/*.cpp \
+	${MY_S_SUBDIR}/xbmc/interfaces/json-rpc/ServiceDescription.h \
 	| xz > "${tar}"
-if [[ ${PV} != "9999" ]] ; then
-	rm -rf xbmc-*/
-fi
-
 du -b "${tar}"
+mv -f ${tar} ${FILESDIR}
+
+cd ${FILESDIR}
+for patchfile in no-arm-flags nomythtv texturepacker; do
+	ln -f -s kodi-9999-${patchfile}.patch kodi-${PV}-${patchfile}.patch
+done
