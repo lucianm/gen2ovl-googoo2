@@ -17,8 +17,9 @@ LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~amd64 ~ppc ~x86 ~x86-linux"
 
-IUSE="ar ch dk_dr dtvla uk_rt uk_bleb uk_tvguide uk_atlas is it na_dd nl fi fi_sv es_laguiatv huro se_swedb hr no_gf fr pt pt_meo eu_epg tv_combiner tv_pick_cgi tv_check na_dtv
-za il eu_egon se_tvzon fr_kazer tr na_tvmedia"
+IUSE="ar ch_search dk_dr dtv_la es_laguiatv eu_dotmedia eu_egon eu_epgdata fi fi_sv fr fr_kazer hr huro il is it na_dd na_dtv na_tvmedia nl no_gf pt pt_meo se_swedb se_tvzon tr
+uk_atlas uk_bleb uk_rt uk_tvguide tv_check tv_combiner tv_pick_cgi
+za"
 # removed upstream due to source site changes:
 # na_icons in es_miguiatv ee re uk_guardian
 
@@ -60,7 +61,7 @@ DEPEND="${RDEPEND}
 	na_dd? ( dev-perl/SOAP-Lite dev-perl/TermReadKey )
 	no_gf? ( dev-perl/HTTP-Cache-Transparent dev-perl/IO-stringy dev-perl/XML-LibXML )
 	pt? ( dev-perl/HTML-Tree dev-perl/Unicode-UTF8simple dev-perl/DateTime )
-	eu_epg? ( dev-perl/Archive-Zip dev-perl/DateTime-Format-Strptime )
+	eu_epgdata? ( dev-perl/Archive-Zip dev-perl/DateTime-Format-Strptime )
 	se_swedb? ( dev-perl/HTTP-Cache-Transparent dev-perl/IO-stringy dev-perl/XML-LibXML )
 	hr? ( dev-perl/HTTP-Cache-Transparent dev-perl/IO-stringy dev-perl/XML-LibXML )
 	uk_rt? ( dev-perl/HTTP-Cache-Transparent dev-perl/IO-stringy dev-perl/DateTime dev-perl/DateTime-TimeZone )
@@ -72,6 +73,7 @@ DEPEND="${RDEPEND}
 	tv_pick_cgi? ( virtual/perl-CGI dev-perl/Lingua-EN-Numbers-Ordinate )
 	na_dtv? ( >=dev-perl/WWW-Mechanize-1.02 dev-perl/TimeDate dev-perl/IO-stringy dev-perl/XML-LibXML dev-perl/DateTime dev-perl/DateTime-Format-ISO8601 )
 	na_tvmedia? ( dev-perl/Data-Dump )
+	dk_dr? ( dev-perl/JSON )
 	"
 #	na_icons? ( dev-perl/HTML-TableExtract >=dev-perl/WWW-Mechanize-1.02 )
 #	nl? ( dev-perl/HTML-Tree )
@@ -95,7 +97,7 @@ src_prepare() {
 
 src_configure() {
 	make_config() {
-		# Never except default configuration
+		# Never accept default configuration
 		echo "no"
 
 		# Enable Australian
@@ -107,39 +109,80 @@ src_configure() {
 		# Enable Brazil Cable
 		#use brnet && echo "yes" || echo "no"
 		# Enable Switzerland Search
-		usex ch
+		usex ch_search
+		# Enable Denmark
+		usex dk_dr
 		# Enable Latin America
-		usex dtvla
-		# Enable UK and Ireland (Radio Times)
-		usex uk_rt
-		# Enable Fast alternative grabber for the UK
-		usex uk_bleb
-		# Enable Fast grabber for UK and Ireland using Atlas database
-		usex uk_atlas
-		# Enable grabber for UK and Ireland using The Guardian website
-		#usex uk_guardian
-		# Enable grabber for UK and Ireland using TV Guide website
-		usex uk_tvguide
-		# Enable Belgium and Luxemburg
-		#use be && echo "yes" || echo "no"
+		usex dtv_la
+		# Enable Spain Alternatives
+		usex es_laguiatv
+		#usex es_miguiatv
+		# Enable Grabber for Europe (xmltv.se / dotmedia)
+		usex eu_dotmedia
+		# Enable German speaking area (Egon zappt)
+		usex eu_egon
+		# Enable Grabber for some European countries (epgdata.com)
+		usex eu_epgdata
+		# Enable Finland
+		usex fi
+		# Enable Finland (Swedish)
+		usex fi_sv
+		# Enable France
+		usex fr
+		# Enable France (Kazer)
+		usex fr_kazer
+		# Enable Croatia
+		usex hr		
+		# Enable Hungary, Romania, Slovakia, Czech Republic
+		usex huro
+		# Enable Israel
+		usex il
 		#Enable Iceland
 		usex is
 		# Enable Italy
 		usex it
 		# Enable Italy from DVB-S stream
 		echo "no" # missing Linux::DVB
-		# Enable India (experimental)
-		#usex in
 		# Enable North America using DataDirect
 		usex na_dd
+		# Enable North America DirecTV
+		usex na_dtv
+		# Enable North America (TVMedia)
+		usex na_tvmedia
+		# Enable Netherlands
+		usex nl
+		# Enable Norway Gfeed
+		usex no_gf
+		# Enable Portugal
+		usex pt
+		# Enable Portugal (MEO)
+		usex pt_meo
+		# Enable Sweden
+		usex se_swedb
+		# Enable Grabber for Sweden (tvzon.se)
+		usex se_tvzon
+		# Enable Turkey (Digiturk)
+		usex tr
+		# Enable Fast grabber for UK and Ireland using Atlas database
+		usex uk_atlas
+		# Enable Fast alternative grabber for the UK
+		usex uk_bleb		
+		# Enable UK and Ireland (Radio Times)
+		usex uk_rt
+		# Enable grabber for UK and Ireland using TV Guide website
+		usex uk_tvguide
+		# Enable GUI checking.
+		usex tv_check
+		# Enable combiner
+		usex tv_combiner
+		# Enable CGI support
+		usex tv_pick_cgi
+		# Enable Belgium and Luxemburg
+		#use be && echo "yes" || echo "no"
+		# Enable India (experimental)
+		#usex in
 		# Enable North America channel icons
 		#usex na_icons
-		# Enable Finland
-		usex fi
-		# Enable Finland (Swedish)
-		usex fi_sv
-		# Enable Israel
-		usex il
 		# Enable Spain
 		#use es  && echo "yes" || echo "no"
 		# Enable Spain Digital
@@ -147,61 +190,22 @@ src_configure() {
 		# Israel Temporary Disabled
 		# use il && echo "yes" || echo "no"
 		#echo "no"
-		# Enable Spain Alternatives
-		usex es_laguiatv
-		#usex es_miguiatv
-		# Enable Netherlands
-		usex nl
 		# Enable Alternate Netherlands
 		#use nl_wolf  && echo "yes" || echo "no"
-		# Enable Hungary and Romania
-		usex huro
-		# Enable Denmark
-		usex dk_dr
 		# Enable Japan
 		#use jp  && echo "yes" || echo "no"
-		# Enable Sweden
-		usex se_swedb
-		# Enable Croatia
-		usex hr
-		# Enable Norway Gfeed
-		usex no_gf
-		# Enable German speaking area (Egon zappt)
-		usex eu_egon
-		# Enable Grabber for Sweden (tvzon.se)
-		usex se_tvzon
-		# Enable France
-		usex fr
-		# Enable France (Kazer)
-		usex fr_kazer
 		# Enable Norway
 		#use no  && echo "yes" || echo "no"
-		# Enable Portugal
-		usex pt
-		# Enable Portugal (MEO)
-		usex pt_meo
 		# Enable South Africa
-		usex za
-		# Enable Europe epg
-		usex eu_epg
-		# Enable combiner
-		usex tv_combiner
-		# Enable GUI checking.
-		usex tv_check
-		# Enable CGI support
-		usex tv_pick_cgi
+		#usex za
 		# Enable Estonia
 		#usex ee
 		# Enable Reunion Island
 		#usex re
 		# Enable Caledonie Island
-		#use nc && echo "yes" || echo "no"
-		# Enable North America DirecTV
-		usex na_dtv
-		# Enable Turkey (Digiturk)
-		usex tr
-		# Enable North America (TVMedia)
-		usex na_tvmedia
+		#use nc && echo "yes" || echo "no"		
+		# Enable grabber for UK and Ireland using The Guardian website
+		#usex uk_guardian
 	}
 
 	pm_echovar=`make_config`
