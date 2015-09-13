@@ -19,6 +19,7 @@ case ${PV} in
 	;;
 *|*_p*)
 	MY_PV=${PV/_p/_r}
+	MY_PV=${PV/_rc/rc}
 	MY_P="${PN}-${MY_PV}"
 	SRC_URI="https://github.com/xbmc/xbmc/archive/${MY_PV}-${CODENAME}.tar.gz -> ${P}.tar.gz"
 #		http://mirrors.kodi.tv/releases/source/${MY_P}-generated-addons.tar.xz"
