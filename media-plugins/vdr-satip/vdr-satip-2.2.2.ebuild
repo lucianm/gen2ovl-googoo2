@@ -1,6 +1,6 @@
-# Copyright 1999-2014 Gentoo Foundation
+# Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: $
+# $Id$
 
 EAPI=5
 
@@ -15,7 +15,17 @@ SLOT="0"
 LICENSE="GPL-2"
 IUSE=""
 
-DEPEND=">=media-video/vdr-2.1.4
-        net-misc/curl
-        dev-libs/pugixml"
+DEPEND=">=media-video/vdr-2.2.0
+		>=net-misc/curl-7.36
+		|| ( dev-libs/tinyxml
+			dev-libs/pugixml )"
 RDEPEND="${DEPEND}"
+
+src_prepare() {
+	vdr-plugin-2_src_prepare
+
+	if has_version "dev-libs/tinyxml" ; then
+		sed -e "s:#SATIP_USE_TINYXML:SATIP_USE_TINYXML:" -i Makefile
+		#BUILD_PARAMS+=" SATIP_USE_TINYXML = 1 "
+	fi
+}
