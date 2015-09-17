@@ -28,6 +28,7 @@ SRC_URI="
 	http://www.lyngsat-logo.com/hires/pp/pro_tv_international.png
 	http://www.lyngsat-logo.com/hires/pp/pro_tv.png
 	http://www.lyngsat-logo.com/hires/pp/pro_tv_chisinau.png
+	http://www.lyngsat-logo.com/logo/tv/pp/pro_tv_hd.png
 	http://www.lyngsat-logo.com/hires/rr/realitatea_tv.png
 	http://www.lyngsat-logo.com/hires/tt/taraf_tv.png
 	http://www.lyngsat-logo.com/hires/num/1music_channel_ro.png
@@ -165,6 +166,7 @@ src_prepare() {
 	ln -f -s "fishing and hunting.png" "fishing&hunting.png"
 	mv -f "National TV.png" "national tv.png"
 	ln -f -s "national tv.png" "national.png"
+	ln -f -s "pro_tv_hd.png" "protv_hd.png"
 }
 
 src_install() {
@@ -182,4 +184,5 @@ src_install() {
 	dosym "acasa tv gold.png" "${CHANLOGOBASE}/${LOGOPACKNAME}/acasă gold.png"
 
 }
+
 

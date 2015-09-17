@@ -26,7 +26,7 @@ RDEPEND="${DEPEND}
 
 pkg_setup() {
 	enewgroup ${PN}
-	enewuser ${PN} -1 /bin/bash /tmp ${PN},video,audio,uucp
+	enewuser ${PN} -1 -1 /tmp ${PN},video,audio,uucp
 }
 
 src_prepare() {
@@ -51,8 +51,8 @@ src_install() {
 
 	dodoc README*
 
-	dodir "/var/${PN}"
-	fowners -R ${PN}:${PN} "/var/${PN}"
+	dodir "/tmp/log"
+	fowners -R ${PN}:${PN} "/tmp/log"
 }
 
 pkg_postinst() {

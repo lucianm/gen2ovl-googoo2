@@ -5,9 +5,9 @@ After=network.target
 [Service]
 User=minisatip
 Group=minisatip
-WorkingDirectory=/var/minisatip
+WorkingDirectory=/tmp
 Type=simple
-EnvironmentFile=-/etc/minisatip.conf
+EnvironmentFile=/etc/minisatip.conf
 ExecStart=/usr/bin/minisatip -f $SERVER_ARGS
 
 [Install]
