@@ -166,8 +166,7 @@ src_prepare() {
 	ln -f -s "fishing and hunting.png" "fishing&hunting.png"
 	mv -f "National TV.png" "national tv.png"
 	ln -f -s "national tv.png" "national.png"
-	ln -f -s "pro_tv_hd.png" "protv_hd.png"
-	ln -f -s "pro_tv_hd.png" "protv hd.png"
+	ln -f -s "pro tv hd.png" "protv hd.png"
 }
 
 src_install() {
@@ -185,5 +184,3 @@ src_install() {
 	dosym "acasa tv gold.png" "${CHANLOGOBASE}/${LOGOPACKNAME}/acasă gold.png"
 
 }
-
-
