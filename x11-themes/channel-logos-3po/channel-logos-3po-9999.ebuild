@@ -167,6 +167,7 @@ src_prepare() {
 	mv -f "National TV.png" "national tv.png"
 	ln -f -s "national tv.png" "national.png"
 	ln -f -s "pro_tv_hd.png" "protv_hd.png"
+	ln -f -s "pro_tv_hd.png" "protv hd.png"
 }
 
 src_install() {
