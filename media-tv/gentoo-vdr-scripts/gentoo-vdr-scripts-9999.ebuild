@@ -23,10 +23,6 @@ RDEPEND="nvram? ( sys-power/nvram-wakeup )
 
 VDR_HOME=/var/vdr
 
-pkg_prepare() {
-	epatch_user
-}
-
 pkg_setup() {
 	enewgroup vdr
 
@@ -35,6 +31,10 @@ pkg_setup() {
 	#   audio - playing sound when using software-devices
 	#   cdrom - playing dvds/audio-cds ...
 	enewuser vdr -1 /bin/bash "${VDR_HOME}" vdr,video,audio,cdrom
+}
+
+src_prepare() {
+	epatch_user
 }
 
 src_install() {
