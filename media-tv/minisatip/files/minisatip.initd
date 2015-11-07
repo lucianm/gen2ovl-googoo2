@@ -1,0 +1,26 @@
+#!/sbin/runscript
+# Copyright 1999-2015 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Id$
+
+depend() {
+    need net
+    use logger
+}
+
+start() {
+    ebegin "Starting Minisat server"
+    start-stop-daemon --start --quiet \
+	--pidfile /var/run/minisat.pid \
+	--exec /usr/bin/minisat -- ${MINISATIP_SERVER_ARGS}
+    pidof /usr/bin/minisatip > /var/run/minisatip.pid
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping Minisat server"
+    start-stop-daemon --stop --quiet \
+	--pidfile /var/run/minisatip.pid \
+	--exec /usr/bin/minisatip
+    eend $?
+}

@@ -7,8 +7,8 @@ User=minisatip
 Group=minisatip
 WorkingDirectory=/tmp
 Type=simple
-EnvironmentFile=/etc/minisatip.conf
-ExecStart=/usr/bin/minisatip -f $SERVER_ARGS
+EnvironmentFile=/etc/conf.d/minisatip
+ExecStart=/usr/bin/minisatip $MINISATIP_SERVER_ARGS
 
 [Install]
 WantedBy=multi-user.target

@@ -22,7 +22,7 @@ DEPEND="dvbcsa? ( media-libs/libdvbcsa )
 	media-tv/linuxtv-dvb-apps"
 
 RDEPEND="${DEPEND}
-	dvbcsa? ( media-tv/oscam )"
+	dvbcsa? ( media-tv/oscam[dvbapi] )"
 
 pkg_setup() {
 	enewgroup ${PN}
@@ -41,8 +41,8 @@ src_install() {
 
 	dobin ${PN}
 
-	insinto "/etc"
-	doins "${FILESDIR}/${PN}.conf"
+	newconfd "${FILESDIR}/${PN}.confd" ${PN}
+	newinitd "${FILESDIR}/${PN}.initd" ${PN}
 
 	insinto "/usr/share/${PN}"
 	doins -r html
