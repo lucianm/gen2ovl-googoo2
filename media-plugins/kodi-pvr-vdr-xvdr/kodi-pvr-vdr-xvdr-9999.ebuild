@@ -1,51 +1,49 @@
-# Copyright 2015 Daniel 'herrnst' Scheller, Team Kodi
-# Original copyright 1999-2011 Gentoo Foundation
+# Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: $
+# $Header: Exp $
 
-EAPI="4"
+EAPI=5
 
 inherit git-2 autotools multilib eutils
 
 EGIT_REPO_URI="git://github.com/pipelka/xbmc-addon-xvdr.git"
-EGIT_BRANCH="master"
+EGIT_BRANCH="${KODI_PVR_GIT_BRANCH:-master}"
 
-DESCRIPTION="VDR-XVDR addon for Kodi"
+DESCRIPTION="XBMC addon: add VDR (http://www.cadsoft.de/vdr) as a TV/PVR Backend"
 HOMEPAGE="https://github.com/pipelka/xbmc-addon-xvdr"
 SRC_URI=""
 KEYWORDS=""
 LICENSE="GPL-2"
 SLOT="0"
-IUSE=""
+IUSE="debug"
 
-DEPEND="
-	sys-libs/zlib
-"
-RDEPEND="${DEPEND}"
+RDEPEND=">=media-tv/kodi-13.9"
+DEPEND="${RDEPEND}
+	sys-libs/zlib"
 
 S=${WORKDIR}/${PN}
 
 src_prepare() {
+	epatch_user
 	eautoreconf
 }
 
 src_configure() {
-	econf --prefix=/usr/$(get_libdir)/kodi
+	econf --prefix=/usr/share/kodi
 }
 
 src_install() {
-	emake DESTDIR="${D}" install || die "emake install failed"
+	emake DESTDIR="${D}" install
+	dodir "/usr/$(get_libdir)/kodi/addons/pvr.vdr.xvdr"
+	mv "${D}usr/share/kodi/addons/pvr.vdr.xvdr/XBMC_VDR_xvdr.pvr" \
+		"${D}usr/$(get_libdir)/kodi/addons/pvr.vdr.xvdr" || \
+		die "Could not move the addon shared object to the actual LIBDIR"
 }
 
-pkg_postinst() {
-	einfo
+pkg_info() {
+	einfo "This add-on requires the "media-plugins/vdr-xvdr" plugin on the VDR server"
+	einfo "(or similar, depending on the distribution used on the VDR backend machine)"
+	einfo "VDR itself doesn't need any patches or modification to use all the current features."
 	einfo "IMPORTANT:"
-	einfo
-	einfo "The XVDR addon is unsupported by Team Kodi. For any support including outdated"
-	einfo "API usage, you need to get in contact with the author of the XVDR addon directly."
-	einfo
-	einfo "Please see https://github.com/pipelka/xbmc-addon-xvdr or http://www.xvdr.tv/ for"
-	einfo "contact details and setup/configuration instructons."
-	einfo
+	einfo "Please disable *all* PVR addons *before* running the XVDR addon!"
 }
-
