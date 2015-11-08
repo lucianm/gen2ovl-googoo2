@@ -13,10 +13,24 @@ inherit multilib cmake-utils
 
 case "${EAPI:-0}" in
 	4|5)
-		EXPORT_FUNCTIONS src_configure
+		EXPORT_FUNCTIONS src_prepare src_configure
 		;;
 	*) die "EAPI=${EAPI} is not supported" ;;
 esac
+
+PLUGINNAME="${PN/kodi-/}"
+PLUGINNAME="${PLUGINNAME/-/.}"
+PLUGINNAME="${PLUGINNAME/-/.}"
+
+kodi-addon_src_prepare() {
+	cmake-utils_src_prepare
+	if [ -f ${S}/${PLUGINNAME}/addon.xml.in ]; then
+		mv ${S}/${PLUGINNAME}/addon.xml.in ${S}/${PLUGINNAME}/addon.xml
+		sed -i ${S}/${PLUGINNAME}/addon.xml \
+		    -e "s:@PLATFORM@:linux:" \
+		    -e "s:@LIBRARY_FILENAME@:${PLUGINNAME}.so:"
+	fi
+}
 
 # @FUNCTION: kodi-addon_src_configure
 # @DESCRIPTION:
