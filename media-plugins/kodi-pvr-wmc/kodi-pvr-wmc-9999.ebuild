@@ -1,40 +1,24 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 2015 Daniel 'herrnst' Scheller, Team Kodi
 # Distributed under the terms of the GNU General Public License v2
-# $Header: Exp $
+# $Header: $
 
-EAPI="5"
+EAPI=5
 
-inherit git-2 autotools multilib cmake-utils
+EGIT_REPO_URI="https://github.com/kodi-pvr/pvr.wmc.git"
+EGIT_BRANCH="master"
 
-ADDON="${PN/kodi-pvr-/pvr.}"
+inherit git-r3 cmake-utils kodi-addon
 
-EGIT_REPO_URI="git://github.com/kodi-pvr/${ADDON}.git"
-EGIT_BRANCH="${KODI_PVR_GIT_BRANCH:-master}"
-
-DESCRIPTION="Kodi Isengard PVR Addon: Windows Media Center PVR Client"
-HOMEPAGE="https://github.com/kodi-pvr/${ADDON}"
+DESCRIPTION="Kodi's Windows Media Center client addon"
+HOMEPAGE="http://kodi.tv"
 SRC_URI=""
-KEYWORDS=""
+
 LICENSE="GPL-2"
 SLOT="0"
+KEYWORDS="~amd64 ~x86"
+IUSE=""
 
-RDEPEND="media-libs/kodi-platform
-	!media-plugins/kodi-addon-pvrclients"
-
-DEPEND="${RDEPEND}"
-
-S=${WORKDIR}/${PN}
-
-src_prepare() {
-	epatch_user
-
-	cmake-utils_src_prepare
-}
-
-src_configure() {
-	local mycmakeargs=(
-		-DCMAKE_INSTALL_LIBDIR=$(get_libdir)/kodi
-		)
-
-	cmake-utils_src_configure
-}
+DEPEND="
+	media-tv/kodi
+	media-libs/kodiplatform
+	"
