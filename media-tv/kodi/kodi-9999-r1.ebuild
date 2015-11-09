@@ -227,6 +227,7 @@ src_configure() {
 		$(use_enable css dvdcss) \
 		$(use_enable dbus) \
 		$(use_enable debug) \
+		--disable-fishbmc \
 		$(use_enable gles) \
 		$(use_enable joystick) \
 		$(use_enable midi mid) \
@@ -234,7 +235,9 @@ src_configure() {
 		$(use_enable nfs) \
 		$(use_enable opengl gl) \
 		$(use_enable profile profiling) \
+		--disable-projectm \
 		$(use_enable pulseaudio pulse) \
+		--disable-rsxs \
 		$(use_enable rtmp) \
 		$(use_enable samba) \
 		$(use_enable sftp ssh) \
@@ -244,6 +247,7 @@ src_configure() {
 		$(use_enable upnp) \
 		$(use_enable vaapi) \
 		$(use_enable vdpau) \
+		--disable-waveform \
 		$(use_enable webserver) \
 		$(use_enable X x11)
 }
