@@ -29,3 +29,7 @@ RDEPEND="
 	media-libs/kodiplatform
 	sys-libs/zlib
 	"
+src_unpack() {
+	EGIT_BRANCH="$(pvr_branch)"
+	git-r3_src_unpack
+}

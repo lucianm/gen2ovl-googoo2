@@ -27,3 +27,7 @@ DEPEND="
 RDEPEND="
 	dev-libs/tinyxml2
 	"
+src_unpack() {
+	EGIT_BRANCH="$(pvr_branch)"
+	git-r3_src_unpack
+}

@@ -22,3 +22,7 @@ DEPEND="
 	media-tv/kodi
 	media-libs/kodiplatform
 	"
+src_unpack() {
+	EGIT_BRANCH="$(pvr_branch)"
+	git-r3_src_unpack
+}

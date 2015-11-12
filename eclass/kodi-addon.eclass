@@ -9,14 +9,31 @@
 # @DESCRIPTION:
 # Provides a src_configure function for correct CMake configuration
 
-inherit multilib cmake-utils
+inherit multilib cmake-utils versionator
 
 case "${EAPI:-0}" in
 	4|5)
-		EXPORT_FUNCTIONS src_prepare src_configure
+		EXPORT_FUNCTIONS pvr_branch src_prepare src_configure
 		;;
 	*) die "EAPI=${EAPI} is not supported" ;;
 esac
+
+kodi-addon_pvr_branch() { 
+	KODI_VER=$(best_version media-tv/kodi)
+	KODI_MAJOR_VER=$(get_major_version ${KODI_VER/media-tv\/kodi-/})
+	case "${KODI_MAJOR_VER}" in
+		15)
+			echo "Isengard"
+			;;
+		*)
+			echo "master"
+			;;
+	esac
+}
+
+kodi-addon_src_fetch() {
+	echo get_kodi_major_ver
+}
 
 PLUGINNAME="${PN/kodi-/}"
 PLUGINNAME="${PLUGINNAME/-/.}"
