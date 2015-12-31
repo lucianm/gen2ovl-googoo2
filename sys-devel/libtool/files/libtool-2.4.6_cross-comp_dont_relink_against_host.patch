@@ -1,0 +1,18 @@
+diff -Naur libtool-2.4.6_orig/build-aux/ltmain.sh libtool-2.4.6/build-aux/ltmain.sh
+--- a/build-aux/ltmain.sh	2015-02-15 17:15:12.000000000 +0100
++++ b/build-aux/ltmain.sh	2015-12-30 00:53:23.000000000 +0100
+@@ -8361,12 +8361,12 @@
+ 	      fi
+ 	    else
+ 	      # We cannot seem to hardcode it, guess we'll fake it.
+-	      add_dir=-L$libdir
++	      #add_dir="-L$lt_sysroot$libdir"
+ 	      # Try looking first in the location we're being installed to.
+ 	      if test -n "$inst_prefix_dir"; then
+ 		case $libdir in
+ 		  [\\/]*)
+-		    func_append add_dir " -L$inst_prefix_dir$libdir"
++		    add_dir "-L$inst_prefix_dir$libdir"
+ 		    ;;
+ 		esac
+ 	      fi
