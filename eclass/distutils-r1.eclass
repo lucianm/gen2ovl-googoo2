@@ -762,7 +762,7 @@ distutils-r1_src_compile() {
 	if declare -f python_compile >/dev/null; then
 		_distutils-r1_run_foreach_impl python_compile
 	else
-		_distutils-r1_run_foreach_impl distutils-r1_python_compile
+		_distutils-r1_run_foreach_impl distutils-r1_python_compile "${@}"
 	fi
 
 	if declare -f python_compile_all >/dev/null; then
