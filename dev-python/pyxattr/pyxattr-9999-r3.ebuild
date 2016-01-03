@@ -25,6 +25,17 @@ DEPEND="${RDEPEND}
 	dev-python/setuptools[${PYTHON_USEDEP}]
 	test? ( dev-python/nose[${PYTHON_USEDEP}] )"
 
+
+python_prepare_all() {
+	sed -i -e 's:import distutils:import distutilscross:' setup.py || die
+
+	distutils-r1_python_prepare_all
+}
+
+src_compile() {
+	distutils-r1_src_compile -x
+}
+
 src_test() {
 	# Perform the tests in /var/tmp; that location is more likely
 	# to have xattr support than /tmp which is often tmpfs.

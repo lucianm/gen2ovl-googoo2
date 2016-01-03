@@ -28,8 +28,13 @@ python_prepare_all() {
 	# Bug 548486
 	sed -e "s:html_theme = 'default':html_theme = 'classic':" \
 		-i doc/conf.py || die
+	sed -i -e 's:import distutils:import distutilscross:' setup.py || die
 
 	distutils-r1_python_prepare_all
+}
+
+src_compile() {
+	distutils-r1_src_compile -x
 }
 
 python_compile_all() {
