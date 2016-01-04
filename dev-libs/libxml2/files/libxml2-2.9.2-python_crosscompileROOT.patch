@@ -1,0 +1,24 @@
+diff -Naur libxml2-2.9.2_orig/python/Makefile.am libxml2-2.9.2/python/Makefile.am
+--- libxml2-2.9.2_orig/python/Makefile.am	2014-10-03 11:00:53.000000000 +0200
++++ libxml2-2.9.2/python/Makefile.am	2016-01-04 02:51:27.950657894 +0100
+@@ -19,7 +19,7 @@
+ AM_CPPFLAGS = \
+ 	-I$(top_builddir)/include \
+ 	-I$(top_srcdir)/include	\
+-	-I$(PYTHON_INCLUDES)
++	-I$(ROOT)$(PYTHON_INCLUDES)
+ 
+ python_LTLIBRARIES = libxml2mod.la
+ 
+diff -Naur libxml2-2.9.2_orig/python/Makefile.in libxml2-2.9.2/python/Makefile.in
+--- libxml2-2.9.2_orig/python/Makefile.in	2014-10-16 09:35:14.000000000 +0200
++++ libxml2-2.9.2/python/Makefile.in	2016-01-04 02:51:16.782642907 +0100
+@@ -490,7 +490,7 @@
+ @WITH_PYTHON_TRUE@AM_CPPFLAGS = \
+ @WITH_PYTHON_TRUE@	-I$(top_builddir)/include \
+ @WITH_PYTHON_TRUE@	-I$(top_srcdir)/include	\
+-@WITH_PYTHON_TRUE@	-I$(PYTHON_INCLUDES)
++@WITH_PYTHON_TRUE@	-I$(ROOT)$(PYTHON_INCLUDES)
+ 
+ @WITH_PYTHON_TRUE@python_LTLIBRARIES = libxml2mod.la
+ @WITH_PYTHON_TRUE@libxml2mod_la_SOURCES = libxml.c libxml_wrap.h libxml2-py.h libxml2-py.c types.c

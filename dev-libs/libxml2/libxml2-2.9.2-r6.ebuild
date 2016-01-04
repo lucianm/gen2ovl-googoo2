@@ -71,6 +71,8 @@ src_unpack() {
 src_prepare() {
 	DOCS=( AUTHORS ChangeLog NEWS README* TODO* )
 
+	epatch "${FILESDIR}"/${PN}-2.9.2-python_crosscompileROOT.patch
+
 	# Patches needed for prefix support
 	epatch "${FILESDIR}"/${PN}-2.7.1-catalog_path.patch
 
