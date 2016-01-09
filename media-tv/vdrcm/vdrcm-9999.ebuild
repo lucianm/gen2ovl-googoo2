@@ -28,6 +28,7 @@ RDEPEND="sys-apps/coreutils
 	sys-apps/which
 	sys-apps/util-linux
 	sys-apps/grep
+	>=media-video/vdr-2.2.0
 	|| (	dev-libs/newt
 		dev-util/dialog )"
 
@@ -44,14 +45,4 @@ src_prepare() {
 
 src_install() {
 	emake DESTDIR="${D}" prefix="/usr" NO_LICENSE_INST="1" install
-}
-
-pkg_postinst() {
-	elog "It actually makes sense to use '${PN}' only if >=vdr-2.2.0 is emerged,"
-	elog "yet vdr is not a dependency, as only the config direcrtories ARGSDIR and"
-	elog "on the same directory hierarchic level, 'conf.avail' are required for '${PN}'"
-	elog ""
-	elog "Nevertheless, in order to find them out, eiter >=vdr-2.2.0 should be emerged,"
-	elog "or the file '~/.${PN}' containing the path to the ARGSDIR should exist, please"
-	elog "have a look in the README.md file for details"
 }
