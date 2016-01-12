@@ -1,6 +1,9 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 2015 Daniel 'herrnst' Scheller, Team Kodi
+# Original copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: Exp $
+# $Id$
+
+# Imported from official Gentoo portage tree
 
 EAPI="5"
 
@@ -9,7 +12,7 @@ EAPI="5"
 PYTHON_COMPAT=( python2_7 )
 PYTHON_REQ_USE="sqlite"
 
-inherit eutils python-single-r1 multiprocessing autotools
+inherit eutils linux-info python-single-r1 multiprocessing autotools toolchain-funcs
 
 CODENAME="Isengard"
 case ${PV} in
@@ -19,13 +22,13 @@ case ${PV} in
 	;;
 *|*_p*)
 	MY_PV=${PV/_p/_r}
-	MY_PV=${PV/_rc/rc}
 	MY_P="${PN}-${MY_PV}"
-	SRC_URI="https://github.com/xbmc/xbmc/archive/${MY_PV}-${CODENAME}.tar.gz -> ${P}.tar.gz"
-#		http://mirrors.kodi.tv/releases/source/${MY_P}-generated-addons.tar.xz"
+	SRC_URI="http://mirrors.kodi.tv/releases/source/${MY_PV}-${CODENAME}.tar.gz -> ${P}.tar.gz
+		https://github.com/xbmc/xbmc/archive/${PV}-${CODENAME}.tar.gz -> ${P}.tar.gz
+		!java? ( http://mirrors.kodi.tv/releases/source/${MY_P}-generated-addons.tar.xz )"
 	KEYWORDS="~amd64 ~x86"
 
-	S=${WORKDIR}/xbmc-${MY_PV}-${CODENAME}
+	S=${WORKDIR}/xbmc-${PV}-${CODENAME}
 	;;
 esac
 
@@ -34,12 +37,10 @@ HOMEPAGE="http://kodi.tv/ http://kodi.wiki/"
 
 LICENSE="GPL-2"
 SLOT="0"
-IUSE="airplay alsa avahi bluetooth bluray caps cec css dbus debug +fishbmc gles goom java joystick midi mysql nfs +opengl profile +projectm pulseaudio +rsxs rtmp +samba sftp +spectrum test +texturepacker udisks upnp upower +usb vaapi vdpau +waveform webserver +X +xrandr"
+IUSE="airplay alsa avahi bluetooth bluray caps cec css dbus debug gles java joystick midi mysql nfs +opengl profile pulseaudio rtmp +samba sftp +ffmpeg test +texturepacker udisks upnp upower +usb vaapi vdpau webserver +X"
 REQUIRED_USE="
-	rsxs? ( X )
 	udisks? ( dbus )
 	upower? ( dbus )
-	xrandr? ( X )
 "
 
 COMMON_DEPEND="${PYTHON_DEPS}
@@ -69,14 +70,13 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	media-libs/jasper
 	media-libs/jbigkit
 	>=media-libs/libass-0.9.7
-	bluray? ( media-libs/libbluray )
+	bluray? ( >=media-libs/libbluray-0.7.0 )
 	css? ( media-libs/libdvdcss )
 	media-libs/libmad
 	media-libs/libmodplug
 	media-libs/libmpeg2
 	media-libs/libogg
 	media-libs/libpng
-	projectm? ( media-libs/libprojectm )
 	media-libs/libsamplerate
 	joystick? ( media-libs/libsdl2 )
 	>=media-libs/taglib-1.8
@@ -84,7 +84,7 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	media-libs/tiff
 	pulseaudio? ( media-sound/pulseaudio )
 	media-sound/wavpack
-	>=media-video/ffmpeg-2.6:=[encode]
+	ffmpeg? ( >=media-video/ffmpeg-2.6:=[encode] )
 	rtmp? ( media-video/rtmpdump )
 	avahi? ( net-dns/avahi )
 	nfs? ( net-fs/libnfs )
@@ -109,14 +109,14 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	)
 	vaapi? ( x11-libs/libva[opengl] )
 	vdpau? (
-		|| ( x11-libs/libvdpau >=x11-drivers/nvidia-drivers-180.51 )
-		media-video/ffmpeg[vdpau]
+		|| ( >=x11-libs/libvdpau-1.1 >=x11-drivers/nvidia-drivers-180.51 )
+		ffmpeg? ( media-video/ffmpeg[vdpau] )
 	)
 	X? (
 		x11-apps/xdpyinfo
 		x11-apps/mesa-progs
 		x11-libs/libXinerama
-		xrandr? ( x11-libs/libXrandr )
+		x11-libs/libXrandr
 		x11-libs/libXrender
 	)"
 RDEPEND="${COMMON_DEPEND}
@@ -126,7 +126,10 @@ RDEPEND="${COMMON_DEPEND}
 DEPEND="${COMMON_DEPEND}
 	app-arch/xz-utils
 	dev-lang/swig
+	dev-libs/crossguid
 	dev-util/gperf
+	texturepacker? ( media-libs/giflib )
+	media-sound/dcadec
 	X? ( x11-proto/xineramaproto )
 	dev-util/cmake
 	x86? ( dev-lang/nasm )
@@ -136,7 +139,14 @@ DEPEND="${COMMON_DEPEND}
 # generated addons package.  #488118
 [[ ${PV} == "9999" ]] && DEPEND+=" virtual/jre"
 
+CONFIG_CHECK="~IP_MULTICAST"
+ERROR_IP_MULTICAST="
+In some cases Kodi needs to access multicast addresses.
+Please consider enabling IP_MULTICAST under Networking options.
+"
+
 pkg_setup() {
+	check_extra_config
 	python-single-r1_pkg_setup
 }
 
@@ -145,14 +155,16 @@ src_unpack() {
 }
 
 src_prepare() {
-	epatch "${FILESDIR}"/${P}-no-arm-flags.patch #400617
-	epatch "${FILESDIR}"/${P}-texturepacker.patch
+	epatch "${FILESDIR}"/${PN}-9999-no-arm-flags.patch #400617
+	epatch "${FILESDIR}"/${PN}-9999-texturepacker.patch
 
 	# some dirs ship generated autotools, some dont
 	multijob_init
-	local d
-	make -C tools/depends/native/JsonSchemaBuilder/
-	for d in $(printf 'f:\n\t@echo $(BOOTSTRAP_TARGETS)\ninclude bootstrap.mk\n' | emake -f - f) ; do
+	local d dirs=(
+		tools/depends/native/TexturePacker/src/configure
+		$(printf 'f:\n\t@echo $(BOOTSTRAP_TARGETS)\ninclude bootstrap.mk\n' | emake -f - f)
+	)
+	for d in "${dirs[@]}" ; do
 		[[ -e ${d} ]] && continue
 		pushd ${d/%configure/.} >/dev/null || die
 		AT_NOELIBTOOLIZE="yes" AT_TOPLEVEL_EAUTORECONF="yes" \
@@ -162,7 +174,13 @@ src_prepare() {
 	multijob_finish
 	elibtoolize
 
-	[[ ${PV} == "9999" ]] && emake -f codegenerator.mk
+	# since templates are subject to be patched, do patching before
+	# doing codegen
+	epatch_user #293109
+
+	if [[ ${PV} == "9999" ]] || use java ; then #558798
+		tc-env_build emake -f codegenerator.mk
+	fi
 
 	# Disable internal func checks as our USE/DEPEND
 	# stuff handles this just fine already #408395
@@ -176,8 +194,6 @@ src_prepare() {
 	sed -i \
 		-e '/dbus_connection_send_with_reply_and_block/s:-1:3000:' \
 		xbmc/linux/*.cpp || die
-
-	epatch_user #293109
 
 	# Tweak autotool timestamps to avoid regeneration
 	find . -type f -exec touch -r configure {} +
@@ -193,11 +209,14 @@ src_configure() {
 	# Requiring java is asine #434662
 	[[ ${PV} != "9999" ]] && export ac_cv_path_JAVA_EXE=$(which $(usex java java true))
 
+	local useffmpeg=shared
+	use ffmpeg || useffmpeg=force
+
 	econf \
 		--docdir=/usr/share/doc/${PF} \
 		--disable-ccache \
 		--disable-optimizations \
-		--with-ffmpeg=shared \
+		--with-ffmpeg=${useffmpeg} \
 		$(use_enable alsa) \
 		$(use_enable airplay) \
 		$(use_enable avahi) \
@@ -207,32 +226,29 @@ src_configure() {
 		$(use_enable css dvdcss) \
 		$(use_enable dbus) \
 		$(use_enable debug) \
-		$(use_enable fishbmc) \
+		--disable-fishbmc \
 		$(use_enable gles) \
-		$(use_enable goom) \
 		$(use_enable joystick) \
 		$(use_enable midi mid) \
 		$(use_enable mysql) \
 		$(use_enable nfs) \
 		$(use_enable opengl gl) \
 		$(use_enable profile profiling) \
-		$(use_enable projectm) \
+		--disable-projectm \
 		$(use_enable pulseaudio pulse) \
-		$(use_enable rsxs) \
+		--disable-rsxs \
 		$(use_enable rtmp) \
 		$(use_enable samba) \
 		$(use_enable sftp ssh) \
-		$(use_enable spectrum) \
 		$(use_enable usb libusb) \
 		$(use_enable test gtest) \
 		$(use_enable texturepacker) \
 		$(use_enable upnp) \
 		$(use_enable vaapi) \
 		$(use_enable vdpau) \
-		$(use_enable waveform) \
+		--disable-waveform \
 		$(use_enable webserver) \
-		$(use_enable X x11) \
-		$(use_enable xrandr)
+		$(use_enable X x11)
 }
 
 src_compile() {
@@ -246,12 +262,11 @@ src_install() {
 	domenu tools/Linux/kodi.desktop
 	newicon media/icon48x48.png kodi.png
 
-	# Remove optional addons (platform specific).
+	# Remove optional addons (platform specific and disabled by USE flag).
 	local disabled_addons=(
 		repository.pvr-{android,ios,osx{32,64},win32}.xbmc.org
-		visualization.dxspectrum
-		visualization.vortex
 	)
+
 	rm -rf "${disabled_addons[@]/#/${ED}/usr/share/kodi/addons/}"
 
 	# Remove fonconfig settings that are used only on MacOSX.
