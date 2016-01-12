@@ -1,0 +1,1256 @@
+diff -Naur libcec-libcec-3.0.1_orig/src/cec-client/cec-client.cpp libcec-libcec-3.0.1/src/cec-client/cec-client.cpp
+--- libcec-libcec-3.0.1_orig/src/cec-client/cec-client.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/cec-client/cec-client.cpp	2016-01-12 23:13:18.512249262 +0100
+@@ -50,7 +50,7 @@
+ #endif
+ 
+ using namespace CEC;
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ #include "cecloader.h"
+ 
+@@ -73,7 +73,7 @@
+ CCursesControl        g_cursesControl("1", "0");
+ #endif
+ 
+-class CReconnect : public PLATFORM::CThread
++class CReconnect : public P8PLATFORM::CThread
+ {
+ public:
+   static CReconnect& Get(void)
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/adapter/Exynos/ExynosCECAdapterCommunication.cpp libcec-libcec-3.0.1/src/libcec/adapter/Exynos/ExynosCECAdapterCommunication.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/adapter/Exynos/ExynosCECAdapterCommunication.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/adapter/Exynos/ExynosCECAdapterCommunication.cpp	2016-01-12 23:13:18.518248222 +0100
+@@ -42,10 +42,10 @@
+ 
+ #include "CECTypeUtils.h"
+ #include "LibCEC.h"
+-#include "platform/util/buffer.h"
++#include <p8-platform/util/buffer.h>
+ 
+ using namespace CEC;
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ #define LIB_CEC m_callback->GetLib()
+ 
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/adapter/Exynos/ExynosCECAdapterCommunication.h libcec-libcec-3.0.1/src/libcec/adapter/Exynos/ExynosCECAdapterCommunication.h
+--- libcec-libcec-3.0.1_orig/src/libcec/adapter/Exynos/ExynosCECAdapterCommunication.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/adapter/Exynos/ExynosCECAdapterCommunication.h	2016-01-12 23:13:18.518248222 +0100
+@@ -36,14 +36,14 @@
+ 
+ #if defined(HAVE_EXYNOS_API)
+ 
+-#include "platform/threads/mutex.h"
+-#include "platform/threads/threads.h"
++#include <p8-platform/threads/mutex.h>
++#include <p8-platform/threads/threads.h>
+ #include "../AdapterCommunication.h"
+ #include <map>
+ 
+ namespace CEC
+ {
+-  class CExynosCECAdapterCommunication : public IAdapterCommunication, public PLATFORM::CThread
++  class CExynosCECAdapterCommunication : public IAdapterCommunication, public P8PLATFORM::CThread
+   {
+   public:
+     /*!
+@@ -83,7 +83,7 @@
+     void SetActiveSource(bool UNUSED(bSetTo), bool UNUSED(bClientUnregistered)) {}
+     ///}
+ 
+-    /** @name PLATFORM::CThread implementation */
++    /** @name P8PLATFORM::CThread implementation */
+     ///{
+     void *Process(void);
+     ///}
+@@ -96,7 +96,7 @@
+     bool                        m_bLogicalAddressChanged;
+     cec_logical_addresses       m_logicalAddresses;
+ 
+-    PLATFORM::CMutex            m_mutex;
++    P8PLATFORM::CMutex          m_mutex;
+     int                         m_fd;
+   };
+ };
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/adapter/Pulse-Eight/USBCECAdapterCommands.cpp libcec-libcec-3.0.1/src/libcec/adapter/Pulse-Eight/USBCECAdapterCommands.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/adapter/Pulse-Eight/USBCECAdapterCommands.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/adapter/Pulse-Eight/USBCECAdapterCommands.cpp	2016-01-12 23:13:18.518248222 +0100
+@@ -43,7 +43,7 @@
+ #include <stdio.h>
+ 
+ using namespace CEC;
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ #define LIB_CEC     m_comm->m_callback->GetLib()
+ #define ToString(p) CCECTypeUtils::ToString(p)
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/adapter/Pulse-Eight/USBCECAdapterCommands.h libcec-libcec-3.0.1/src/libcec/adapter/Pulse-Eight/USBCECAdapterCommands.h
+--- libcec-libcec-3.0.1_orig/src/libcec/adapter/Pulse-Eight/USBCECAdapterCommands.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/adapter/Pulse-Eight/USBCECAdapterCommands.h	2016-01-12 23:13:18.519248049 +0100
+@@ -250,6 +250,6 @@
+     uint32_t                     m_iBuildDate;             /**< the build date of the firmware */
+     bool                         m_bControlledMode;        /**< current value of the controlled mode feature */
+     p8_cec_adapter_type          m_adapterType;            /**< the type of the adapter that we're connected to */
+-    PLATFORM::CMutex             m_mutex;
++    P8PLATFORM::CMutex           m_mutex;
+   };
+ }
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/adapter/Pulse-Eight/USBCECAdapterCommunication.cpp libcec-libcec-3.0.1/src/libcec/adapter/Pulse-Eight/USBCECAdapterCommunication.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/adapter/Pulse-Eight/USBCECAdapterCommunication.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/adapter/Pulse-Eight/USBCECAdapterCommunication.cpp	2016-01-12 23:13:18.519248049 +0100
+@@ -49,7 +49,7 @@
+ #include "CECProcessor.h"
+ 
+ using namespace CEC;
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ #define CEC_ADAPTER_PING_TIMEOUT          15000
+ #define CEC_ADAPTER_EEPROM_WRITE_INTERVAL 30000
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/adapter/Pulse-Eight/USBCECAdapterCommunication.h libcec-libcec-3.0.1/src/libcec/adapter/Pulse-Eight/USBCECAdapterCommunication.h
+--- libcec-libcec-3.0.1_orig/src/libcec/adapter/Pulse-Eight/USBCECAdapterCommunication.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/adapter/Pulse-Eight/USBCECAdapterCommunication.h	2016-01-12 23:13:18.519248049 +0100
+@@ -37,7 +37,7 @@
+ #include "adapter/AdapterCommunication.h"
+ #include "USBCECAdapterMessage.h"
+ 
+-namespace PLATFORM
++namespace P8PLATFORM
+ {
+   class ISocket;
+ }
+@@ -51,7 +51,7 @@
+   class CCECAdapterMessageQueue;
+   class CCECAdapterMessage;
+ 
+-  class CUSBCECAdapterCommunication : public IAdapterCommunication, public PLATFORM::CThread
++  class CUSBCECAdapterCommunication : public IAdapterCommunication, public P8PLATFORM::CThread
+   {
+     friend class CUSBCECAdapterCommands;
+     friend class CCECAdapterMessageQueue;
+@@ -173,8 +173,8 @@
+      */
+     void ResetMessageQueue(void);
+ 
+-    PLATFORM::ISocket *                          m_port;                 /**< the com port connection */
+-    PLATFORM::CMutex                             m_mutex;                /**< mutex for changes in this class */
++    P8PLATFORM::ISocket *                        m_port;                 /**< the com port connection */
++    P8PLATFORM::CMutex                           m_mutex;                /**< mutex for changes in this class */
+     uint8_t                                      m_iLineTimeout;         /**< the current line timeout on the CEC line */
+     cec_logical_address                          m_lastPollDestination;  /**< the destination of the last poll message that was received */
+     bool                                         m_bInitialised;         /**< true when the connection is initialised, false otherwise */
+@@ -184,10 +184,10 @@
+     CUSBCECAdapterCommands *                     m_commands;             /**< commands that can be sent to the adapter */
+     CCECAdapterMessageQueue *                    m_adapterMessageQueue;  /**< the incoming and outgoing message queue */
+     cec_logical_addresses                        m_logicalAddresses;     /**< the logical address list that this instance is using */
+-    PLATFORM::CMutex                             m_waitingMutex;
++    P8PLATFORM::CMutex                           m_waitingMutex;
+   };
+ 
+-  class CAdapterEepromWriteThread : public PLATFORM::CThread
++  class CAdapterEepromWriteThread : public P8PLATFORM::CThread
+   {
+   public:
+     CAdapterEepromWriteThread(CUSBCECAdapterCommunication *com) :
+@@ -203,13 +203,13 @@
+   private:
+     CUSBCECAdapterCommunication *m_com;
+     bool                         m_bWrite;
+-    PLATFORM::CCondition<bool>   m_condition;
+-    PLATFORM::CMutex             m_mutex;
++    P8PLATFORM::CCondition<bool> m_condition;
++    P8PLATFORM::CMutex           m_mutex;
+     int64_t                      m_iLastEepromWrite;     /**< last time that this instance did an eeprom write */
+     int64_t                      m_iScheduleEepromWrite; /**< in case there were more than 2 changes within 30 seconds, do another write at this time */
+   };
+ 
+-  class CAdapterPingThread : public PLATFORM::CThread
++  class CAdapterPingThread : public P8PLATFORM::CThread
+   {
+   public:
+     CAdapterPingThread(CUSBCECAdapterCommunication *com, uint32_t iTimeout) :
+@@ -219,7 +219,7 @@
+ 
+     void* Process(void);
+   private:
+-    CUSBCECAdapterCommunication *m_com;
+-    PLATFORM::CTimeout           m_timeout;
++    CUSBCECAdapterCommunication* m_com;
++    P8PLATFORM::CTimeout         m_timeout;
+   };
+ };
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/adapter/Pulse-Eight/USBCECAdapterMessage.cpp libcec-libcec-3.0.1/src/libcec/adapter/Pulse-Eight/USBCECAdapterMessage.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/adapter/Pulse-Eight/USBCECAdapterMessage.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/adapter/Pulse-Eight/USBCECAdapterMessage.cpp	2016-01-12 23:13:18.520247875 +0100
+@@ -37,7 +37,7 @@
+ #include "LibCEC.h"
+ 
+ using namespace CEC;
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ CCECAdapterMessage::CCECAdapterMessage(void)
+ {
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/adapter/Pulse-Eight/USBCECAdapterMessageQueue.cpp libcec-libcec-3.0.1/src/libcec/adapter/Pulse-Eight/USBCECAdapterMessageQueue.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/adapter/Pulse-Eight/USBCECAdapterMessageQueue.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/adapter/Pulse-Eight/USBCECAdapterMessageQueue.cpp	2016-01-12 23:13:18.520247875 +0100
+@@ -40,7 +40,7 @@
+ #include "LibCEC.h"
+ 
+ using namespace CEC;
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ #define MESSAGE_QUEUE_SIGNAL_WAIT_TIME 1000
+ 
+@@ -286,7 +286,7 @@
+ }
+ 
+ CCECAdapterMessageQueue::CCECAdapterMessageQueue(CUSBCECAdapterCommunication *com) :
+-  PLATFORM::CThread(),
++  P8PLATFORM::CThread(),
+   m_com(com),
+   m_iNextMessage(0)
+ {
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/adapter/Pulse-Eight/USBCECAdapterMessageQueue.h libcec-libcec-3.0.1/src/libcec/adapter/Pulse-Eight/USBCECAdapterMessageQueue.h
+--- libcec-libcec-3.0.1_orig/src/libcec/adapter/Pulse-Eight/USBCECAdapterMessageQueue.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/adapter/Pulse-Eight/USBCECAdapterMessageQueue.h	2016-01-12 23:13:18.521247702 +0100
+@@ -126,17 +126,17 @@
+      */
+     bool TimedOutOrSucceeded(void) const;
+ 
+-    CCECAdapterMessageQueue *  m_queue;
+-    CCECAdapterMessage *       m_message;      /**< the message that was sent */
+-    uint8_t                    m_iPacketsLeft; /**< the amount of acks that we're waiting on */
+-    bool                       m_bSucceeded;   /**< true when the command received a response, false otherwise */
+-    bool                       m_bWaiting;     /**< true while a thread is waiting or when it hasn't started waiting yet */
+-    PLATFORM::CCondition<bool> m_condition;    /**< the condition to wait on */
+-    PLATFORM::CMutex           m_mutex;        /**< mutex for changes to this class */
+-    PLATFORM::CTimeout         m_queueTimeout;   /**< ack timeout for fire and forget commands */
++    CCECAdapterMessageQueue *    m_queue;
++    CCECAdapterMessage *         m_message;      /**< the message that was sent */
++    uint8_t                      m_iPacketsLeft; /**< the amount of acks that we're waiting on */
++    bool                         m_bSucceeded;   /**< true when the command received a response, false otherwise */
++    bool                         m_bWaiting;     /**< true while a thread is waiting or when it hasn't started waiting yet */
++    P8PLATFORM::CCondition<bool> m_condition;    /**< the condition to wait on */
++    P8PLATFORM::CMutex           m_mutex;        /**< mutex for changes to this class */
++    P8PLATFORM::CTimeout         m_queueTimeout;   /**< ack timeout for fire and forget commands */
+   };
+ 
+-  class CCECAdapterMessageQueue : public PLATFORM::CThread
++  class CCECAdapterMessageQueue : public P8PLATFORM::CThread
+   {
+     friend class CUSBCECAdapterCommunication;
+     friend class CCECAdapterMessageQueueEntry;
+@@ -182,12 +182,12 @@
+     void CheckTimedOutMessages(void);
+ 
+   private:
+-    CUSBCECAdapterCommunication *                          m_com;                    /**< the communication handler */
+-    PLATFORM::CMutex                                       m_mutex;                  /**< mutex for changes to this class */
+-    std::map<uint64_t, CCECAdapterMessageQueueEntry *>     m_messages;               /**< the outgoing message queue */
+-    PLATFORM::SyncedBuffer<CCECAdapterMessageQueueEntry *> m_writeQueue;             /**< the queue for messages that are to be written */
+-    uint64_t                                               m_iNextMessage;           /**< the index of the next message */
+-    CCECAdapterMessage                                    *m_incomingAdapterMessage; /**< the current incoming message that's being assembled */
+-    cec_command                                            m_currentCECFrame;        /**< the current incoming CEC command that's being assembled */
++    CUSBCECAdapterCommunication *                            m_com;                    /**< the communication handler */
++    P8PLATFORM::CMutex                                       m_mutex;                  /**< mutex for changes to this class */
++    std::map<uint64_t, CCECAdapterMessageQueueEntry *>       m_messages;               /**< the outgoing message queue */
++    P8PLATFORM::SyncedBuffer<CCECAdapterMessageQueueEntry *> m_writeQueue;             /**< the queue for messages that are to be written */
++    uint64_t                                                 m_iNextMessage;           /**< the index of the next message */
++    CCECAdapterMessage                                    *  m_incomingAdapterMessage; /**< the current incoming message that's being assembled */
++    cec_command                                              m_currentCECFrame;        /**< the current incoming CEC command that's being assembled */
+   };
+ }
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/adapter/RPi/RPiCECAdapterCommunication.cpp libcec-libcec-3.0.1/src/libcec/adapter/RPi/RPiCECAdapterCommunication.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/adapter/RPi/RPiCECAdapterCommunication.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/adapter/RPi/RPiCECAdapterCommunication.cpp	2016-01-12 23:13:18.521247702 +0100
+@@ -45,7 +45,7 @@
+ #include "RPiCECAdapterMessageQueue.h"
+ 
+ using namespace CEC;
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ #define LIB_CEC m_callback->GetLib()
+ 
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/adapter/RPi/RPiCECAdapterCommunication.h libcec-libcec-3.0.1/src/libcec/adapter/RPi/RPiCECAdapterCommunication.h
+--- libcec-libcec-3.0.1_orig/src/libcec/adapter/RPi/RPiCECAdapterCommunication.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/adapter/RPi/RPiCECAdapterCommunication.h	2016-01-12 23:13:18.521247702 +0100
+@@ -107,15 +107,15 @@
+     CRPiCECAdapterMessageQueue *m_queue;
+     cec_logical_address         m_logicalAddress;
+ 
+-    bool                        m_bLogicalAddressChanged;
+-    PLATFORM::CCondition<bool>  m_logicalAddressCondition;
+-    PLATFORM::CMutex            m_mutex;
+-    VCHI_INSTANCE_T             m_vchi_instance;
+-    VCHI_CONNECTION_T *         m_vchi_connection;
+-    cec_logical_address         m_previousLogicalAddress;
+-    bool                        m_bLogicalAddressRegistered;
++    bool                          m_bLogicalAddressChanged;
++    P8PLATFORM::CCondition<bool>  m_logicalAddressCondition;
++    P8PLATFORM::CMutex            m_mutex;
++    VCHI_INSTANCE_T               m_vchi_instance;
++    VCHI_CONNECTION_T *           m_vchi_connection;
++    cec_logical_address           m_previousLogicalAddress;
++    bool                          m_bLogicalAddressRegistered;
+ 
+-    bool                        m_bDisableCallbacks;
++    bool                          m_bDisableCallbacks;
+   };
+ };
+ 
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/adapter/RPi/RPiCECAdapterMessageQueue.cpp libcec-libcec-3.0.1/src/libcec/adapter/RPi/RPiCECAdapterMessageQueue.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/adapter/RPi/RPiCECAdapterMessageQueue.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/adapter/RPi/RPiCECAdapterMessageQueue.cpp	2016-01-12 23:13:18.522247529 +0100
+@@ -49,7 +49,7 @@
+ }
+ 
+ using namespace CEC;
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ #define LIB_CEC m_com->m_callback->GetLib()
+ 
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/adapter/RPi/RPiCECAdapterMessageQueue.h libcec-libcec-3.0.1/src/libcec/adapter/RPi/RPiCECAdapterMessageQueue.h
+--- libcec-libcec-3.0.1_orig/src/libcec/adapter/RPi/RPiCECAdapterMessageQueue.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/adapter/RPi/RPiCECAdapterMessageQueue.h	2016-01-12 23:13:18.522247529 +0100
+@@ -84,8 +84,8 @@
+ 
+     CRPiCECAdapterMessageQueue * m_queue;
+     bool                         m_bWaiting;     /**< true while a thread is waiting or when it hasn't started waiting yet */
+-    PLATFORM::CCondition<bool>   m_condition;    /**< the condition to wait on */
+-    PLATFORM::CMutex             m_mutex;        /**< mutex for changes to this class */
++    P8PLATFORM::CCondition<bool> m_condition;    /**< the condition to wait on */
++    P8PLATFORM::CMutex           m_mutex;        /**< mutex for changes to this class */
+     cec_command                  m_command;
+     uint32_t                     m_retval;
+     bool                         m_bSucceeded;
+@@ -123,7 +123,7 @@
+ 
+   private:
+     CRPiCECAdapterCommunication *                             m_com;                    /**< the communication handler */
+-    PLATFORM::CMutex                                          m_mutex;                  /**< mutex for changes to this class */
++    P8PLATFORM::CMutex                                        m_mutex;                  /**< mutex for changes to this class */
+     std::map<uint64_t, CRPiCECAdapterMessageQueueEntry *>     m_messages;               /**< the outgoing message queue */
+     uint64_t                                                  m_iNextMessage;           /**< the index of the next message */
+   };
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/adapter/TDA995x/AdapterMessageQueue.h libcec-libcec-3.0.1/src/libcec/adapter/TDA995x/AdapterMessageQueue.h
+--- libcec-libcec-3.0.1_orig/src/libcec/adapter/TDA995x/AdapterMessageQueue.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/adapter/TDA995x/AdapterMessageQueue.h	2016-01-12 23:13:18.522247529 +0100
+@@ -37,7 +37,7 @@
+ 
+ namespace CEC
+ {
+-  using namespace PLATFORM;
++  using namespace P8PLATFORM;
+   
+   class CAdapterMessageQueueEntry
+   {
+@@ -126,8 +126,8 @@
+     
+   private:    
+     bool                         m_bWaiting;     /**< true while a thread is waiting or when it hasn't started waiting yet */
+-    PLATFORM::CCondition<bool>   m_condition;    /**< the condition to wait on */
+-    PLATFORM::CMutex             m_mutex;        /**< mutex for changes to this class */
++    P8PLATFORM::CCondition<bool> m_condition;    /**< the condition to wait on */
++    P8PLATFORM::CMutex           m_mutex;        /**< mutex for changes to this class */
+     uint32_t                  	 m_hash;
+     uint32_t                     m_retval;
+     bool                         m_bSucceeded;
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/adapter/TDA995x/TDA995xCECAdapterCommunication.cpp libcec-libcec-3.0.1/src/libcec/adapter/TDA995x/TDA995xCECAdapterCommunication.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/adapter/TDA995x/TDA995xCECAdapterCommunication.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/adapter/TDA995x/TDA995xCECAdapterCommunication.cpp	2016-01-12 23:13:18.523247355 +0100
+@@ -48,7 +48,7 @@
+ }
+ 
+ using namespace CEC;
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ #include "AdapterMessageQueue.h"
+ 
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/adapter/TDA995x/TDA995xCECAdapterCommunication.h libcec-libcec-3.0.1/src/libcec/adapter/TDA995x/TDA995xCECAdapterCommunication.h
+--- libcec-libcec-3.0.1_orig/src/libcec/adapter/TDA995x/TDA995xCECAdapterCommunication.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/adapter/TDA995x/TDA995xCECAdapterCommunication.h	2016-01-12 23:13:18.523247355 +0100
+@@ -44,7 +44,7 @@
+ #define TDA995X_ADAPTER_VID 0x0471
+ #define TDA995X_ADAPTER_PID 0x1001
+ 
+-namespace PLATFORM
++namespace P8PLATFORM
+ {
+   class CCDevSocket;
+ };
+@@ -54,7 +54,7 @@
+ {
+   class CAdapterMessageQueueEntry;
+ 
+-  class CTDA995xCECAdapterCommunication : public IAdapterCommunication, public PLATFORM::CThread
++  class CTDA995xCECAdapterCommunication : public IAdapterCommunication, public P8PLATFORM::CThread
+   {
+   public:
+     /*!
+@@ -94,7 +94,7 @@
+     void SetActiveSource(bool UNUSED(bSetTo), bool UNUSED(bClientUnregistered)) {}
+     ///}
+ 
+-    /** @name PLATFORM::CThread implementation */
++    /** @name P8PLATFORM::CThread implementation */
+     ///{
+     void *Process(void);
+     ///}
+@@ -107,10 +107,10 @@
+     bool                        m_bLogicalAddressChanged;
+     cec_logical_addresses       m_logicalAddresses;
+ 
+-    PLATFORM::CMutex            m_mutex;
+-    PLATFORM::CCDevSocket       *m_dev;	/**< the device connection */
++    P8PLATFORM::CMutex          m_mutex;
++    P8PLATFORM::CCDevSocket     *m_dev;	/**< the device connection */
+     
+-    PLATFORM::CMutex            m_messageMutex;
++    P8PLATFORM::CMutex          m_messageMutex;
+     uint32_t                    m_iNextMessage;
+     std::map<uint32_t, CAdapterMessageQueueEntry *> m_messages;
+   };
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/CECClient.cpp libcec-libcec-3.0.1/src/libcec/CECClient.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/CECClient.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/CECClient.cpp	2016-01-12 23:13:18.513249089 +0100
+@@ -44,7 +44,7 @@
+ #include <stdio.h>
+ 
+ using namespace CEC;
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ #define LIB_CEC     m_processor->GetLib()
+ #define ToString(x) CCECTypeUtils::ToString(x)
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/CECClient.h libcec-libcec-3.0.1/src/libcec/CECClient.h
+--- libcec-libcec-3.0.1_orig/src/libcec/CECClient.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/CECClient.h	2016-01-12 23:16:18.179484991 +0100
+@@ -121,7 +121,7 @@
+ 
+     int Result(uint32_t iTimeout)
+     {
+-      PLATFORM::CLockObject lock(m_mutex);
++      P8PLATFORM::CLockObject lock(m_mutex);
+ 
+       bool bReturn = m_bSucceeded ? true : m_condition.Wait(m_mutex, m_bSucceeded, iTimeout);
+       if (bReturn)
+@@ -131,7 +131,7 @@
+ 
+     void Report(int result)
+     {
+-      PLATFORM::CLockObject lock(m_mutex);
++      P8PLATFORM::CLockObject lock(m_mutex);
+ 
+       m_result = result;
+       m_bSucceeded = true;
+@@ -148,23 +148,23 @@
+       CEC_CB_SOURCE_ACTIVATED,
+     } m_type;
+ 
+-    cec_command          m_command;
+-    cec_keypress         m_key;
+-    cec_log_message      m_message;
+-    libcec_alert         m_alertType;
+-    libcec_parameter     m_alertParam;
+-    libcec_configuration m_config;
+-    cec_menu_state       m_menuState;
+-    bool                 m_bActivated;
+-    cec_logical_address  m_logicalAddress;
+-    bool                 m_keepResult;
+-    int                  m_result;
+-    PLATFORM::CCondition<bool> m_condition;
+-    PLATFORM::CMutex     m_mutex;
+-    bool                 m_bSucceeded;
++    cec_command                  m_command;
++    cec_keypress                 m_key;
++    cec_log_message              m_message;
++    libcec_alert                 m_alertType;
++    libcec_parameter             m_alertParam;
++    libcec_configuration         m_config;
++    cec_menu_state               m_menuState;
++    bool                         m_bActivated;
++    cec_logical_address          m_logicalAddress;
++    bool                         m_keepResult;
++    int                          m_result;
++    P8PLATFORM::CCondition<bool> m_condition;
++    P8PLATFORM::CMutex           m_mutex;
++    bool                         m_bSucceeded;
+   };
+ 
+-  class CCECClient : private PLATFORM::CThread
++  class CCECClient : private P8PLATFORM::CThread
+   {
+     friend class CCECProcessor;
+ 
+@@ -436,17 +436,20 @@
+ 
+     uint32_t DoubleTapTimeoutMS(void);
+ 
+-    CCECProcessor *       m_processor;                         /**< a pointer to the processor */
+-    libcec_configuration  m_configuration;                     /**< the configuration of this client */
+-    bool                  m_bInitialised;                      /**< true when initialised, false otherwise */
+-    bool                  m_bRegistered;                       /**< true when registered in the processor, false otherwise */
+-    PLATFORM::CMutex      m_mutex;                             /**< mutex for changes to this instance */
+-    PLATFORM::CMutex      m_cbMutex;                           /**< mutex that is held when doing anything with callbacks */
+-    cec_user_control_code m_iCurrentButton;                    /**< the control code of the button that's currently held down (if any) */
+-    int64_t               m_buttontime;                        /**< the timestamp when the button was pressed (in seconds since epoch), or 0 if none was pressed. */
+-    int64_t               m_iPreventForwardingPowerOffCommand; /**< prevent forwarding standby commands until this time */
+-    int64_t               m_iLastKeypressTime;                 /**< last time a key press was sent to the client */
+-    cec_keypress          m_lastKeypress;                      /**< the last key press that was sent to the client */
+-    PLATFORM::SyncedBuffer<CCallbackWrap*> m_callbackCalls;
++    CCECProcessor *                          m_processor;                         /**< a pointer to the processor */
++    libcec_configuration                     m_configuration;                     /**< the configuration of this client */
++    bool                                     m_bInitialised;                      /**< true when initialised, false otherwise */
++    bool                                     m_bRegistered;                       /**< true when registered in the processor, false otherwise */
++    P8PLATFORM::CMutex                       m_mutex;                             /**< mutex for changes to this instance */
++    P8PLATFORM::CMutex                       m_cbMutex;                           /**< mutex that is held when doing anything with callbacks */
++    cec_user_control_code                    m_iCurrentButton;                    /**< the control code of the button that's currently held down (if any) */
++    int64_t                                  m_initialButtontime;                 /**< the timestamp when the button was initially pressed (in seconds since epoch), or 0 if none was pressed. */
++    int64_t                                  m_updateButtontime;                  /**< the timestamp when the button was updated (in seconds since epoch), or 0 if none was pressed. */
++    int64_t                                  m_repeatButtontime;                  /**< the timestamp when the button will next repeat (in seconds since epoch), or 0 if repeat is disabled. */
++    int64_t                                  m_releaseButtontime;                 /**< the timestamp when the button will be released (in seconds since epoch), or 0 if none was pressed. */
++    int32_t                                  m_pressedButtoncount;                /**< the number of times a button released message has been seen for this press. */
++    int32_t                                  m_releasedButtoncount;               /**< the number of times a button pressed message has been seen for this press. */
++    int64_t                                  m_iPreventForwardingPowerOffCommand; /**< prevent forwarding standby commands until this time */
++    P8PLATFORM::SyncedBuffer<CCallbackWrap*> m_callbackCalls;
+   };
+ }
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/CECInputBuffer.h libcec-libcec-3.0.1/src/libcec/CECInputBuffer.h
+--- libcec-libcec-3.0.1_orig/src/libcec/CECInputBuffer.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/CECInputBuffer.h	2016-01-12 23:13:18.515248742 +0100
+@@ -51,7 +51,7 @@
+ 
+     void Broadcast(void)
+     {
+-      PLATFORM::CLockObject lock(m_mutex);
++      P8PLATFORM::CLockObject lock(m_mutex);
+       m_bHasData = true;
+       m_condition.Broadcast();
+     }
+@@ -59,7 +59,7 @@
+     bool Push(const cec_command &command)
+     {
+       bool bReturn(false);
+-      PLATFORM::CLockObject lock(m_mutex);
++      P8PLATFORM::CLockObject lock(m_mutex);
+       if (command.initiator == CECDEVICE_TV)
+         bReturn = m_tvInBuffer.Push(command);
+       else
+@@ -75,7 +75,7 @@
+     bool Pop(cec_command &command, uint16_t iTimeout)
+     {
+       bool bReturn(false);
+-      PLATFORM::CLockObject lock(m_mutex);
++      P8PLATFORM::CLockObject lock(m_mutex);
+       if (m_tvInBuffer.IsEmpty() && m_inBuffer.IsEmpty() &&
+           !m_condition.Wait(m_mutex, m_bHasData, iTimeout))
+         return bReturn;
+@@ -90,10 +90,10 @@
+     }
+ 
+   private:
+-    PLATFORM::CMutex                    m_mutex;
+-    PLATFORM::CCondition<volatile bool> m_condition;
+-    volatile bool                       m_bHasData;
+-    PLATFORM::SyncedBuffer<cec_command> m_tvInBuffer;
+-    PLATFORM::SyncedBuffer<cec_command> m_inBuffer;
++    P8PLATFORM::CMutex                    m_mutex;
++    P8PLATFORM::CCondition<volatile bool> m_condition;
++    volatile bool                         m_bHasData;
++    P8PLATFORM::SyncedBuffer<cec_command> m_tvInBuffer;
++    P8PLATFORM::SyncedBuffer<cec_command> m_inBuffer;
+   };
+ };
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/CECProcessor.cpp libcec-libcec-3.0.1/src/libcec/CECProcessor.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/CECProcessor.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/CECProcessor.cpp	2016-01-12 23:13:18.516248569 +0100
+@@ -50,7 +50,7 @@
+ #include <stdio.h>
+ 
+ using namespace CEC;
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ #define CEC_PROCESSOR_SIGNAL_WAIT_TIME 1000
+ #define ACTIVE_SOURCE_CHECK_INTERVAL   500
+@@ -68,7 +68,7 @@
+   int64_t next;
+   while (!IsStopped())
+   {
+-    PLATFORM::CEvent::Sleep(1000);
++    P8PLATFORM::CEvent::Sleep(1000);
+ 
+     next = GetTimeMs();
+ 
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/CECProcessor.h libcec-libcec-3.0.1/src/libcec/CECProcessor.h
+--- libcec-libcec-3.0.1_orig/src/libcec/CECProcessor.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/CECProcessor.h	2016-01-12 23:13:18.516248569 +0100
+@@ -65,7 +65,7 @@
+     cec_device_type to;
+   } device_type_change_t;
+ 
+-  class CCECAllocateLogicalAddress : public PLATFORM::CThread
++  class CCECAllocateLogicalAddress : public P8PLATFORM::CThread
+   {
+   public:
+     CCECAllocateLogicalAddress(CCECProcessor* processor, CECClientPtr client);
+@@ -76,7 +76,7 @@
+     CECClientPtr   m_client;
+   };
+ 
+-  class CCECProcessor : public PLATFORM::CThread, public IAdapterCommunicationCallback
++  class CCECProcessor : public P8PLATFORM::CThread, public IAdapterCommunicationCallback
+   {
+     public:
+       CCECProcessor(CLibCEC *libcec);
+@@ -180,7 +180,7 @@
+       void ResetMembers(void);
+ 
+       bool                                        m_bInitialised;
+-      PLATFORM::CMutex                            m_mutex;
++      P8PLATFORM::CMutex                          m_mutex;
+       IAdapterCommunication *                     m_communication;
+       CLibCEC*                                    m_libcec;
+       uint8_t                                     m_iStandardLineTimeout;
+@@ -196,7 +196,7 @@
+       std::vector<device_type_change_t>           m_deviceTypeChanges;
+   };
+ 
+-  class CCECStandbyProtection : public PLATFORM::CThread
++  class CCECStandbyProtection : public P8PLATFORM::CThread
+   {
+   public:
+     CCECStandbyProtection(CCECProcessor* processor);
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/devices/CECAudioSystem.cpp libcec-libcec-3.0.1/src/libcec/devices/CECAudioSystem.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/devices/CECAudioSystem.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/devices/CECAudioSystem.cpp	2016-01-12 23:13:18.523247355 +0100
+@@ -40,7 +40,7 @@
+ #include "CECTypeUtils.h"
+ 
+ using namespace CEC;
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ #define LIB_CEC     m_processor->GetLib()
+ #define ToString(p) CCECTypeUtils::ToString(p)
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/devices/CECBusDevice.cpp libcec-libcec-3.0.1/src/libcec/devices/CECBusDevice.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/devices/CECBusDevice.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/devices/CECBusDevice.cpp	2016-01-12 23:13:18.524247182 +0100
+@@ -56,7 +56,7 @@
+ #include "CECTV.h"
+ 
+ using namespace CEC;
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ #define LIB_CEC     m_processor->GetLib()
+ #define ToString(p) CCECTypeUtils::ToString(p)
+@@ -92,7 +92,7 @@
+ 
+ void CWaitForResponse::Clear()
+ {
+-  PLATFORM::CLockObject lock(m_mutex);
++  P8PLATFORM::CLockObject lock(m_mutex);
+   for (std::map<cec_opcode, CResponse*>::iterator it = m_waitingFor.begin(); it != m_waitingFor.end(); it++)
+   {
+     it->second->Broadcast();
+@@ -118,7 +118,7 @@
+ {
+   CResponse *retVal(NULL);
+   {
+-    PLATFORM::CLockObject lock(m_mutex);
++    P8PLATFORM::CLockObject lock(m_mutex);
+     std::map<cec_opcode, CResponse*>::iterator it = m_waitingFor.find(opcode);
+     if (it != m_waitingFor.end())
+     {
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/devices/CECBusDevice.h libcec-libcec-3.0.1/src/libcec/devices/CECBusDevice.h
+--- libcec-libcec-3.0.1_orig/src/libcec/devices/CECBusDevice.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/devices/CECBusDevice.h	2016-01-12 23:13:18.524247182 +0100
+@@ -61,8 +61,8 @@
+     void Broadcast(void);
+ 
+   private:
+-    cec_opcode       m_opcode;
+-    PLATFORM::CEvent m_event;
++    cec_opcode         m_opcode;
++    P8PLATFORM::CEvent m_event;
+   };
+ 
+   class CWaitForResponse
+@@ -78,7 +78,7 @@
+   private:
+     CResponse *GetEvent(cec_opcode opcode);
+ 
+-    PLATFORM::CMutex                 m_mutex;
++    P8PLATFORM::CMutex               m_mutex;
+     std::map<cec_opcode, CResponse*> m_waitingFor;
+   };
+ 
+@@ -230,9 +230,9 @@
+     cec_version           m_cecVersion;
+     cec_bus_device_status m_deviceStatus;
+     std::set<cec_opcode>  m_unsupportedFeatures;
+-    PLATFORM::CMutex      m_mutex;
+-    PLATFORM::CMutex      m_handlerMutex;
+-    PLATFORM::CEvent      m_replacing;
++    P8PLATFORM::CMutex    m_mutex;
++    P8PLATFORM::CMutex    m_handlerMutex;
++    P8PLATFORM::CEvent    m_replacing;
+     unsigned              m_iHandlerUseCount;
+     bool                  m_bAwaitingReceiveFailed;
+     bool                  m_bVendorIdRequested;
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/devices/CECPlaybackDevice.cpp libcec-libcec-3.0.1/src/libcec/devices/CECPlaybackDevice.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/devices/CECPlaybackDevice.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/devices/CECPlaybackDevice.cpp	2016-01-12 23:13:18.524247182 +0100
+@@ -40,7 +40,7 @@
+ #include "CECTypeUtils.h"
+ 
+ using namespace CEC;
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ #define ToString(p) CCECTypeUtils::ToString(p)
+ 
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/devices/CECRecordingDevice.cpp libcec-libcec-3.0.1/src/libcec/devices/CECRecordingDevice.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/devices/CECRecordingDevice.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/devices/CECRecordingDevice.cpp	2016-01-12 23:13:18.525247009 +0100
+@@ -35,7 +35,7 @@
+ #include "CECRecordingDevice.h"
+ 
+ using namespace CEC;
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ CCECRecordingDevice::CCECRecordingDevice(CCECProcessor *processor, cec_logical_address address, uint16_t iPhysicalAddress /* = CEC_INVALID_PHYSICAL_ADDRESS */) :
+     CCECPlaybackDevice(processor, address, iPhysicalAddress),
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/devices/CECTuner.cpp libcec-libcec-3.0.1/src/libcec/devices/CECTuner.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/devices/CECTuner.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/devices/CECTuner.cpp	2016-01-12 23:13:18.526246835 +0100
+@@ -35,7 +35,7 @@
+ #include "CECTuner.h"
+ 
+ using namespace CEC;
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ CCECTuner::CCECTuner(CCECProcessor *processor, cec_logical_address address, uint16_t iPhysicalAddress /* = CEC_INVALID_PHYSICAL_ADDRESS */) :
+     CCECBusDevice(processor, address, iPhysicalAddress)
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/devices/CECTV.cpp libcec-libcec-3.0.1/src/libcec/devices/CECTV.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/devices/CECTV.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/devices/CECTV.cpp	2016-01-12 23:13:18.526246835 +0100
+@@ -35,7 +35,7 @@
+ #include "CECTV.h"
+ 
+ using namespace CEC;
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ CCECTV::CCECTV(CCECProcessor *processor, cec_logical_address address) :
+     CCECBusDevice(processor, address, CEC_PHYSICAL_ADDRESS_TV)
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/implementations/AQCommandHandler.cpp libcec-libcec-3.0.1/src/libcec/implementations/AQCommandHandler.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/implementations/AQCommandHandler.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/implementations/AQCommandHandler.cpp	2016-01-12 23:13:18.526246835 +0100
+@@ -40,7 +40,7 @@
+ #include "CECClient.h"
+ 
+ using namespace CEC;
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ #define LIB_CEC     m_busDevice->GetProcessor()->GetLib()
+ #define ToString(p) LIB_CEC->ToString(p)
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/implementations/AQCommandHandler.h libcec-libcec-3.0.1/src/libcec/implementations/AQCommandHandler.h
+--- libcec-libcec-3.0.1_orig/src/libcec/implementations/AQCommandHandler.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/implementations/AQCommandHandler.h	2016-01-12 23:13:18.526246835 +0100
+@@ -58,7 +58,7 @@
+     CAQPowerStatusCheck* m_powerOnCheck;
+   };
+ 
+-  class CAQPowerStatusCheck : public PLATFORM::CThread
++  class CAQPowerStatusCheck : public P8PLATFORM::CThread
+   {
+   public:
+     CAQPowerStatusCheck(CAQCommandHandler* handler, cec_logical_address iInitiator, cec_logical_address iDestination) :
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/implementations/CECCommandHandler.cpp libcec-libcec-3.0.1/src/libcec/implementations/CECCommandHandler.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/implementations/CECCommandHandler.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/implementations/CECCommandHandler.cpp	2016-01-12 23:13:18.527246662 +0100
+@@ -44,7 +44,7 @@
+ #include "platform/util/util.h"
+ 
+ using namespace CEC;
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ #define LIB_CEC     m_busDevice->GetProcessor()->GetLib()
+ #define ToString(p) CCECTypeUtils::ToString(p)
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/implementations/CECCommandHandler.h libcec-libcec-3.0.1/src/libcec/implementations/CECCommandHandler.h
+--- libcec-libcec-3.0.1_orig/src/libcec/implementations/CECCommandHandler.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/implementations/CECCommandHandler.h	2016-01-12 23:13:18.528246489 +0100
+@@ -157,17 +157,17 @@
+ 
+     virtual bool SourceSwitchAllowed(void) { return true; }
+ 
+-    CCECBusDevice *  m_busDevice;
+-    CCECProcessor *  m_processor;
+-    int32_t          m_iTransmitTimeout;
+-    int32_t          m_iTransmitWait;
+-    int8_t           m_iTransmitRetries;
+-    bool            m_bHandlerInited;
+-    bool            m_bOPTSendDeckStatusUpdateOnActiveSource;
+-    cec_vendor_id    m_vendorId;
+-    int64_t          m_iActiveSourcePending;
+-    PLATFORM::CMutex m_mutex;
+-    int64_t          m_iPowerStatusRequested;
++    CCECBusDevice *    m_busDevice;
++    CCECProcessor *    m_processor;
++    int32_t            m_iTransmitTimeout;
++    int32_t            m_iTransmitWait;
++    int8_t             m_iTransmitRetries;
++    bool               m_bHandlerInited;
++    bool               m_bOPTSendDeckStatusUpdateOnActiveSource;
++    cec_vendor_id      m_vendorId;
++    int64_t            m_iActiveSourcePending;
++    P8PLATFORM::CMutex m_mutex;
++    int64_t            m_iPowerStatusRequested;
+     std::map<cec_opcode, std::vector<cec_command> > m_logsRequested;
+   };
+ };
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/implementations/PHCommandHandler.cpp libcec-libcec-3.0.1/src/libcec/implementations/PHCommandHandler.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/implementations/PHCommandHandler.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/implementations/PHCommandHandler.cpp	2016-01-12 23:13:18.528246489 +0100
+@@ -40,7 +40,7 @@
+ #include "CECClient.h"
+ 
+ using namespace CEC;
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ #define LIB_CEC     m_busDevice->GetProcessor()->GetLib()
+ #define ToString(p) LIB_CEC->ToString(p)
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/implementations/PHCommandHandler.h libcec-libcec-3.0.1/src/libcec/implementations/PHCommandHandler.h
+--- libcec-libcec-3.0.1_orig/src/libcec/implementations/PHCommandHandler.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/implementations/PHCommandHandler.h	2016-01-12 23:13:18.528246489 +0100
+@@ -40,7 +40,7 @@
+ {
+   class CPHCommandHandler;
+ 
+-  class CImageViewOnCheck : public PLATFORM::CThread
++  class CImageViewOnCheck : public P8PLATFORM::CThread
+   {
+   public:
+     CImageViewOnCheck(CPHCommandHandler* handler):
+@@ -51,7 +51,7 @@
+ 
+   private:
+     CPHCommandHandler* m_handler;
+-    PLATFORM::CEvent   m_event;
++    P8PLATFORM::CEvent m_event;
+   };
+ 
+   class CPHCommandHandler : public CCECCommandHandler
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/implementations/RLCommandHandler.cpp libcec-libcec-3.0.1/src/libcec/implementations/RLCommandHandler.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/implementations/RLCommandHandler.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/implementations/RLCommandHandler.cpp	2016-01-12 23:13:18.528246489 +0100
+@@ -41,7 +41,7 @@
+ #include "CECClient.h"
+ 
+ using namespace CEC;
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ #define RL_KEY_TOP_MENU           0x10
+ #define RL_KEY_DVD_MENU           0x11
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/implementations/SLCommandHandler.cpp libcec-libcec-3.0.1/src/libcec/implementations/SLCommandHandler.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/implementations/SLCommandHandler.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/implementations/SLCommandHandler.cpp	2016-01-12 23:13:18.529246316 +0100
+@@ -42,7 +42,7 @@
+ #include <stdio.h>
+ 
+ using namespace CEC;
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ #define SL_COMMAND_TYPE_HDDRECORDER_DISC  0x01
+ #define SL_COMMAND_TYPE_VCR               0x02
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/implementations/SLCommandHandler.h libcec-libcec-3.0.1/src/libcec/implementations/SLCommandHandler.h
+--- libcec-libcec-3.0.1_orig/src/libcec/implementations/SLCommandHandler.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/implementations/SLCommandHandler.h	2016-01-12 23:13:18.529246316 +0100
+@@ -74,8 +74,8 @@
+     bool SLInitialised(void);
+     void SetSLInitialised(void);
+ 
+-    bool               m_bSLEnabled;
+-    PLATFORM::CTimeout m_resetPowerState;
+-    PLATFORM::CMutex   m_SLMutex;
++    bool                 m_bSLEnabled;
++    P8PLATFORM::CTimeout m_resetPowerState;
++    P8PLATFORM::CMutex   m_SLMutex;
+   };
+ };
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/implementations/VLCommandHandler.cpp libcec-libcec-3.0.1/src/libcec/implementations/VLCommandHandler.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/implementations/VLCommandHandler.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/implementations/VLCommandHandler.cpp	2016-01-12 23:13:18.529246316 +0100
+@@ -47,7 +47,7 @@
+ #define VL_UNKNOWN1     0x06
+ 
+ using namespace CEC;
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ #define LIB_CEC     m_busDevice->GetProcessor()->GetLib()
+ #define ToString(p) LIB_CEC->ToString(p)
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/implementations/VLCommandHandler.h libcec-libcec-3.0.1/src/libcec/implementations/VLCommandHandler.h
+--- libcec-libcec-3.0.1_orig/src/libcec/implementations/VLCommandHandler.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/implementations/VLCommandHandler.h	2016-01-12 23:13:18.530246142 +0100
+@@ -65,8 +65,8 @@
+     void SendVendorCommandCapabilities(const cec_logical_address initiator, const cec_logical_address destination);
+     int HandleReportPowerStatus(const cec_command &command);
+ 
+-    PLATFORM::CMutex m_mutex;
+-    uint64_t         m_iPowerUpEventReceived;
+-    bool             m_bCapabilitiesSent;
++    P8PLATFORM::CMutex m_mutex;
++    uint64_t           m_iPowerUpEventReceived;
++    bool               m_bCapabilitiesSent;
+   };
+ };
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/LibCEC.cpp libcec-libcec-3.0.1/src/libcec/LibCEC.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/LibCEC.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/LibCEC.cpp	2016-01-12 23:13:18.516248569 +0100
+@@ -49,7 +49,7 @@
+ #include "CECClient.h"
+ 
+ using namespace CEC;
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ CLibCEC::CLibCEC(void) :
+     m_iStartTime(GetTimeMs()),
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/LibCEC.h libcec-libcec-3.0.1/src/libcec/LibCEC.h
+--- libcec-libcec-3.0.1_orig/src/libcec/LibCEC.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/LibCEC.h	2016-01-12 23:13:18.517248395 +0100
+@@ -147,7 +147,7 @@
+ 
+     protected:
+       int64_t                   m_iStartTime;
+-      PLATFORM::CMutex          m_mutex;
++      P8PLATFORM::CMutex        m_mutex;
+       CECClientPtr              m_client;
+       std::vector<CECClientPtr> m_clients;
+   };
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/platform/adl/adl-edid.cpp libcec-libcec-3.0.1/src/libcec/platform/adl/adl-edid.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/platform/adl/adl-edid.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/platform/adl/adl-edid.cpp	2016-01-12 23:13:18.530246142 +0100
+@@ -39,7 +39,7 @@
+ #include "platform/windows/dlfcn-win32.h"
+ #endif
+ 
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ CADLEdidParser::CADLEdidParser(void) :
+   m_bOpen(false),
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/platform/adl/adl-edid.h libcec-libcec-3.0.1/src/libcec/platform/adl/adl-edid.h
+--- libcec-libcec-3.0.1_orig/src/libcec/platform/adl/adl-edid.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/platform/adl/adl-edid.h	2016-01-12 23:13:18.531245969 +0100
+@@ -63,7 +63,7 @@
+ 
+ #define ADL_DISPLAY_CONNECTED (ADL_DISPLAY_DISPLAYINFO_DISPLAYCONNECTED | ADL_DISPLAY_DISPLAYINFO_DISPLAYMAPPED)
+ 
+-namespace PLATFORM
++namespace P8PLATFORM
+ {
+   class CADLEdidParser
+   {
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/platform/drm/drm-edid.cpp libcec-libcec-3.0.1/src/libcec/platform/drm/drm-edid.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/platform/drm/drm-edid.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/platform/drm/drm-edid.cpp	2016-01-12 23:13:18.531245969 +0100
+@@ -38,7 +38,7 @@
+ #include <dirent.h>
+ #include <fstream>
+ 
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ uint16_t CDRMEdidParser::GetPhysicalAddress(void)
+ {
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/platform/drm/drm-edid.h libcec-libcec-3.0.1/src/libcec/platform/drm/drm-edid.h
+--- libcec-libcec-3.0.1_orig/src/libcec/platform/drm/drm-edid.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/platform/drm/drm-edid.h	2016-01-12 23:13:18.531245969 +0100
+@@ -34,7 +34,7 @@
+ 
+ #include "platform/util/edid.h"
+ 
+-namespace PLATFORM
++namespace P8PLATFORM
+ {
+   class CDRMEdidParser
+   {
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/platform/nvidia/nv-edid.cpp libcec-libcec-3.0.1/src/libcec/platform/nvidia/nv-edid.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/platform/nvidia/nv-edid.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/platform/nvidia/nv-edid.cpp	2016-01-12 23:13:18.531245969 +0100
+@@ -37,7 +37,7 @@
+ #include "nv-edid.h"
+ #include <stdio.h>
+ 
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ uint16_t CNVEdidParser::GetPhysicalAddress(void)
+ {
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/platform/nvidia/nv-edid.h libcec-libcec-3.0.1/src/libcec/platform/nvidia/nv-edid.h
+--- libcec-libcec-3.0.1_orig/src/libcec/platform/nvidia/nv-edid.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/platform/nvidia/nv-edid.h	2016-01-12 23:13:18.532245796 +0100
+@@ -37,7 +37,7 @@
+ 
+ #include "platform/util/edid.h"
+ 
+-namespace PLATFORM
++namespace P8PLATFORM
+ {
+   class CNVEdidParser
+   {
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/platform/posix/os-edid.cpp libcec-libcec-3.0.1/src/libcec/platform/posix/os-edid.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/platform/posix/os-edid.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/platform/posix/os-edid.cpp	2016-01-12 23:13:18.532245796 +0100
+@@ -35,7 +35,7 @@
+ #include "platform/util/edid.h"
+ #include "platform/X11/randr-edid.h"
+ 
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ uint16_t CEDIDParser::GetPhysicalAddress(void)
+ {
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/platform/posix/serialport.cpp libcec-libcec-3.0.1/src/libcec/platform/posix/serialport.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/platform/posix/serialport.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/platform/posix/serialport.cpp	2016-01-12 23:13:18.532245796 +0100
+@@ -59,7 +59,7 @@
+ #define XCASE  0
+ #endif
+ 
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ inline bool RemoveLock(const char *strDeviceName)
+ {
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/platform/sockets/serialport.h libcec-libcec-3.0.1/src/libcec/platform/sockets/serialport.h
+--- libcec-libcec-3.0.1_orig/src/libcec/platform/sockets/serialport.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/platform/sockets/serialport.h	2016-01-12 23:13:18.533245622 +0100
+@@ -44,7 +44,7 @@
+ 
+ #include "platform/sockets/socket.h"
+ 
+-namespace PLATFORM
++namespace P8PLATFORM
+ {
+   enum SerialParity
+   {
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/platform/util/baudrate.h libcec-libcec-3.0.1/src/libcec/platform/util/baudrate.h
+--- libcec-libcec-3.0.1_orig/src/libcec/platform/util/baudrate.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/platform/util/baudrate.h	2016-01-12 23:13:18.533245622 +0100
+@@ -41,7 +41,7 @@
+ #include <termios.h>
+ #endif
+ 
+-namespace PLATFORM
++namespace P8PLATFORM
+ {
+   static struct sbaudrate
+   {
+@@ -203,7 +203,7 @@
+ 
+   inline int32_t IntToBaudrate(uint32_t baudrate)
+   {
+-    for (unsigned int i = 0; i < sizeof(baudrates) / sizeof(PLATFORM::sbaudrate) - 1; i++)
++    for (unsigned int i = 0; i < sizeof(baudrates) / sizeof(P8PLATFORM::sbaudrate) - 1; i++)
+     {
+       if (baudrates[i].rate == (int32_t) baudrate)
+         return baudrates[i].symbol;
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/platform/util/edid.h libcec-libcec-3.0.1/src/libcec/platform/util/edid.h
+--- libcec-libcec-3.0.1_orig/src/libcec/platform/util/edid.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/platform/util/edid.h	2016-01-12 23:13:18.533245622 +0100
+@@ -34,7 +34,7 @@
+ 
+ #include "env.h"
+ 
+-namespace PLATFORM
++namespace P8PLATFORM
+ {
+   class CEDIDParser
+   {
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/platform/windows/os-edid.cpp libcec-libcec-3.0.1/src/libcec/platform/windows/os-edid.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/platform/windows/os-edid.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/platform/windows/os-edid.cpp	2016-01-12 23:13:18.534245449 +0100
+@@ -39,7 +39,7 @@
+ #include "initguid.h"
+ #include "stdio.h"
+ 
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ static GUID MONITOR_GUID =  { 0x4D36E96E, 0xE325, 0x11CE, { 0xBF, 0xC1, 0x08, 0x00, 0x2B, 0xE1, 0x03, 0x18 } };
+ #define PA_MAX_REGENTRIES_TO_CHECK 1024
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/platform/windows/serialport.cpp libcec-libcec-3.0.1/src/libcec/platform/windows/serialport.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/platform/windows/serialport.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/platform/windows/serialport.cpp	2016-01-12 23:13:18.534245449 +0100
+@@ -35,7 +35,7 @@
+ #include "../util/baudrate.h"
+ #include "platform/util/timeutils.h"
+ 
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ void FormatWindowsError(int iErrorCode, std::string& strMessage)
+ {
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/platform/X11/randr-edid.cpp libcec-libcec-3.0.1/src/libcec/platform/X11/randr-edid.cpp
+--- libcec-libcec-3.0.1_orig/src/libcec/platform/X11/randr-edid.cpp	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/platform/X11/randr-edid.cpp	2016-01-12 23:13:18.530246142 +0100
+@@ -38,7 +38,7 @@
+ #include <X11/extensions/Xrandr.h>
+ #include <stdlib.h>
+ 
+-using namespace PLATFORM;
++using namespace P8PLATFORM;
+ 
+ static const char * const edid_names[] = 
+ { 
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/platform/X11/randr-edid.h libcec-libcec-3.0.1/src/libcec/platform/X11/randr-edid.h
+--- libcec-libcec-3.0.1_orig/src/libcec/platform/X11/randr-edid.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/platform/X11/randr-edid.h	2016-01-12 23:13:18.530246142 +0100
+@@ -35,7 +35,7 @@
+ #include "env.h"
+ #include "platform/util/edid.h"
+ 
+-namespace PLATFORM
++namespace P8PLATFORM
+ {
+   class CRandrEdidParser
+   {
+diff -Naur libcec-libcec-3.0.1_orig/src/libcec/SwigHelper.h libcec-libcec-3.0.1/src/libcec/SwigHelper.h
+--- libcec-libcec-3.0.1_orig/src/libcec/SwigHelper.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/libcec/SwigHelper.h	2016-01-12 23:13:18.517248395 +0100
+@@ -35,23 +35,11 @@
+ #define SWIG_FILE_WITH_INIT
+ #define LIBCEC_SWIG_EXPORTS
+ 
+-/** XXX python does a #define PLATFORM, which causes a collision with our PLATFORM namespace */
+-#ifdef PLATFORM
+-#define _platform_tmp PLATFORM
+-#undef PLATFORM
+-#endif
+-
+ #include "cectypes.h"
+ #include "cec.h"
+ #include "CECTypeUtils.h"
+ #include "platform/threads/mutex.h"
+ 
+-/** XXX python does a #define PLATFORM, which causes a collision with our PLATFORM namespace */
+-#ifdef _platform_tmp
+-#define PLATFORM _platform_tmp
+-#undef _platform_tmp
+-#endif
+-
+ namespace CEC
+ {
+   enum libcecSwigCallback {
+diff -Naur libcec-libcec-3.0.1_orig/src/LibCecSharp/CecSharpTypes.h libcec-libcec-3.0.1/src/LibCecSharp/CecSharpTypes.h
+--- libcec-libcec-3.0.1_orig/src/LibCecSharp/CecSharpTypes.h	2015-07-03 19:20:49.000000000 +0200
++++ libcec-libcec-3.0.1/src/LibCecSharp/CecSharpTypes.h	2016-01-12 23:13:18.511249435 +0100
+@@ -1792,7 +1792,7 @@
+     ACTICB    sourceActivatedCB;
+   } UnmanagedCecCallbacks;
+ 
+-  static PLATFORM::CMutex                   g_callbackMutex;
++  static P8PLATFORM::CMutex                 g_callbackMutex;
+   static std::vector<UnmanagedCecCallbacks> g_unmanagedCallbacks;
+   static CEC::ICECCallbacks                 g_cecCallbacks;
+ 
+@@ -1807,7 +1807,7 @@
+     if (cbParam)
+     {
+       size_t iPtr = (size_t)cbParam;
+-      PLATFORM::CLockObject lock(g_callbackMutex);
++      P8PLATFORM::CLockObject lock(g_callbackMutex);
+       if (iPtr >= 0 && iPtr < g_unmanagedCallbacks.size())
+         return g_unmanagedCallbacks[iPtr].logCB(message);
+     }
+@@ -1825,7 +1825,7 @@
+     if (cbParam)
+     {
+       size_t iPtr = (size_t)cbParam;
+-      PLATFORM::CLockObject lock(g_callbackMutex);
++      P8PLATFORM::CLockObject lock(g_callbackMutex);
+       if (iPtr >= 0 && iPtr < g_unmanagedCallbacks.size())
+         return g_unmanagedCallbacks[iPtr].keyCB(key);
+     }
+@@ -1843,7 +1843,7 @@
+     if (cbParam)
+     {
+       size_t iPtr = (size_t)cbParam;
+-      PLATFORM::CLockObject lock(g_callbackMutex);
++      P8PLATFORM::CLockObject lock(g_callbackMutex);
+       if (iPtr >= 0 && iPtr < g_unmanagedCallbacks.size())
+         return g_unmanagedCallbacks[iPtr].commandCB(command);
+     }
+@@ -1861,7 +1861,7 @@
+     if (cbParam)
+     {
+       size_t iPtr = (size_t)cbParam;
+-      PLATFORM::CLockObject lock(g_callbackMutex);
++      P8PLATFORM::CLockObject lock(g_callbackMutex);
+       if (iPtr >= 0 && iPtr < g_unmanagedCallbacks.size())
+         return g_unmanagedCallbacks[iPtr].configCB(config);
+     }
+@@ -1879,7 +1879,7 @@
+     if (cbParam)
+     {
+       size_t iPtr = (size_t)cbParam;
+-      PLATFORM::CLockObject lock(g_callbackMutex);
++      P8PLATFORM::CLockObject lock(g_callbackMutex);
+       if (iPtr >= 0 && iPtr < g_unmanagedCallbacks.size())
+         return g_unmanagedCallbacks[iPtr].alertCB(alert, data);
+     }
+@@ -1897,7 +1897,7 @@
+     if (cbParam)
+     {
+       size_t iPtr = (size_t)cbParam;
+-      PLATFORM::CLockObject lock(g_callbackMutex);
++      P8PLATFORM::CLockObject lock(g_callbackMutex);
+       if (iPtr >= 0 && iPtr < g_unmanagedCallbacks.size())
+         return g_unmanagedCallbacks[iPtr].menuCB(newVal);
+     }
+@@ -1915,7 +1915,7 @@
+     if (cbParam)
+     {
+       size_t iPtr = (size_t)cbParam;
+-      PLATFORM::CLockObject lock(g_callbackMutex);
++      P8PLATFORM::CLockObject lock(g_callbackMutex);
+       if (iPtr >= 0 && iPtr < g_unmanagedCallbacks.size())
+         g_unmanagedCallbacks[iPtr].sourceActivatedCB(logicalAddress, activated);
+     }
+@@ -1989,7 +1989,7 @@
+     /// </summary>
+     size_t GetCallbackPtr(void)
+     {
+-      PLATFORM::CLockObject lock(g_callbackMutex);
++      P8PLATFORM::CLockObject lock(g_callbackMutex);
+       return m_iCallbackPtr;
+     }
+ 
+@@ -2246,7 +2246,7 @@
+         unmanagedCallbacks.menuCB            = m_menuCallback;
+         unmanagedCallbacks.sourceActivatedCB = m_sourceActivatedCallback;
+ 
+-        PLATFORM::CLockObject lock(g_callbackMutex);
++        P8PLATFORM::CLockObject lock(g_callbackMutex);
+         g_unmanagedCallbacks.push_back(unmanagedCallbacks);
+         m_iCallbackPtr = g_unmanagedCallbacks.size() - 1;
+         m_bDelegatesCreated = true;
