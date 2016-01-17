@@ -1,8 +1,8 @@
-# Copyright 2003-2012 Gentoo Foundation
+# Copyright 2003-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
-EAPI="4"
+EAPI=5
 
 IUSE=""
 inherit vdr-plugin-2 eutils
@@ -19,8 +19,8 @@ LICENSE="GPL-2"
 
 DEPEND=">=media-video/vdr-1.2.0"
 
-PATCHES="${FILESDIR}/${P}-uint64.diff
-	${FILESDIR}/${P}_gcc44.diff"
+PATCHES=("${FILESDIR}/${P}-uint64.diff"
+	"${FILESDIR}/${P}_gcc44.diff")
 
 src_prepare() {
 	vdr-plugin-2_src_prepare
