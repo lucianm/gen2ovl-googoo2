@@ -1,0 +1,14 @@
+# Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
+
+# skindesigner (0.7.2) - Skin Designer
+
+[skindesigner]
+
+#  -s <SKINPATH>, --skinpath=<SKINPATH> Set directory where xml skins are stored by Package Manager
+--skinpath=/usr/share/vdr/plugins/skindesigner/skins/
+#  -i <INSTALLERPATH>, --installerpath=<INSTALLERPATH> Set directory where xml skins are stored by Installer
+--installerpath=/etc/vdr/plugins/skindesigner/skins/
+#  -l <LOGOPATH>, --logopath=<LOGOPATH> Set directory where a common logo set for all skins is stored
+--logopath=/usr/share/vdr/plugins/skindesigner/logos/
+#  -e <EPGIMAGESPATH>, --epgimages=<IMAGESPATH> Set directory where epgimages are stored
+--epgimages=/var/cache/vdr/epgimages/

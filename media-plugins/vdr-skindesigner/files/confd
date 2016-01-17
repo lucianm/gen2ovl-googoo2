@@ -1,9 +1,11 @@
 # /etc/conf.d/vdr.skindesigner:
 
-#SKINDESIGNER_EPGIMGDIR="/var/cache/vdr/epgimages/"
+#SKINDESIGNER_SKINPATH="/usr/share/vdr/plugins/skindesigner/skins/"
 
-#SKINDESIGNER_SKINSDIR="/usr/share/vdr/plugins/skindesigner/skins/"
+#SKINDESIGNER_INSTALLERPATH="/etc/vdr/plugins/skindesigner/skins/"
 
 #SKINDESIGNER_LOGOPATH="/usr/share/vdr/plugins/skindesigner/logos/"
+
+#SKINDESIGNER_EPGIMAGESPATH="/var/cache/vdr/epgimages/"
 
 # _EXTRAOPTS=""

@@ -1,0 +1,45 @@
+From 70837e675a7e10203592fac1aa66cca52d46a36c Mon Sep 17 00:00:00 2001
+From: Lucian Muresan <lucianm@users.sourceforge.net>
+Date: Sun, 17 Jan 2016 02:52:02 +0100
+Subject: [PATCH] vdr-skindesigner no subproject when separate package
+
+---
+ Makefile | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index f2c47d5..1eb7141 100644
+--- a/Makefile
++++ b/Makefile
+@@ -113,7 +113,7 @@ OBJS = $(PLUGIN).o \
+ 
+ ### The main target:
+ 
+-all: subprojects $(SOFILE) i18n
++all: $(SOFILE) i18n
+ 
+ ### subprojects:
+ 
+@@ -132,8 +132,8 @@ clean-subprojects:
+ 
+ ### get version of subprojects in specific targets when subprojects have been built
+ 
+-%.o: SUB_DEFINES = -DLIBSKINDESIGNERAPIVERSION='"$(shell pkg-config --modversion libskindesignerapi/libskindesignerapi.pc)"'
+-$(SOFILE): SUB_LIBS = libskindesignerapi/libskindesignerapi.so.$(shell pkg-config --modversion libskindesignerapi/libskindesignerapi.pc)
++%.o: SUB_DEFINES = -DLIBSKINDESIGNERAPIVERSION='"$(shell pkg-config --modversion libskindesignerapi)"'
++$(SOFILE): SUB_LIBS = $(shell pkg-config --libs libskindesignerapi)
+ 
+ ### Implicit rules:
+ 
+@@ -197,7 +197,7 @@ install-scripts:
+ 	mkdir -p $(DESTDIR)$(SKINDESIGNER_SCRIPTDIR)
+ 	cp -r scripts/* $(DESTDIR)$(SKINDESIGNER_SCRIPTDIR)
+ 
+-install: install-subprojects install-lib install-i18n install-themes install-skins install-scripts
++install: install-lib install-i18n install-themes install-skins install-scripts
+ 
+ dist: $(I18Npo) clean
+ 	@-rm -rf $(TMPDIR)/$(ARCHIVE)
+-- 
+2.6.0
+

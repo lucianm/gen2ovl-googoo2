@@ -1,0 +1,34 @@
+From 60bae6fb44a011266f7adc620447061832847962 Mon Sep 17 00:00:00 2001
+From: Lucian Muresan <lucianm@users.sourceforge.net>
+Date: Sun, 17 Jan 2016 02:39:31 +0100
+Subject: [PATCH] libskindesignerapi_LIBDIR-assignable+SO-symlink.patch
+
+---
+ libskindesignerapi/Makefile | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/libskindesignerapi/Makefile b/libskindesignerapi/Makefile
+index 7948799..3b2f444 100644
+--- a/libskindesignerapi/Makefile
++++ b/libskindesignerapi/Makefile
+@@ -12,7 +12,7 @@ TARGET_LIB = $(SONAME).$(MINOR)
+ PREFIX ?= /usr/local
+ INCDIR ?= $(PREFIX)/include
+ LIBDIR ?= $(PREFIX)/lib
+-PCDIR  ?= $(PREFIX)/lib/pkgconfig
++PCDIR  ?= $(LIBDIR)/pkgconfig
+ TMPDIR ?= /tmp
+ 
+ ### The name of the distribution archive:
+@@ -70,7 +70,7 @@ $(LIBNAME).pc:
+ install-lib: $(TARGET_LIB)
+ 	install -D $^ $(DESTDIR)$(LIBDIR)/$^
+ 	if [ -z "$(DESTDIR)" ] ; then ldconfig; fi
+-	cd $(DESTDIR)$(LIBDIR) ; if [ ! -e $(LIBNAME).so ] ; then ln -s $(TARGET_LIB) $(LIBNAME).so; fi
++	cd $(DESTDIR)$(LIBDIR) ; if [ ! -e $(LIBNAME).so ] ; then ln -s $(TARGET_LIB) $(LIBNAME).so; ln -s $(TARGET_LIB) $(SONAME); fi
+ 
+ install-includes:
+ 	@mkdir -p $(DESTDIR)$(INCDIR)/$(LIBNAME)
+-- 
+2.6.0
+

@@ -1,40 +1,45 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: Exp $
+# $Header: $
 
-EAPI="5"
+EAPI=5
 
-inherit vdr-plugin-2
+inherit font vdr-plugin-2
 
-VERSION="1803" # every bump, new version
 
 if [ "${PV}" = "9999" ]; then
-	inherit git-2
+	inherit git-r3
 	EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-${VDRPLUGIN}.git"
 	KEYWORDS=""
+	S="${WORKDIR}/${P}"
 else
-	SRC_URI="mirror://vdr-developerorg/${VERSION}/${P}.tgz"
+	SRC_URI="http://projects.vdr-developer.org/git/vdr-plugin-${VDRPLUGIN}.git/snapshot/vdr-plugin-${VDRPLUGIN}-${PV}.tar.bz2"
 	KEYWORDS="~amd64 ~x86"
+	S="${WORKDIR}/vdr-plugin-${VDRPLUGIN}-${PV}"
 fi
 
 DESCRIPTION="Video Disk Recorder - \"${VDRPLUGIN}\" - modern text2skin-like engine to display XML based skins"
 HOMEPAGE="http://projects.vdr-developer.org/projects/plg-${VDRPLUGIN}"
 
 SLOT="0"
-LICENSE="GPL-2"
+LICENSE="GPL-2 Apache-2.0"
 IUSE=""
 
-DEPEND=">=media-video/vdr-2.0.0
-	media-gfx/imagemagick[png,jpeg]
-	net-misc/curl
+FONT_SUFFIX="ttf"
+FONT_S="${S}/fonts/VDROpenSans"
+
+DEPEND=">=media-libs/libskindesignerapi-0.0.2
 	dev-libs/libxml2
-	>=media-plugins/vdr-softhddevice-0.6.0
-	>=media-plugins/vdr-epgsearch-1.0.1
-	media-fonts/vdropensans-ttf"
+	gnome-base/librsvg
+	virtual/jpeg
+	x11-libs/cairo[svg]
+	media-plugins/vdr-epgsearch"
+
+	
 RDEPEND="${DEPEND}
 	virtual/channel-logos-hq"
 
-#PATCHES="${FILESDIR}/${PN}_..."
+PATCHES="${FILESDIR}/${PN}_no-subproject-when-separate-package.patch"
 
 SKINDESIGNER_CACHEDIR="/var/cache/vdr/plugins/${VDRPLUGIN}"
 
@@ -49,17 +54,40 @@ src_prepare() {
 	BUILD_PARAMS+=" PREFIX=/usr SKINDESIGNER_SCRIPTDIR=/etc/vdr/plugins/${VDRPLUGIN}/scripts"
 }
 
+pkg_setup() {
+	vdr-plugin-2_pkg_setup
+	font_pkg_setup
+}
+
 src_install() {
 	vdr-plugin-2_src_install
-	fowners -R vdr:vdr /etc/vdr	
-	dodir "${SKINDESIGNER_CACHEDIR}"
-	fowners -R vdr:vdr "${SKINDESIGNER_CACHEDIR}"
+	font_src_install
 }
 
 pkg_postinst() {
+	vdr-plugin-2_pkg_postinst
+	font_pkg_postinst
+
 	einfo "Please check and ajust your settings in \"/etc/conf.d/vdr.${VDRPLUGIN}\","
 	einfo "especially for the channel logos path, and in general, make sure"
 	einfo "they end with an \"/\""
 	einfo ""
 	einfo "Please also check /etc/vdr/plugins/${VDRPLUGIN}/scripts/README !!!"
+	
+	elog "To properly use the skins provided by \"skindesigner\", please follow the most important hints from the README:\n"
+
+	elog "For S2-6400 Users: Disable High Level OSD, otherwise the plugin will not be"
+	elog "loaded because lack of true color support\n"
+
+	elog "For Xine-Plugin Users: Set \"Blend scaled Auto\" as OSD display mode to achieve"
+	elog "an suitable true color OSD.\n"
+
+	elog "For Xineliboutput Users: Start vdr-sxfe with the --hud option enabled\n"
+
+	elog "If you want \"skindesigner\" to use Channel Logos, please read the \"Channel Logos\" section in the README file.\n"
+}
+
+pkg_postrm() {
+	vdr-plugin-2_pkg_postrm
+	font_pkg_postrm
 }
