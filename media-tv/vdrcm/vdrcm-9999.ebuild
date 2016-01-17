@@ -24,11 +24,12 @@ esac
 SLOT="0"
 LICENSE="GPL-2"
 
+PDEPEND=">=media-video/vdr-2.2.0"
+
 RDEPEND="sys-apps/coreutils
 	sys-apps/which
 	sys-apps/util-linux
 	sys-apps/grep
-	>=media-video/vdr-2.2.0
 	|| (	dev-libs/newt
 		dev-util/dialog )"
 
