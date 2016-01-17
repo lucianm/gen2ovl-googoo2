@@ -1,6 +1,6 @@
 # Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/eclass/vdr-plugin-2.eclass,v 1.32 2015/03/31 18:43:33 ulm Exp $
+# $Id$
 
 # @ECLASS: vdr-plugin-2.eclass
 # @MAINTAINER:
@@ -20,6 +20,12 @@
 # A plugin config file can be specified through the $VDR_CONFD_FILE variable, it
 # defaults to ${FILESDIR}/confd. Each config file will be installed as e.g.
 # ${D}/etc/conf.d/vdr.${VDRPLUGIN}
+
+# @ECLASS-VARIABLE: VDR_ARGS_FILE
+# @DESCRIPTION:
+# A plugin new style argsdir config file can be specified through the $VDR_ARGS_FILE variable, it
+# defaults to ${FILESDIR}/${VDRPLUGIN}.conf. Each config file will be installed as e.g.
+# ${D}/etc/vdr/conf.avail/${VDRPLUGIN}.conf
 
 # @ECLASS-VARIABLE: VDR_RCADDON_FILE
 # @DEFAULT_UNSET
@@ -249,21 +255,6 @@ vdr_patchmakefile() {
 	# Use a file instead of a variable as single-stepping via ebuild
 	# destroys environment.
 	touch "${WORKDIR}"/.vdr-plugin_makefile_patched
-
-	# remove inclusion of Make.global
-	sed -i Makefile \
-		-e "s:-include \$(VDRDIR)/Make.global::" \
-		-e "s:include \$(VDRDIR)/Make.global::" \
-		-e "s:-include \$(VDRSRC)/Make.global::" \
-		-e "s:include \$(VDRSRC)/Make.global::" \
-		-e "s:-include \$(VDRSRC)/Make.config::" \
-		-e "s:include \$(VDRSRC)/Make.config::"
-
-	# include Make.config if not included at all (even via PLGCFG)
-	if ! grep -q '\-include \$(VDRDIR)/Make.config' Makefile && ! grep -q '\-include \$(VDRSRC)/Make.config' Makefile && ! grep -q '\-include \$(PLGCFG)' Makefile; then
-		sed -i Makefile \
-			-e "/^### The object files (add further files here)\:/a -include \$(VDRDIR)/Make.config"
-	fi
 }
 
 dev_check() {
@@ -649,6 +640,14 @@ vdr-plugin-2_src_install() {
 	if [[ -n ${VDR_RCADDON_FILE} ]]; then
 		insinto "${VDR_RC_DIR}"
 		newins "${VDR_RCADDON_FILE}" plugin-${VDRPLUGIN}.sh
+	fi
+
+	# if VDR_ARGS_FILE is empty and ${FILESDIR}/${VDRPLUGIN}.conf exists take it
+	[[ -z ${VDR_ARGS_FILE} ]] && [[ -e ${FILESDIR}/argsfile ]] && VDR_ARGS_FILE=${FILESDIR}/argsfile
+
+	if [[ -n ${VDR_ARGS_FILE} ]]; then
+		insinto "/etc/vdr/conf.avail"
+		newins "${VDR_ARGS_FILE}" ${VDRPLUGIN}.conf
 	fi
 }
 

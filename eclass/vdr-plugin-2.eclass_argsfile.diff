@@ -1,0 +1,30 @@
+--- vdr-plugin-2.eclass.orig	2016-01-16 23:28:30.271861802 +0100
++++ vdr-plugin-2.eclass	2016-01-17 01:03:40.314738121 +0100
+@@ -21,6 +21,12 @@
+ # defaults to ${FILESDIR}/confd. Each config file will be installed as e.g.
+ # ${D}/etc/conf.d/vdr.${VDRPLUGIN}
+ 
++# @ECLASS-VARIABLE: VDR_ARGS_FILE
++# @DESCRIPTION:
++# A plugin new style argsdir config file can be specified through the $VDR_ARGS_FILE variable, it
++# defaults to ${FILESDIR}/${VDRPLUGIN}.conf. Each config file will be installed as e.g.
++# ${D}/etc/vdr/conf.avail/${VDRPLUGIN}.conf
++
+ # @ECLASS-VARIABLE: VDR_RCADDON_FILE
+ # @DEFAULT_UNSET
+ # @DESCRIPTION:
+@@ -635,6 +641,14 @@
+ 		insinto "${VDR_RC_DIR}"
+ 		newins "${VDR_RCADDON_FILE}" plugin-${VDRPLUGIN}.sh
+ 	fi
++
++	# if VDR_ARGS_FILE is empty and ${FILESDIR}/${VDRPLUGIN}.conf exists take it
++	[[ -z ${VDR_ARGS_FILE} ]] && [[ -e ${FILESDIR}/argsfile ]] && VDR_RCADDON_FILE=${FILESDIR}/argsfile
++
++	if [[ -n ${VDR_ARGS_FILE} ]]; then
++		insinto "/etc/vdr/conf.avail"
++		newins "${VDR_ARGS_FILE}" ${VDRPLUGIN}.conf
++	fi
+ }
+ 
+ vdr-plugin-2_pkg_postinst() {
