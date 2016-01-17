@@ -6,3 +6,4 @@
 
 # -c FILE   --config=FILE   loads the specified xml file
 #                           (default: ConfigDir/plugins/menuorg.xml)
+--config=/etc/vdr/plugins/menuorg/menuorg.xml
