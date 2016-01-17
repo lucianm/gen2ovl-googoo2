@@ -14,13 +14,27 @@ PYTHON_REQ_USE="sqlite"
 
 inherit eutils linux-info python-single-r1 multiprocessing autotools toolchain-funcs
 
-CODENAME="Jarvis"
 case ${PV} in
 9999)
 	EGIT_REPO_URI="git://github.com/xbmc/xbmc.git"
 	inherit git-r3
 	;;
 *|*_p*)
+	inherit versionator
+	case $(get_version_component_range 1) in
+	15)
+		CODENAME="Isengard"
+		;;
+	16)
+		CODENAME="Jarvis"
+		;;
+	17)
+		CODENAME="Krypton"
+		;;
+	*)
+		CODENAME="CODENAME_NOT_SET"
+		;;
+	esac
 	MY_PV=${PV/_p/_r}
 	MY_P="${PN}-${MY_PV}"
 	SRC_URI="http://mirrors.kodi.tv/releases/source/${MY_PV}-${CODENAME}.tar.gz -> ${P}.tar.gz
