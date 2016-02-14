@@ -5,7 +5,19 @@
 # Joerg Bornkessel <hd_brummy@gentoo.org>
 # Matthias Schwarzott <zzam@gentoo.org>
 
+# this is from /etc/conf.d/vdr.sodteletext, as always
 : ${OSDTELETEXT_TMPFS:=yes}
+
+# read from /etc/vdr/conf.avail/osdteletext.conf if the proper g-v-s installed:
+argsdir_funcs="/usr/share/vdr/inc/argsdir-functions.sh"
+if [ -f "${argsdir_funcs}" ]; then
+	source ${argsdir_funcs}
+	OSDTELETEXT_DIR="$(get_cfg_opt osdteletext --directory -d)"
+	OSDTELETEXT_SIZE="$(get_cfg_opt osdteletext --max-cache -n)"
+	[ is_cfg_opt_on osdteletext --toptext -t ] && OSDTELETEXT_STORETOPTEXT="yes"
+fi
+
+# if still reading /etc/conf.d/vdr.sodteletext
 : ${OSDTELETEXT_SIZE:=20}
 : ${OSDTELETEXT_DIR:=/var/cache/vdr/plugins/osdteletext}
 : ${OSDTELETEXT_STORETOPTEXT:=no}
