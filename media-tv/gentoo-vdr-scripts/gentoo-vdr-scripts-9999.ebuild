@@ -6,7 +6,7 @@ EAPI=5
 
 inherit eutils git-2 user
 
-EGIT_REPO_URI="git://anongit.gentoo.org/proj/gentoo-vdr-scripts.git"
+EGIT_REPO_URI="git://github.com/lucianm/gentoo-vdr-scripts.git"
 
 DESCRIPTION="Scripts necessary for use of vdr as a set-top-box"
 HOMEPAGE="http://www.gentoo.org/"
@@ -45,7 +45,7 @@ src_install() {
 	diropts -ovdr -gvdr
 	keepdir "${VDR_HOME}"
 
-	local kd
+local kd
 	for kd in shutdown-data merged-config-files dvd-images; do
 		keepdir "${VDR_HOME}/${kd}"
 	done
