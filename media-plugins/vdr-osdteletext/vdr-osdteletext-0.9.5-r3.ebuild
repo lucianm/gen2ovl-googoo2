@@ -1,20 +1,20 @@
-# Copyright 1999-2014 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/media-plugins/vdr-osdteletext/vdr-osdteletext-0.9.4-r1.ebuild,v 1.4 2014/04/05 22:57:43 hd_brummy Exp ${VDRPLUGIN}/vdr-${VDRPLUGIN}-0.3.1.ebuild,v 1.1 2003/05/13 09:39:19 fow0ryl Exp $
+# $Id$
 
 EAPI=5
 
 inherit vdr-plugin-2
 
-VERSION="1282" # every bump, new version
+VERSION="1881" # every bump, new version
 
 DESCRIPTION="VDR Plugin: Osd-Teletext displays the teletext on the OSD"
-HOMEPAGE="http://projects.vdr-developer.org/projects/show/plg-osdteletext"
+HOMEPAGE="http://projects.vdr-developer.org/projects/plg-osdteletext"
 SRC_URI="mirror://vdr-developerorg/${VERSION}/${P}.tgz"
 
 SLOT="0"
 LICENSE="GPL-2"
-KEYWORDS="amd64 x86"
+KEYWORDS="~amd64 ~x86"
 IUSE=""
 
 DEPEND=">=media-video/vdr-1.7.39"
