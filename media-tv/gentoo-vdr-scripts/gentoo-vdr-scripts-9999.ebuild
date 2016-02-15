@@ -17,6 +17,8 @@ SLOT="0"
 KEYWORDS="~amd64 ~arm ~ppc ~x86"
 IUSE="nvram"
 
+PDEPEND="media-tv/vdrcm"
+
 RDEPEND="nvram? ( sys-power/nvram-wakeup )
 	app-admin/sudo
 	sys-process/wait_on_pid
