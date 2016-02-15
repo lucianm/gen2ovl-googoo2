@@ -19,7 +19,8 @@ IUSE="nvram"
 
 RDEPEND="nvram? ( sys-power/nvram-wakeup )
 	app-admin/sudo
-	sys-process/wait_on_pid"
+	sys-process/wait_on_pid
+	sys-apps/gentoo-functions"
 
 VDR_HOME=/var/vdr
 
