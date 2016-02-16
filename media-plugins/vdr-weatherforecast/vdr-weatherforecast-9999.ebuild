@@ -6,15 +6,15 @@ EAPI="5"
 
 inherit vdr-plugin-2
 
-VERSION="1402" # every bump, new version
-
 if [ "${PV}" = "9999" ]; then
-	inherit git-2
+	inherit git-r3
 	EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-${VDRPLUGIN}.git"
 	KEYWORDS=""
+	S="${WORKDIR}/${P}"
 else
-	SRC_URI="mirror://vdr-developerorg/${VERSION}/${P}.tgz"
-	KEYWORDS="~amd64 ~x86"
+	SRC_URI="http://projects.vdr-developer.org/git/vdr-plugin-${VDRPLUGIN}.git/snapshot/vdr-plugin-${VDRPLUGIN}-${PV}.tar.bz2"
+	KEYWORDS="~amd64 ~x86 ~arm"
+	S="${WORKDIR}/vdr-plugin-${VDRPLUGIN}-${PV}"
 fi
 
 DESCRIPTION="Video Disk Recorder - \"WeatherForecast\" provides a weather forecast \(who'd have thought? \;\) ) based on forecast.io data"
@@ -26,25 +26,13 @@ IUSE=""
 
 DEPEND=">=media-video/vdr-1.7.28
 	net-misc/curl
-	dev-libs/jansson"
+	dev-libs/jansson
+	>=media-libs/libskindesignerapi-0.1.0
+	>=media-plugins/vdr-skindesigner-0.4.0"
 
 RDEPEND="${DEPEND}"
 
-#VDR_CONFD_FILE="${FILESDIR}/confd-${PV}"
-#VDR_RCADDON_FILE="${FILESDIR}/rc-addon-${PV}.sh"
-
-#PATCHES="${FILESDIR}/.."
-
-src_install() {
-	vdr-plugin-2_src_install
-	#chown vdr:vdr -R "${D}"/etc/vdr
-	WEATHERFORECAST_CACHEDIR="/var/cache/vdr/plugins/${VDRPLUGIN}"
-	dodir "${WEATHERFORECAST_CACHEDIR}"
-	fowners -R vdr:vdr "${WEATHERFORECAST_CACHEDIR}"
-}
-
-#pkg_postinst() {
-#	einfo "Please check and ajust your settings in \"/etc/conf.d/vdr.${VDRPLUGIN}\","
-#	einfo "especially for the channel logos path, and in general, make sure"
-#	einfo "they end with an \"/\""
-#}
+#VDR_RCADDON_FILE="${FILESDIR}/rc-addon.sh"
+#VDR_CONFD_FILE="${FILESDIR}/confd-v2"
+VDR_RCADDON_FILE_4ARGSDIR="${FILESDIR}/rc-addon_4argsdir.sh"
+#VDR_CONFD_FILE_4ARGSDIR="${FILESDIR}/confd_4argsdir"
