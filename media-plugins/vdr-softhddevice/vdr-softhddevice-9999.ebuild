@@ -1,30 +1,46 @@
-# Copyright 1999-2014 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-EAPI="5"
+EAPI=5
 
 inherit vdr-plugin-2
 
-VERSION="1309" # every bump, new version
+KEYWORDS="~amd64 ~x86"
 
-if [ "${PV}" = "9999" ]; then
-	inherit git-2
-	EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-softhddevice.git"
+case ${PV} in
+9999)
+	EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-${VDRPLUGIN}.git"
+	inherit git-r3
 	KEYWORDS=""
-else
+	S="${WORKDIR}/vdr-${VDRPLUGIN}-${PV}"
+	;;
+0.6.1_p20151001)
+	GIT_REVISION="5dc5601576c617516ec41c9c4899d3e18c0cc030"
+	SRC_URI="http://projects.vdr-developer.org/git/vdr-plugin-${VDRPLUGIN}.git/snapshot/vdr-plugin-${VDRPLUGIN}-${GIT_REVISION}.tar.bz2"
+	S="${WORKDIR}/vdr-plugin-${VDRPLUGIN}-${GIT_REVISION}"
+	;;
+0.6.1_p20151103)
+	GIT_REVISION="6dfa88aecf1b5a4c5932ba278209d9f22676547f"
+	SRC_URI="http://projects.vdr-developer.org/git/vdr-plugin-${VDRPLUGIN}.git/snapshot/vdr-plugin-${VDRPLUGIN}-${GIT_REVISION}.tar.bz2"
+	S="${WORKDIR}/vdr-plugin-${VDRPLUGIN}-${GIT_REVISION}"
+	;;
+0.6.0)
+	VERSION="1309" # every bump, new version
 	SRC_URI="mirror://vdr-developerorg/${VERSION}/${P}.tgz"
-	KEYWORDS="~amd64 ~x86"
-fi
+	;;
+*)
+	;;
+esac
 
 DESCRIPTION="VDR Plugin: Software and GPU emulated HD output device"
-HOMEPAGE="http://projects.vdr-developer.org/projects/show/plg-softhddevice"
+HOMEPAGE="http://projects.vdr-developer.org/projects/show/plg-${VDRPLUGIN}"
 
 LICENSE="AGPL-3"
 SLOT="0"
-IUSE="alsa +debug opengl oss vaapi vdpau xscreensaver"
+IUSE="alsa debug opengl oss vaapi vdpau -xscreensaver"
 
-RESTRICT="test"
+#RESTRICT="test"
 
 RDEPEND=">=media-video/vdr-2
 	x11-libs/libX11
@@ -35,10 +51,9 @@ RDEPEND=">=media-video/vdr-2
 	alsa? ( media-libs/alsa-lib )
 	opengl? ( virtual/opengl )
 	vaapi? ( x11-libs/libva
-		virtual/ffmpeg[vaapi] )
+			virtual/ffmpeg[vaapi] )
 	vdpau? ( x11-libs/libvdpau
-		virtual/ffmpeg[vdpau] )"
-
+			virtual/ffmpeg[vdpau] )"
 DEPEND="${RDEPEND}
 	virtual/pkgconfig
 	x11-libs/xcb-util"
@@ -47,14 +62,11 @@ REQUIRED_USE="opengl? ( vaapi )
 			|| ( vaapi vdpau )
 			|| ( alsa oss )"
 
-VDR_CONFD_FILE="${FILESDIR}/confd-${PV}"
-VDR_RCADDON_FILE="${FILESDIR}/rc-addon-${PV}.sh"
-
 pkg_setup() {
 	vdr-plugin-2_pkg_setup
 
 	append-cppflags -DHAVE_PTHREAD_NAME
- 
+
 	use debug && append-cppflags -DDEBUG -DOSD_DEBUG
 }
 
@@ -73,6 +85,10 @@ src_prepare() {
 
 	if has_version ">=media-video/ffmpeg-0.8"; then
 		BUILD_PARAMS+=" SWRESAMPLE=1"
+	fi
+
+	if has_version ">=media-video/libav-0.8"; then
+		BUILD_PARAMS+=" AVRESAMPLE=1"
 	fi
 }
 
