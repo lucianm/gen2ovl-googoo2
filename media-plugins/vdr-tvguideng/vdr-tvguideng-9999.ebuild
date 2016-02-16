@@ -1,4 +1,4 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
@@ -6,16 +6,15 @@ EAPI="5"
 
 inherit vdr-plugin-2
 
-VERSION="1402" # every bump, new version
-
 if [ "${PV}" = "9999" ]; then
-	inherit git-2
+	inherit git-r3
 	EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-${VDRPLUGIN}.git"
 	KEYWORDS=""
+	S="${WORKDIR}/${P}"
 else
-	#SRC_URI="mirror://vdr-developerorg/${VERSION}/${P}.tgz"
 	SRC_URI="http://projects.vdr-developer.org/git/vdr-plugin-${VDRPLUGIN}.git/snapshot/vdr-plugin-${VDRPLUGIN}-${PV}.tar.bz2"
 	KEYWORDS="~amd64 ~x86"
+	S="${WORKDIR}/vdr-plugin-${VDRPLUGIN}-${PV}"
 fi
 
 DESCRIPTION="Video Disk Recorder - \"TvGuideNG\" - hightly customizable 2D EPG viewer plugin"
@@ -25,13 +24,9 @@ SLOT="0"
 LICENSE="GPL-2"
 IUSE=""
 
-DEPEND=">=media-plugins/vdr-skindesigner-0.3.0"
+DEPEND=">=media-libs/libskindesignerapi-0.1.0
+	>=media-plugins/vdr-skindesigner-0.4.0"
 RDEPEND="${DEPEND}"
-
-#VDR_CONFD_FILE="${FILESDIR}/confd-${PV}"
-#VDR_RCADDON_FILE="${FILESDIR}/rc-addon-${PV}.sh"
-
-#PATCHES="${FILESDIR}/.."
 
 src_install() {
 	vdr-plugin-2_src_install
