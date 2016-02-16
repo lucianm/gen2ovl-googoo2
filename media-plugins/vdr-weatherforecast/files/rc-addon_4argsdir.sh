@@ -16,10 +16,10 @@ fi
 # depends on QA, create paths in /var/cache on the fly at runtime as needed
 init_cache_dir() {
 	ADDON_SCRIPT_NAME="$(basename $0)"
-	CACHEDIR_WEATHERFORECAST="${CACHEDIR}/plugins/${ADDON_SCRIPT_NAME/plugin-/}"
-	if [ ! -d "${CACHEDIR_WEATHERFORECAST}" ]; then
-		mkdir -p ${CACHEDIR_WEATHERFORECAST}
-		chown vdr:vdr ${CACHEDIR_WEATHERFORECAST}
+	local PLUGIN_CACHEDIR="${CACHEDIR}/plugins/${ADDON_SCRIPT_NAME/plugin-/}"
+	if [ ! -d "${PLUGIN_CACHEDIR}" ]; then
+		mkdir -p ${PLUGIN_CACHEDIR}
+		chown vdr:vdr ${PLUGIN_CACHEDIR}
 	fi
 }
 

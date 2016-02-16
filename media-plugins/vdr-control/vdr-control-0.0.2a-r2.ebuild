@@ -13,7 +13,7 @@ DESCRIPTION="Video Disk Recorder telnet-OSD PlugIn"
 HOMEPAGE="http://ricomp.de/vdr/"
 SRC_URI="http://ricomp.de/vdr/${P}.tgz
 		mirror://vdrfiles/${PN}/${P}.tgz"
-KEYWORDS="~x86 ~amd64"
+KEYWORDS="~x86 ~amd64 ~arm"
 SLOT="0"
 LICENSE="GPL-2"
 

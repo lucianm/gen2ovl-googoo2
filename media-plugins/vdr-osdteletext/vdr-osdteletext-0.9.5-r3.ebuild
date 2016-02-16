@@ -14,7 +14,7 @@ SRC_URI="mirror://vdr-developerorg/${VERSION}/${P}.tgz"
 
 SLOT="0"
 LICENSE="GPL-2"
-KEYWORDS="~amd64 ~x86"
+KEYWORDS="~amd64 ~x86 ~arm"
 IUSE=""
 
 DEPEND=">=media-video/vdr-1.7.39"

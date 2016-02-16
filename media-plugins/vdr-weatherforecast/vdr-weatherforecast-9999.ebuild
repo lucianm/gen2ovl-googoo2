@@ -32,7 +32,4 @@ DEPEND=">=media-video/vdr-1.7.28
 
 RDEPEND="${DEPEND}"
 
-#VDR_RCADDON_FILE="${FILESDIR}/rc-addon.sh"
-#VDR_CONFD_FILE="${FILESDIR}/confd-v2"
 VDR_RCADDON_FILE_4ARGSDIR="${FILESDIR}/rc-addon_4argsdir.sh"
-#VDR_CONFD_FILE_4ARGSDIR="${FILESDIR}/confd_4argsdir"

@@ -39,6 +39,8 @@ DEPEND=">=media-libs/libskindesignerapi-0.0.2
 RDEPEND="${DEPEND}
 	virtual/channel-logos-hq"
 
+VDR_RCADDON_FILE_4ARGSDIR="${FILESDIR}/rc-addon_4argsdir.sh"
+
 PATCHES="${FILESDIR}/${PN}_no-subproject-when-separate-package.patch"
 
 SKINDESIGNER_CACHEDIR="/var/cache/vdr/plugins/${VDRPLUGIN}"
