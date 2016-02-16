@@ -22,6 +22,8 @@ RDEPEND="${DEPEND}"
 
 VDR_RCADDON_FILE="${FILESDIR}/rc-addon-v3.sh"
 VDR_CONFD_FILE="${FILESDIR}/confd-v2"
+VDR_RCADDON_FILE_4ARGSDIR="${FILESDIR}/rc-addon_4argsdir.sh"
+VDR_CONFD_FILE_4ARGSDIR="${FILESDIR}/confd_4argsdir"
 
 src_install() {
 	vdr-plugin-2_src_install

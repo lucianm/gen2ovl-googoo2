@@ -1,0 +1,10 @@
+# /etc/conf.d/vdr.osdteletext
+# $Id$
+
+# ################################################
+#
+# for minimal activity on your Harddisc
+# store the vtx files in a temp filesystem
+#	allowed values: yes no
+#	default: yes
+#OSDTELETEXT_TMPFS=yes
