@@ -1,9 +1,17 @@
---- vdr-plugin-2.eclass.orig	2016-01-16 23:28:30.271861802 +0100
-+++ vdr-plugin-2.eclass	2016-01-17 01:03:40.314738121 +0100
-@@ -21,6 +21,12 @@
+--- /var/portage/portage/eclass/vdr-plugin-2.eclass	2015-08-09 22:34:51.000000000 +0200
++++ vdr-plugin-2.eclass	2016-02-16 01:04:21.238875172 +0100
+@@ -21,6 +21,20 @@
  # defaults to ${FILESDIR}/confd. Each config file will be installed as e.g.
  # ${D}/etc/conf.d/vdr.${VDRPLUGIN}
  
++# @ECLASS-VARIABLE: VDR_CONFD_FILE_4ARGSDIR
++# @DEFAULT_UNSET
++# @DESCRIPTION:
++# An alternative plugin config file can be specified through the $VDR_CONFD_FILE_4ARGSDIR variable,
++# if using ARGSDIR (>=media-tv/gentoo-vdr-scripts-3.0.0) it defaults to ${FILESDIR}/confd_4argsdir.
++# Each config file will be installed as e.g.
++# ${D}/etc/conf.d/vdr.${VDRPLUGIN}
++
 +# @ECLASS-VARIABLE: VDR_ARGS_FILE
 +# @DESCRIPTION:
 +# A plugin new style argsdir config file can be specified through the $VDR_ARGS_FILE variable, it
@@ -13,13 +21,58 @@
  # @ECLASS-VARIABLE: VDR_RCADDON_FILE
  # @DEFAULT_UNSET
  # @DESCRIPTION:
-@@ -635,6 +641,14 @@
+@@ -30,6 +44,16 @@
+ # ${FILESDIR}/rc-addon.sh and will be installed as
+ # ${VDR_RC_DIR}/plugin-${VDRPLUGIN}.sh
+ #
++# @ECLASS-VARIABLE: VDR_RCADDON_FILE_4ARGSDIR
++# @DEFAULT_UNSET
++# @DESCRIPTION:
++# Installing rc-addon files is basically the same as for plugin config files
++# (see above), it's just using the $VDR_RCADDON_FILE_4ARGSDIR variable instead.
++# The default value when $VDR_RCADDON_FILE_4ARGSDIR is undefined and if using ARGSDIR
++# (>=media-tv/gentoo-vdr-scripts-3.0.0) is:
++# ${FILESDIR}/rc-addon_4argsdir.sh and will be installed as
++# ${VDR_RC_DIR}/plugin-${VDRPLUGIN}.sh
++#
+ # The rc-addon files will be sourced by the startscript when the specific plugin
+ # has been enabled.
+ # rc-addon files may be used to prepare everything that is necessary for the
+@@ -620,26 +644,50 @@
+ 	for docfile in README* HISTORY CHANGELOG; do
+ 		[[ -f ${docfile} ]] && dodoc ${docfile}
+ 	done
+-
++	
++	local confd_name="confd"
++	if has_version ">=media-tv/gentoo-vdr-scripts-2.9.9"; then
++		confd_name="confd_4argsdir"
++		[[ -n ${VDR_CONFD_FILE_4ARGSDIR} ]] && [[ -e ${VDR_CONFD_FILE_4ARGSDIR} ]] && VDR_CONFD_FILE=${VDR_CONFD_FILE_4ARGSDIR}
++	fi
+ 	# if VDR_CONFD_FILE is empty and ${FILESDIR}/confd exists take it
+-	[[ -z ${VDR_CONFD_FILE} ]] && [[ -e ${FILESDIR}/confd ]] && VDR_CONFD_FILE=${FILESDIR}/confd
++	[[ -z ${VDR_CONFD_FILE} ]] && [[ -e ${FILESDIR}/${confd_name} ]] && VDR_CONFD_FILE=${FILESDIR}/${confd_name}
+ 
+ 	if [[ -n ${VDR_CONFD_FILE} ]]; then
+ 		newconfd "${VDR_CONFD_FILE}" vdr.${VDRPLUGIN}
+ 	fi
+ 
++	local rcaddon_name="rc-addon.sh"
++	if has_version ">=media-tv/gentoo-vdr-scripts-2.9.9"; then
++		confd_name="rc-addon_4argsdir.sh"
++		[[ -n ${VDR_RCADDON_FILE_4ARGSDIR} ]] && [[ -e ${VDR_RCADDON_FILE_4ARGSDIR} ]] && VDR_RCADDON_FILE=${VDR_RCADDON_FILE_4ARGSDIR}
++	fi
+ 	# if VDR_RCADDON_FILE is empty and ${FILESDIR}/rc-addon.sh exists take it
+-	[[ -z ${VDR_RCADDON_FILE} ]] && [[ -e ${FILESDIR}/rc-addon.sh ]] && VDR_RCADDON_FILE=${FILESDIR}/rc-addon.sh
++	[[ -z ${VDR_RCADDON_FILE} ]] && [[ -e ${FILESDIR}/${rcaddon_name} ]] && VDR_RCADDON_FILE=${FILESDIR}/${rcaddon_name}
+ 
+ 	if [[ -n ${VDR_RCADDON_FILE} ]]; then
  		insinto "${VDR_RC_DIR}"
  		newins "${VDR_RCADDON_FILE}" plugin-${VDRPLUGIN}.sh
  	fi
 +
-+	# if VDR_ARGS_FILE is empty and ${FILESDIR}/${VDRPLUGIN}.conf exists take it
-+	[[ -z ${VDR_ARGS_FILE} ]] && [[ -e ${FILESDIR}/argsfile ]] && VDR_RCADDON_FILE=${FILESDIR}/argsfile
++	# if VDR_ARGS_FILE is empty and ${FILESDIR}/argsfile exists take it
++	[[ -z ${VDR_ARGS_FILE} ]] && [[ -e ${FILESDIR}/argsfile ]] && VDR_ARGS_FILE=${FILESDIR}/argsfile
 +
 +	if [[ -n ${VDR_ARGS_FILE} ]]; then
 +		insinto "/etc/vdr/conf.avail"
@@ -28,3 +81,14 @@
  }
  
  vdr-plugin-2_pkg_postinst() {
+ 	vdr-plugin-2_print_enable_command
+ 
++	if [[ -n "${VDR_ARGS_FILE}" ]]; then
++		elog "Please have a look at the argsdir-file"
++		elog "\t/etc/vdr/conf.avail/${VDRPLUGIN}.conf"
++		elog
++	fi
++
+ 	if [[ -n "${VDR_CONFD_FILE}" ]]; then
+ 		elog "Please have a look at the config-file"
+ 		elog "\t/etc/conf.d/vdr.${VDRPLUGIN}"
