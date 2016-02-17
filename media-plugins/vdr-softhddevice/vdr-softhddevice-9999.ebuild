@@ -10,7 +10,11 @@ KEYWORDS="~amd64 ~x86"
 
 case ${PV} in
 9999)
-	EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-${VDRPLUGIN}.git"
+	if use opengl; then
+		EGIT_REPO_URI="https://github.com/lucianm/softhddevice-unified.git"
+	else
+		EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-${VDRPLUGIN}.git"
+	fi
 	inherit git-r3
 	KEYWORDS=""
 	S="${WORKDIR}/vdr-${VDRPLUGIN}-${PV}"
@@ -49,7 +53,10 @@ RDEPEND=">=media-video/vdr-2
 	x11-libs/xcb-util-keysyms
 	x11-libs/xcb-util-renderutil
 	alsa? ( media-libs/alsa-lib )
-	opengl? ( virtual/opengl )
+	opengl? ( virtual/opengl
+			media-libs/glew
+			media-libs/freeglut
+			media-libs/glm )
 	vaapi? ( x11-libs/libva
 			virtual/ffmpeg[vaapi] )
 	vdpau? ( x11-libs/libvdpau
@@ -58,9 +65,8 @@ DEPEND="${RDEPEND}
 	virtual/pkgconfig
 	x11-libs/xcb-util"
 
-REQUIRED_USE="opengl? ( vaapi )
-			|| ( vaapi vdpau )
-			|| ( alsa oss )"
+REQUIRED_USE="opengl? ( || ( vaapi vdpau ) )
+	|| ( alsa oss )"
 
 pkg_setup() {
 	vdr-plugin-2_pkg_setup
@@ -76,8 +82,10 @@ src_prepare() {
 	if has_version ">=media-video/ffmpeg-2.0"; then
 		sed -i "s:#CONFIG += -DH264_EOS_TRICKSPEED:CONFIG += -DH264_EOS_TRICKSPEED:" Makefile || die
 	fi
+	sed -i "s:#CONFIG += -DHAVE_PTHREAD_NAME:CONFIG += -DHAVE_PTHREAD_NAME:" Makefile || die
 	BUILD_PARAMS+=" ALSA=$(usex alsa 1 0)"
 	BUILD_PARAMS+=" OPENGL=$(usex opengl 1 0)"
+	use opengl && sed -i "s:#OPENGLOSD ?= 1:OPENGLOSD ?= 1:" Makefile || die
 	BUILD_PARAMS+=" OSS=$(usex oss 1 0)"
 	BUILD_PARAMS+=" VAAPI=$(usex vaapi 1 0)"
 	BUILD_PARAMS+=" VDPAU=$(usex vdpau 1 0)"
