@@ -1,10 +1,16 @@
+# Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
+
 # dbus2vdr (28) - control vdr via D-Bus
-#
+
+[dbus2vdr]
+
 #  --shutdown-hooks=/path/to/dir/with/shutdown-hooks
 #    directory with shutdown-hooks to be called by ConfirmShutdown
 #    usually it's /usr/share/vdr/shutdown-hooks
+--shutdown-hooks=/usr/share/vdr/shutdown
 #  --shutdown-hooks-wrapper=/path/to/shutdown-hooks-wrapper
 #    path to a program that will call the shutdown-hooks with suid
+--shutdown-hooks-wrapper=/usr/share/vdr/plugins/dbus2vdr/shutdown-wrapper
 #  --osd
 #    creates an OSD provider which will save the OSD as PNG files
 #  --systemd
@@ -23,8 +29,3 @@
 #    it has to store its address at $PLUGINDIR/network-address.conf
 #  --log=n
 #    set plugin's loglevel
-
-
-_EXTRAOPTS="\
---shutdown-hooks=/usr/share/vdr/shutdown \
---shutdown-hooks-wrapper=/usr/share/vdr/plugins/dbus2vdr/shutdown-wrapper"
