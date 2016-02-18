@@ -1,0 +1,9 @@
+# Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
+
+# dvbapi (2.2.2-GIT-54d41d4) - SoftCAM for OSCam
+
+[dvbapi]
+
+#  -o N,     --offset=N     add constant value to all adapter indexes when
+#                           communicating with OSCam (default: 0)
+#  -d,       --disable-exp  disable CW expiration check
