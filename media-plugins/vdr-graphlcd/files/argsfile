@@ -1,0 +1,14 @@
+# Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
+
+# graphlcd (0.3.0) - Output to graphic LCD
+
+[graphlcd]
+
+#  -c, --config=CFG             use CFG as driver config file (default is "/etc/graphlcd.conf")
+--config=/etc/vdr/plugins/graphlcd/graphlcd.conf
+#  -d, --display=DISP[,DISP]... use display DISP for output or if DISP=none: start w/o any display
+--display=t6963c
+#  -s, --skin=SKIN[,SKIN]...    use skin SKIN (default is "default")
+--skin=default
+#  -p, --skinspath=PATH         use path PATH for skins (default is "<plugin_config>/skins/")
+--skinspath=/usr/share/vdr/plugins/graphlcd/skins

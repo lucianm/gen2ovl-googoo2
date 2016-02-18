@@ -1,10 +1,10 @@
-# Copyright 1999-2013 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
-EAPI="4"
+EAPI=5
 
-inherit vdr-plugin-2 git-2
+inherit vdr-plugin-2 git-r3
 
 SRC_URI=""
 
@@ -26,6 +26,8 @@ DEPEND=">=media-video/vdr-1.6
 	>=app-misc/graphlcd-base-9999"
 RDEPEND="${DEPEND}
 	media-fonts/vdrsymbols-ttf"
+
+S="${WORKDIR}/${P}"
 
 #PATCHES="${FILESDIR}/graphlcd-9999_Makefile-vdr-1.7.34.diff"
 
@@ -82,7 +84,7 @@ pkg_preinst() {
 		elog "Remove wrong DIR in /etc/vdr/plugins/graphlcd from prior install"
 		elog "Press CTRL+C to abbort"
 		epause
-		rmdir -R /etc/vdrplugins/graphlcd/{fonts,logos}
+		rmdir -R /etc/vdr/plugins/graphlcd/{fonts,logos}
 	fi
 }
 

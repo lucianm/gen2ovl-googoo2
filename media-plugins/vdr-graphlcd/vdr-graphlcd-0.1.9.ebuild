@@ -1,8 +1,8 @@
-# Copyright 1999-2012 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
-EAPI="4"
+EAPI=5
 
 inherit eutils vdr-plugin-2
 
@@ -92,7 +92,7 @@ pkg_preinst() {
 		elog "Remove wrong DIR in /etc/vdr/plugins/graphlcd from prior install"
 		elog "Press CTRL+C to abbort"
 		epause
-		rmdir -R /etc/vdrplugins/graphlcd/{fonts,logos}
+		rmdir -R /etc/vdr/plugins/graphlcd/{fonts,logos}
 	fi
 }
 
