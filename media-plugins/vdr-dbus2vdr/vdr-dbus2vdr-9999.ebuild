@@ -1,19 +1,24 @@
-# Copyright 1999-2014 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
-EAPI="5"
+EAPI=5
 
-inherit vdr-plugin-2 git-2 systemd
+inherit vdr-plugin-2 systemd
 
-EGIT_REPO_URI="${DVBAPI_EGIT_REPO_URI:-git://github.com/yavdr/vdr-plugin-${VDRPLUGIN}.git}"
-EGIT_PROJECT="${PN}-plugin${DVBAPI_EGIT_PROJECT:-}.git"
-EGIT_BRANCH="${DVBAPI_EGIT_BRANCH:-master}"
+if [[ "${PV}" == "9999" ]]; then
+	EGIT_REPO_URI="https://github.com/flensrocker/vdr-plugin-${VDRPLUGIN}.git"
+	KEYWORDS=""
+	S=${WORKDIR}/${P}
+	inherit git-r3
+else
+	SRC_URI="https://github.com/flensrocker/vdr-plugin-${VDRPLUGIN}/releases/download/v${PV}/vdr-${VDRPLUGIN}-${PV}.tgz"
+	KEYWORDS="~arm ~amd64 ~x86"
+	S=${WORKDIR}/${VDRPLUGIN}-${PV}
+fi
 
-DESCRIPTION="VDR plugin: control VDR via DBus (including SVDRP replacement)"
-HOMEPAGE="https://github.com/manio/vdr-plugin-${VDRPLUGIN}"
-SRC_URI=""
-KEYWORDS=""
+DESCRIPTION="VDR plugin: control VDR via DBus (including SVDRP replacement for plugin commands)"
+HOMEPAGE="https://github.com/flensrocker/vdr-plugin-${VDRPLUGIN}"
 LICENSE="GPL-2"
 SLOT="0"
 IUSE="debug"
@@ -25,8 +30,6 @@ DEPEND=">=media-video/vdr-1.7.8
 	dev-cpp/pngpp"
 
 RDEPEND="${DEPEND}"
-
-S=${WORKDIR}/${PN}-plugin
 
 PATCHES="${FILESDIR}/${VDRPLUGIN}-gentoo.diff"
 
