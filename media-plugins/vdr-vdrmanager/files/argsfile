@@ -1,0 +1,12 @@
+# Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
+
+# vdrmanager (0.14) - VDR-Manager plugin
+
+[vdrmanager]
+
+#  -p port                port number to listen to
+-p 6420
+#  -P password            password (none if not given). No password forces check against svdrphosts.conf.
+#  -s                     force check against svdrphosts.conf, even if a password was given
+#  -c compression         selects the compression mode to use ('z' for zlib or 'g' for gzip and 'n' for none).
+#                         Zlib compression is enabled as default or is default compression if youf specify -c without arguments
