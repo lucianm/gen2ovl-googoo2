@@ -1,8 +1,8 @@
-# Copyright 1999-2013 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
-EAPI="5"
+EAPI=5
 
 inherit vdr-plugin-2
 
@@ -10,9 +10,10 @@ DESCRIPTION="Video Disk Recorder epgsearch plugin"
 HOMEPAGE="http://winni.vdr-developer.org/epgsearch"
 
 if [ "${PV}" = "9999" ]; then
-	inherit git-2
+	inherit git-r3
 	EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-${VDRPLUGIN}.git"
 	KEYWORDS=""
+	S="${WORKDIR}/${P}"
 else
 	case ${P#*_} in
 		rc*|beta*)
@@ -74,6 +75,12 @@ src_prepare() {
 
 src_install() {
 	vdr-plugin-2_src_install
+	
+	# install argsfiles for extra plugins
+	insinto "/etc/vdr/conf.avail"
+	for extra_argsfile in $(ls ${FILESDIR} | grep argsfile.); do
+		newins "${FILESDIR}/$extra_argsfile" "${extra_argsfile/argsfile./}.conf"
+	done
 
 #	diropts "-m755 -o vdr -g vdr"
 #	keepdir /etc/vdr/plugins/epgsearch
@@ -105,4 +112,3 @@ pkg_postinst() {
 		elog "These files were moved:${moved}"
 	fi
 }
-

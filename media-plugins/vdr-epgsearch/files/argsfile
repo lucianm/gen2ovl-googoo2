@@ -1,0 +1,15 @@
+# Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
+
+# epgsearch (1.0.1.beta5) - search the EPG for repeats and more
+
+[epgsearch]
+
+#  -f file,  --svdrpsendcmd=file  the path to svdrpsend for external
+#                           SVDRP communication (default is internal
+#                           communication)
+#  -c path,  --config=path  to specify a specific config dir for epgsearch
+#  -l file,  --logfile=file to specify a specific logfile for epgsearch
+#  -v n,  --verbose=n       verbose level for logfile
+#  -r,  --reloadmenuconf    reload epgsearchmenu.conf with plugin call
+#  -m file,  --mailcmd=file path to an alternative mail script for mail
+#                           notification
