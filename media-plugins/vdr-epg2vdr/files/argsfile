@@ -1,0 +1,8 @@
+# Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
+
+# epg2vdr (0.3.24-GIT83fe182) - epg2vdr plugin
+
+[epg2vdr]
+
+# This plugin has no command line arguments!
+
