@@ -1,8 +1,8 @@
-# Copyright 1999-2013 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/media-plugins/vdr-femon/vdr-femon-1.6.4.ebuild,v 1.1 2008/11/30 21:35:01 hd_brummy Exp $
+# $Id$
 
-EAPI="5"
+EAPI=5
 
 inherit vdr-plugin-2
 
@@ -15,5 +15,5 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE=""
 
-DEPEND=">=media-video/vdr-1.7.40"
+DEPEND=">=media-video/vdr-2.2.0"
 RDEPEND="${DEPEND}"

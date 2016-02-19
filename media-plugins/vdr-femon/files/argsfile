@@ -1,0 +1,7 @@
+# Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
+
+# femon (2.2.1) - DVB Signal Information Monitor (OSD)
+
+[femon]
+
+#  -t <mode>, --trace=<mode>  set the tracing mode
