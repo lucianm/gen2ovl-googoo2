@@ -1,8 +1,8 @@
-# Copyright 1999-2014 Gentoo Foundation
+# Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
-EAPI="5"
+EAPI=5
 
 inherit channel-logos git-2
 
@@ -71,7 +71,7 @@ SRC_URI="
 	http://www.lyngsat-logo.com/hires/zz/zu_tv_ro.png
 	http://www.lyngsat-logo.com/logo/tv/dd/digi_premium.png
 	http://www.lyngsat-logo.com/logo/tv/tt/trinitas_tv.png
-	http://www.lyngsat-logo.com/logo/tv/kk/kanal_d_hd.png
+	http://www.lyngsat-logo.com/logo/tv/kk/kanal_d_tr_hd.png
 	http://www.lyngsat-logo.com/logo/tv/kk/kanal_d_ro.png
 	http://www.lyngsat-logo.com/logo/tv/pp/prima_tv.png
 	http://www.lyngsat-logo.com/logo/tv/dd/direct_digital_tv.png
@@ -84,9 +84,9 @@ SRC_URI="
 	http://www.lyngsat-logo.com/hires/nn/neptun_tv.png
 	http://www.lyngsat-logo.com/hires/ss/sport1_ro.png
 	http://upload.wikimedia.org/wikipedia/en/0/02/National_TV.png
-	https://bytebucket.org/picons/logos/raw/550df5e5a015fa0283aee3bdc9556c09890cee4a/tv/travelchannelhd.png
-	https://bytebucket.org/picons/logos/raw/550df5e5a015fa0283aee3bdc9556c09890cee4a/tv/sundancechannelhd.png
-	https://bytebucket.org/picons/logos/raw/550df5e5a015fa0283aee3bdc9556c09890cee4a/tv/cartoonnetwork_tcm.png
+	https://github.com/picons/picons-source/raw/master/build-source/logos/travelchannelhd.default.svg
+	https://github.com/picons/picons-source/raw/master/build-source/logos/sundancechannelhd.default.svg
+	https://github.com/picons/picons-source/raw/master/build-source/logos/cartoonnetwork_tcm.default.svg
 "
 
 EGIT_REPO_URI="git://github.com/3PO/Senderlogos.git"
@@ -167,6 +167,7 @@ src_prepare() {
 	mv -f "National TV.png" "national tv.png"
 	ln -f -s "national tv.png" "national.png"
 	ln -f -s "pro tv hd.png" "protv hd.png"
+	mv -f "kanal_d_tr_hd.png" "kanal_d_hd.png"
 }
 
 src_install() {
