@@ -1,11 +1,11 @@
-# Copyright 2015 Daniel 'herrnst' Scheller, Team Kodi
+# Copyright 2016 Lucian Muresan, Daniel 'herrnst' Scheller, Team Kodi
 # Original copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
 # Imported from official Gentoo portage tree
 
-EAPI="5"
+EAPI=5
 
 # Does not work with py3 here
 # It might work with py:2.5 but I didn't test that
@@ -38,8 +38,8 @@ case ${PV} in
 	MY_PV=${PV/_p/_r}
 	MY_P="${PN}-${MY_PV}"
 	SRC_URI="http://mirrors.kodi.tv/releases/source/${MY_PV}-${CODENAME}.tar.gz -> ${P}.tar.gz
-		https://github.com/xbmc/xbmc/archive/${PV}-${CODENAME}.tar.gz -> ${P}.tar.gz
-		!java? ( http://mirrors.kodi.tv/releases/source/${MY_P}-generated-addons.tar.xz )"
+		https://github.com/xbmc/xbmc/archive/${PV}-${CODENAME}.tar.gz -> ${P}.tar.gz"
+#		!java? ( http://mirrors.kodi.tv/releases/source/${MY_P}-generated-addons.tar.xz )"
 	KEYWORDS="~amd64 ~x86"
 
 	S=${WORKDIR}/xbmc-${PV}-${CODENAME}
@@ -51,7 +51,7 @@ HOMEPAGE="http://kodi.tv/ http://kodi.wiki/"
 
 LICENSE="GPL-2"
 SLOT="0"
-IUSE="airplay alsa avahi bluetooth bluray caps cec css dbus debug gles java joystick midi mysql nfs +opengl profile pulseaudio rtmp +samba sftp +ffmpeg test +texturepacker udisks upnp upower +usb vaapi vdpau webserver +X"
+IUSE="airplay +alsa avahi bluetooth bluray caps +cec css dbus debug gles java joystick midi mysql nfs +opengl profile pulseaudio rtmp +samba sftp +ffmpeg test +texturepacker udisks upnp upower +usb vaapi vdpau webserver +X"
 REQUIRED_USE="
 	udisks? ( dbus )
 	upower? ( dbus )
