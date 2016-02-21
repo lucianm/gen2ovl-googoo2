@@ -24,11 +24,6 @@ DEPEND="
 	sys-libs/zlib
 	"
 
-RDEPEND="
-	dev-libs/p8-platform
-	media-libs/kodiplatform
-	sys-libs/zlib
-	"
 src_unpack() {
 	EGIT_BRANCH="$(pvr_branch)"
 	git-r3_src_unpack
