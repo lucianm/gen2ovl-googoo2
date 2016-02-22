@@ -1,0 +1,11 @@
+# Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
+
+# remote (0.7.0) - Remote control
+
+[remote]
+
+#  -i dev,   --input=dev    input device (/dev/input/... | autodetect)
+#  -l dev,   --lirc=dev     lirc device (/dev/lircd)
+#  -p tcp:n, --port=tcp:n   listen on tcp port <n>
+#  -t dev,   --tty=dev      tty device
+#  -T dev,   --TTY=dev      tty device with 'OSD'
