@@ -23,7 +23,3 @@ DEPEND="
 	dev-libs/p8-platform
 	dev-libs/tinyxml
 	"
-
-RDEPEND="
-	dev-libs/tinyxml
-	"
