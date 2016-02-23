@@ -26,5 +26,7 @@ DEPEND="
 
 src_unpack() {
 	EGIT_BRANCH="$(codename_from_installedkodi)"
+	# hmm,  after all that effort, they did not follow the rule for this package:
+	[[ "${EGIT_BRANCH}" == "Jarvis" ]] && EGIT_BRANCH="master"
 	git-r3_src_unpack
 }
