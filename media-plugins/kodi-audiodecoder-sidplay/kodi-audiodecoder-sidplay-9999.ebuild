@@ -24,6 +24,3 @@ DEPEND="
 	media-libs/libsidplay
 	"
 
-RDEPEND="
-	media-libs/libsidplay
-	"

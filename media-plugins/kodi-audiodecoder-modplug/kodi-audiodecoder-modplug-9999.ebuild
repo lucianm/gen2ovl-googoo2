@@ -24,6 +24,3 @@ DEPEND="
 	media-libs/libmodplug
 	"
 
-RDEPEND="
-	media-libs/libmodplug
-	"

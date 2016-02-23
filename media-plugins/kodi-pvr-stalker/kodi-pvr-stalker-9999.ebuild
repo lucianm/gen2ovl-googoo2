@@ -25,10 +25,6 @@ DEPEND="
 	dev-libs/tinyxml
 	"
 
-RDEPEND="
-	dev-libs/jsoncpp
-	dev-libs/tinyxml
-	"
 src_unpack() {
 	EGIT_BRANCH="$(pvr_branch)"
 	git-r3_src_unpack
