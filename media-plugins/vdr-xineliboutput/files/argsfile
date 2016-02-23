@@ -1,0 +1,48 @@
+# Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
+
+# xineliboutput (2.0.0-cvs) - X11/xine-lib output plugin
+
+[xineliboutput]
+
+#  -l NAME   --local=NAME   Use local frontend NAME
+#                           Supported frontends:
+#                           sxfe    (X11)
+#                           fbfe    (framebuffer)
+#                           none    (only remote frontends)
+#  -r PORT   --remote=PORT  Listen PORT for remote clients
+#                           (default 37890)
+#                           none or 0 disables remote mode
+#                           Also local interface address can be specified:
+#                           --remote=<ip>:<port>  (default is all interfaces)
+#  -A NAME   --audio=NAME   Use audio driver NAME for local frontend
+#                           Supported values:
+#                           auto, alsa, oss, esound, none
+#  -V NAME   --video=NAME   Use video driver NAME for local frontend
+#                           Supported values:
+#                           for sxfe: auto, x11, xshm, xv, xvmc, xxmc,
+#                                     vdpau,                                      vaapi, vidix, sdl, opengl, none
+#                           for fbfe: auto, fb, DirectFB, vidixfb,
+#                                     sdl, dxr3, aadxr3, none
+#  -f        --fullscreen   Fullscreen mode (X11)
+#  -D        --hud[=flag[,flag]]
+#                           Head Up Display OSD (X11)
+#                           flags:
+#                           xshape  Use XShape instead of compositing
+#                           opengl  Use OpenGL instead of compositing
+#  -O        --opengl       Use OpenGL for video and Head Up Display OSD
+#  -w        --width=x      Window width
+#  -h        --height=x     Window width
+#  -g,       --geometry=WxH[+X+Y] Set output window geometry (X style)
+#  -d DISP   --display=DISP Use X11 display DISP
+#                           (or framebuffer device name)
+#  -W ID     --wid=ID       Use existing X11 window
+#                           Special ID for root window: --wid=root
+#  -m        --modeswitch   Enable video mode switching
+#  -P NAME   --post=NAME    Use xine post plugin NAME
+#                           format: pluginname[:arg=val[,arg=val]][,...]
+#                           example: 
+#                           --post=upmix;tvtime:enabled=1,cheap_mode=1
+#  -p        --primary      Force xineliboutput to be primary device when
+#                           there are active frontend(s)
+#  -c        --exit-on-close  Exit vdr when local frontend window is closed
+#  -C        --config=file  Use xine-lib config file

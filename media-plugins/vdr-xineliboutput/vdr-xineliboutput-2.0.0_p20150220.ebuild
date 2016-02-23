@@ -3,20 +3,19 @@
 # $Id$
 
 EAPI=5
+
+inherit vdr-plugin-2
+
 GENTOO_VDR_CONDITIONAL=yes
 
-inherit vdr-plugin-2 cvs toolchain-funcs
-
-DESCRIPTION="Video Disk Recorder Xinelib PlugIn"
+DESCRIPTION="VDR Plugin: Xinelib PlugIn"
 HOMEPAGE="http://sourceforge.net/projects/xineliboutput/"
-
-ECVS_SERVER="xineliboutput.cvs.sourceforge.net:/cvsroot/xineliboutput"
-ECVS_MODULE="${PN}"
+SRC_URI="http://vdr.websitec.de/download/${PN}/${P}.tar.xz"
 
 SLOT="0"
 LICENSE="GPL-2"
-KEYWORDS=""
-IUSE="bluray caps cec dbus fbcon jpeg libextractor nls opengl +vdr vdpau +X +xine xinerama"
+KEYWORDS="~amd64 ~x86"
+IUSE="bluray caps dbus fbcon jpeg libextractor nls opengl +vdr vdpau +X +xine xinerama"
 
 COMMON_DEPEND="
 	vdr? (
@@ -40,9 +39,7 @@ COMMON_DEPEND="
 			bluray? ( media-libs/libbluray )
 			opengl? ( virtual/opengl )
 		)
-	)
-
-	cec? ( dev-libs/libcec )"
+	)"
 
 DEPEND="${COMMON_DEPEND}
 	virtual/pkgconfig
@@ -56,31 +53,18 @@ DEPEND="${COMMON_DEPEND}
 	)"
 RDEPEND="${COMMON_DEPEND}"
 
-S=${WORKDIR}/${PN}
+REQUIRED_USE=" || ( vdr xine )"
+
 VDR_CONFD_FILE="${FILESDIR}/confd-2.0.0"
 VDR_CONFD_FILE_4ARGSDIR="${FILESDIR}/confd_4argsdir"
 
 pkg_setup() {
-	if ! use vdr && ! use xine; then
-		die "You either need at least one of these flags: vdr xine"
-	fi
-
 	vdr-plugin-2_pkg_setup
 
 	if use xine; then
 		XINE_PLUGIN_DIR=$(pkg-config --variable=plugindir libxine)
 		[ -z "${XINE_PLUGIN_DIR}" ] && die "Could not find xine plugin dir"
 	fi
-}
-
-src_prepare() {
-	# Allow user patches to be applied without modifyfing the ebuild
-	epatch_user
-
-	vdr-plugin-2_src_prepare
-
-	# UINT64_C is needed by ffmpeg headers
-	append-cxxflags -D__STDC_CONSTANT_MACROS
 }
 
 src_configure() {
@@ -113,9 +97,11 @@ src_configure() {
 		$(use_enable nls i18n) \
 		$(use_enable bluray libbluray) \
 		$(use_enable opengl) \
-		$(use_enable cec libcec) \
 		${myconf} \
 		|| die
+
+	# UINT64_C is needed by ffmpeg headers
+	append-cxxflags -D__STDC_CONSTANT_MACROS
 }
 
 src_install() {

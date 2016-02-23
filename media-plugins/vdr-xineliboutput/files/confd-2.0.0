@@ -25,3 +25,26 @@
 #
 #
 _EXTRAOPTS="--local=none --remote=37890"
+
+###################################################
+#       start sxfe remote frontend                #
+###################################################
+#
+# We do not add any start up paramaters by default
+# Please refer for detailed info to
+# media-plugins/vdr-xineliboutput README 
+# --> Using remote frontends
+#
+# Example:
+# --display=:1.0 --silent --fullscreen --syslog --reconnect xvdr://localhost &>/dev/null
+#
+# init script --> vdr-frontend
+#
+# DEBUG REQUEST: do we need sxfb support? feedback please!
+#
+# sxfe start parameter
+#	allowed values: see README
+#	default: no paramters given
+#
+#REMOTE_FRONTEND=""
+
