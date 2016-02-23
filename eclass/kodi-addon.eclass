@@ -25,6 +25,12 @@ kodi-addon_pvr_branch() {
 		15)
 			echo "Isengard"
 			;;
+		16)
+			echo "Jarvis"
+			;;
+		17)
+			echo "Krypton"
+			;;
 		*)
 			echo "master"
 			;;
