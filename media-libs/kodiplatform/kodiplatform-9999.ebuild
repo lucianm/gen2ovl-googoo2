@@ -7,7 +7,7 @@ EAPI=5
 EGIT_REPO_URI="https://github.com/xbmc/kodi-platform.git"
 EGIT_BRANCH="master"
 
-inherit git-r3 cmake-utils
+inherit git-r3 cmake-utils kodi-versionator
 
 DESCRIPTION="Kodi platform support library"
 HOMEPAGE="http://kodi.tv"
@@ -23,3 +23,8 @@ DEPEND="
 	dev-libs/p8-platform
 	dev-libs/tinyxml
 	"
+
+src_unpack() {
+	EGIT_BRANCH="$(codename_from_installedkodi)"
+	git-r3_src_unpack
+}
