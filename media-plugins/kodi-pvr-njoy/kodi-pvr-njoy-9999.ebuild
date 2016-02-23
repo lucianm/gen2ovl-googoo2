@@ -25,6 +25,6 @@ DEPEND="
 	"
 
 src_unpack() {
-	EGIT_BRANCH="$(pvr_branch)"
+	EGIT_BRANCH="$(addon_branch)"
 	git-r3_src_unpack
 }
