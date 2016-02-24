@@ -6,7 +6,7 @@ EAPI=5
 
 inherit multilib vdr-plugin-2
 
-VERSION="1402" # every bump, new version
+#VERSION="1402" # every bump, new version
 
 if [ "${PV}" = "9999" ]; then
 	inherit git-r3
