@@ -1,17 +1,26 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
-EAPI="5"
+EAPI=5
 
-inherit vdr-plugin-2 git-2
+inherit vdr-plugin-2
 
-EGIT_REPO_URI="git://github.com/FernetMenta/vdr-plugin-vnsiserver.git"
+if [[ "${PV}" == "9999" ]]; then
+	inherit git-r3
+	EGIT_REPO_URI="https://github.com/FernetMenta/vdr-plugin-${VDRPLUGIN}.git"
+	KEYWORDS=""
+	S="${WORKDIR}/${P}"
+else
+	SRC_URI="https://github.com/FernetMenta/vdr-plugin-${VDRPLUGIN}/archive/v${PV}.tar.gz -> ${P}.tar.gz"
+	KEYWORDS="~amd64 ~x86"
+	S="${WORKDIR}/vdr-plugin-${VDRPLUGIN}-${PV}"
+fi
+
 
 DESCRIPTION="VDR plugin: VNSI Streamserver Plugin"
-HOMEPAGE="https://github.com/FernetMenta/vdr-plugin-vnsiserver"
-SRC_URI=""
-KEYWORDS=""
+HOMEPAGE="https://github.com/FernetMenta/vdr-plugin-${VDRPLUGIN}"
+
 LICENSE="GPL-2"
 SLOT="0"
 IUSE=""
