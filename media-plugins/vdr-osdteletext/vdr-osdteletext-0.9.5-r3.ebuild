@@ -18,7 +18,8 @@ KEYWORDS="~amd64 ~x86 ~arm"
 IUSE=""
 
 DEPEND=">=media-video/vdr-1.7.39"
-RDEPEND="${DEPEND}"
+RDEPEND="${DEPEND}
+	media-fonts/teletext-ttf"
 
 VDR_RCADDON_FILE="${FILESDIR}/rc-addon-v3.sh"
 VDR_CONFD_FILE="${FILESDIR}/confd-v2"
