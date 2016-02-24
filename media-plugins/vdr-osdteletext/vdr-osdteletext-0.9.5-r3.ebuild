@@ -25,7 +25,8 @@ VDR_CONFD_FILE="${FILESDIR}/confd-v2"
 VDR_RCADDON_FILE_4ARGSDIR="${FILESDIR}/rc-addon_4argsdir.sh"
 VDR_CONFD_FILE_4ARGSDIR="${FILESDIR}/confd_4argsdir"
 
-PATCHES=("${FILESDIR}/osdteletext-intern_cBitmap_HighLevel_Osd.diff")
+#PATCHES=("${FILESDIR}/osdteletext-intern_cBitmap_HighLevel_Osd.diff")
+PATCHES=("${FILESDIR}/osdteletext-ttf.patch")
 
 src_install() {
 	vdr-plugin-2_src_install

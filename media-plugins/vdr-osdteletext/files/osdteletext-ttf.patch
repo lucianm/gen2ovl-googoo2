@@ -1,0 +1,1835 @@
+diff --git a/display.c b/display.c
+index a3b3a58..4b6fdfa 100644
+--- a/display.c
++++ b/display.c
+@@ -18,7 +18,7 @@
+ #include "setup.h"
+ #include "display.h"
+ #include "txtfont.h"
+-    
++
+ // Static variables of Display:: namespace
+ Display::Mode Display::mode=Display::Full;
+ cDisplay *Display::display=NULL;
+@@ -26,55 +26,49 @@ cDisplay *Display::display=NULL;
+ 
+ void Display::SetMode(Display::Mode NewMode) {
+     // (re-)set display mode.
+-    
++
+     if (display!=NULL && NewMode==mode) return;
+     // No change, nothing to do
+ 
+     // OSD origin, centered on VDR OSD
+     int x0=Setup.OSDLeft+(Setup.OSDWidth-ttSetup.OSDwidth)*ttSetup.OSDHAlign/100;
+     int y0=Setup.OSDTop +(Setup.OSDHeight-ttSetup.OSDheight)*ttSetup.OSDVAlign/100;
+-    
++
+     switch (NewMode) {
+     case Display::Full:
+         // Need to re-initialize *display:
+         Delete();
+-        // Try 4BPP display first:
+-        display=new cDisplay4BPP(x0,y0,ttSetup.OSDwidth,ttSetup.OSDheight);
+-        if (!display->Valid()) {
+-            // Failed, possibly out of memory 
+-            delete display;
+-            // Try 2BPP display
+-            display=new cDisplay2BPP(x0,y0,ttSetup.OSDwidth,ttSetup.OSDheight);
+-        }
++        // Try 32BPP display first:
++        display=new cDisplay32BPP(x0,y0,ttSetup.OSDwidth,ttSetup.OSDheight);
+         break;
+     case Display::HalfUpper:
+         // Shortcut to switch from HalfUpper to HalfLower:
+         if (mode==Display::HalfLower) {
+             // keep instance.
+-            ((cDisplay4BPPHalf*)display)->SetUpper(true);
++            ((cDisplay32BPPHalf*)display)->SetUpper(true);
+             break;
+         }
+         // Need to re-initialize *display:
+         Delete();
+-        display=new cDisplay4BPPHalf(x0,y0,ttSetup.OSDwidth,ttSetup.OSDheight,true);
++        display=new cDisplay32BPPHalf(x0,y0,ttSetup.OSDwidth,ttSetup.OSDheight,true);
+         break;
+     case Display::HalfLower:
+         // Shortcut to switch from HalfUpper to HalfLower:
+         if (mode==Display::HalfUpper) {
+             // keep instance.
+-            ((cDisplay4BPPHalf*)display)->SetUpper(false);
++            ((cDisplay32BPPHalf*)display)->SetUpper(false);
+             break;
+         }
+         // Need to re-initialize *display:
+         Delete();
+-        display=new cDisplay4BPPHalf(x0,y0,ttSetup.OSDwidth,ttSetup.OSDheight,false);
++        display=new cDisplay32BPPHalf(x0,y0,ttSetup.OSDwidth,ttSetup.OSDheight,false);
+         break;
+-    }           
++    }
+     mode=NewMode;
+     // If display is invalid, clean up immediately:
+     if (!display->Valid()) Delete();
+     // Pass through OSD black transparency
+-    SetBackgroundColor((tColor)ttSetup.configuredClrBackground);    
++    SetBackgroundColor((tColor)ttSetup.configuredClrBackground);
+ }
+ 
+ void Display::ShowUpperHalf() {
+@@ -86,113 +80,59 @@ void Display::ShowUpperHalf() {
+ }
+ 
+ 
+-
+-
+-
+-
+-cDisplay2BPP::cDisplay2BPP(int x0, int y0, int width, int height) 
++cDisplay32BPP::cDisplay32BPP(int x0, int y0, int width, int height)
+     : cDisplay(width,height) {
+-    // 2BPP display with color mapping
++    // 32BPP display for True Color OSD providers
+ 
+     osd = cOsdProvider::NewOsd(x0, y0);
+     if (!osd) return;
+-   
+-    width=(width+3)&~3;
+-    // Width has to end on byte boundary, so round up
+-    
+-    tArea Areas[] = { { 0, 0, width - 1, height - 1, 2 } };
+-    if (osd->CanHandleAreas(Areas, sizeof(Areas) / sizeof(tArea)) != oeOk) {
+-        DELETENULL(osd);
+-        return;
+-    }   
+-    osd->SetAreas(Areas, sizeof(Areas) / sizeof(tArea));
+-    
+-    InitPalette();
+-    
+-    InitScaler();
+-
+-    CleanDisplay();
+-}
+-
+-tColor cDisplay2BPP::GetColorRGB(enumTeletextColor ttc, int Area) {
+-    switch (ttc) {
+-    case ttcBlack:       return Background;
+-    case ttcRed:         return clrRed;
+-    case ttcGreen:       return clrYellow;
+-    case ttcYellow:      return clrYellow;
+-    case ttcBlue:        return Background;
+-    case ttcMagenta:     return clrRed;
+-    case ttcCyan:        return clrCyan;
+-    case ttcWhite:       return clrCyan;
+-    case ttcTransparent: return Background;
+-    default:             return Background;
+-    }
+-}
+-
+-tColor cDisplay2BPP::GetColorRGBAlternate(enumTeletextColor ttc, int Area) {
+-    switch (ttc) {
+-    case ttcBlack:       return clrCyan;
+-    case ttcRed:         return clrYellow;
+-    case ttcGreen:       return clrRed;
+-    case ttcYellow:      return clrRed;
+-    case ttcBlue:        return clrCyan;
+-    case ttcMagenta:     return clrYellow;
+-    case ttcCyan:        return Background;
+-    case ttcWhite:       return Background;
+-    case ttcTransparent: return clrCyan;
+-    default:             return Background;
+-    }
+-}
+-
+-
+-
+-
+-
+-cDisplay4BPP::cDisplay4BPP(int x0, int y0, int width, int height) 
+-    : cDisplay(width,height) {
+-    // 4BPP display for memory-modded DVB cards and other OSD providers
+ 
+-    osd = cOsdProvider::NewOsd(x0, y0);
+-    if (!osd) return;
+-   
+     width=(width+1)&~1;
+     // Width has to end on byte boundary, so round up
+ 
+-    tArea Areas[] = { { 0, 0, width - 1, height - 1, 4 } };
++    tArea Areas[] = { { 0, 0, width - 1, height - 1, 32 } };
+     if (osd->CanHandleAreas(Areas, sizeof(Areas) / sizeof(tArea)) != oeOk) {
+         DELETENULL(osd);
+         return;
+-    }   
++    }
+     osd->SetAreas(Areas, sizeof(Areas) / sizeof(tArea));
+-    
+-    InitPalette();
++
++    setOutputWidth(width);
++    setOutputHeight(Height);
++
++#if APIVERSNUM >= 20107
++    Width = 480;
++    Height = 250;
++#endif
++
++    esyslog("OSD-Teletext: 32BPP");
+ 
+     InitScaler();
+-    
++
+     CleanDisplay();
+ }
+ 
+ 
+-cDisplay4BPPHalf::cDisplay4BPPHalf(int x0, int y0, int width, int height, bool upper) 
++cDisplay32BPPHalf::cDisplay32BPPHalf(int x0, int y0, int width, int height, bool upper)
+     : cDisplay(width,height), Upper(upper), OsdX0(x0), OsdY0(y0)
+-{   
++{
+     osd=NULL;
+-    
++
+     // Redirect all real init work to method
+     InitOSD();
+ }
+ 
+-void cDisplay4BPPHalf::InitOSD() {
++void cDisplay32BPPHalf::InitOSD() {
+     delete osd;
+     osd = cOsdProvider::NewOsd(OsdX0, OsdY0);
+     if (!osd) return;
+-   
++
+     int width=(Width+1)&~1;
+     // Width has to end on byte boundary, so round up
+-    
+-    tArea Areas[] = { { 0, 0, width - 1, Height - 1, 4 } };
++
++    tArea Areas[] = { { 0, 0, width - 1, Height - 1, 32 } };
+     // Try full-size area first
+-    
++
+     while (osd->CanHandleAreas(Areas, sizeof(Areas) / sizeof(tArea)) != oeOk) {
+         // Out of memory, so shrink
+         if (Upper) {
+@@ -218,10 +158,16 @@ void cDisplay4BPPHalf::InitOSD() {
+ 
+     osd->SetAreas(Areas, sizeof(Areas) / sizeof(tArea));
+ 
+-    InitPalette();
++    setOutputWidth(width);
++    setOutputHeight(Height);
++
++#if APIVERSNUM >= 20107
++    Width = 480;
++    Height = 250;
++#endif
+ 
+     InitScaler();
+-    
++
+     CleanDisplay();
+ 
+     // In case we switched on the fly, do a full redraw
+@@ -229,6 +175,3 @@ void cDisplay4BPPHalf::InitOSD() {
+     DirtyAll=true;
+     Flush();
+ }
+-
+-
+-
+diff --git a/display.h b/display.h
+index 1e21deb..9d6f813 100644
+--- a/display.h
++++ b/display.h
+@@ -23,12 +23,12 @@ namespace Display {
+     // The Display:: namespace mainly encapsulates a cDisplay *display variable
+     // and allows NULL-safe access to display members.
+     // Additionally, selects via mode the actually used instance for *display.
+-    
++
+     enum Mode { Full, HalfUpper, HalfLower };
+     // Full mode: 2BPP or 4BPP full screen display, depending on memory constrains
+     // HalfUpper: 4BPP display of upper half, drop lower half if out of memory
+     // HalfLower: 4BPP display of lower half, drop upper half if out of memory
+-    
++
+     extern Mode mode;
+     extern cDisplay *display;
+ 
+@@ -36,40 +36,40 @@ namespace Display {
+     void SetMode(Display::Mode mode);
+     inline void Delete()
+         { if (display) { DELETENULL(display); } }
+-    
++
+     void ShowUpperHalf();
+     // Make sure the upper half of screen is visible
+     // eg. for entering numbers etc.
+ 
+ 
+     // Wrapper calls for various *display members:
+-    inline bool GetBlink() 
++    inline bool GetBlink()
+         { if (display) return display->GetBlink(); else return false; }
+-    inline bool SetBlink(bool blink) 
++    inline bool SetBlink(bool blink)
+         { if (display) display->SetBlink(blink); else return false; }
+-    inline bool GetConceal() 
++    inline bool GetConceal()
+         { if (display) return display->GetConceal(); else return false; }
+-    inline bool SetConceal(bool conceal) 
++    inline bool SetConceal(bool conceal)
+         { if (display) display->SetConceal(conceal); else return false; }
+-    inline cDisplay::enumZoom GetZoom() 
++    inline cDisplay::enumZoom GetZoom()
+         { if (display) return display->GetZoom(); else return cDisplay::Zoom_Off; }
+     inline void SetZoom(cDisplay::enumZoom zoom)
+         { if (display) display->SetZoom(zoom); }
+ 
+     inline void SetBackgroundColor(tColor c)
+         { if (display) display->SetBackgroundColor(c); }
+-        
+-    inline tColor GetBackgroundColor() 
++
++    inline tColor GetBackgroundColor()
+         { if (display) return display->GetBackgroundColor(); else return 0; }
+ 
+-    inline void HoldFlush() 
++    inline void HoldFlush()
+         { if (display) display->HoldFlush(); }
+-    inline void ReleaseFlush() 
++    inline void ReleaseFlush()
+         { if (display) display->ReleaseFlush(); }
+ 
+     inline void RenderTeletextCode(unsigned char *PageCode)
+         { if (display) display->RenderTeletextCode(PageCode); }
+-    
++
+     inline void DrawClock()
+         { if (display) display->DrawClock(); }
+     inline void DrawPageId(const char *text)
+@@ -81,51 +81,34 @@ namespace Display {
+ }
+ 
+ 
+-
+-
+-class cDisplay2BPP : public cDisplay {
+-    // 2BPP (4 color) OSD display
+-    // Use static color mapping to limit color depth
+-    
+-public:
+-    cDisplay2BPP(int x0, int y0, int width, int height);
+-
+-    virtual tColor GetColorRGB(enumTeletextColor ttc, int Area);
+-    virtual tColor GetColorRGBAlternate(enumTeletextColor ttc, int Area);
+-};
+-
+-
+-
+-class cDisplay4BPP : public cDisplay {
+-    // 4BPP (16 color) OSD display
++class cDisplay32BPP : public cDisplay {
++    // True Color OSD display
+     // No need for color mapping
++    // Uses cPixmap instead of cBitmap
+ public:
+-    cDisplay4BPP(int x0, int y0, int width, int height);
++    cDisplay32BPP(int x0, int y0, int width, int height);
+ };
+ 
+ 
+ 
+-
+-class cDisplay4BPPHalf : public cDisplay {
+-    // 4BPP (16 color) OSD display with auto size reduction on memory constrains
++class cDisplay32BPPHalf : public cDisplay {
++    // 32BPP (true color) OSD display with auto size reduction on memory constrains
+     // Automatically tries to make visible area as big as possible
+     // No need for color mapping
+     bool Upper;
+     // Prefer to show upper half or lower half?
+-    
+-    int OsdX0,OsdY0; 
++
++    int OsdX0,OsdY0;
+     // Needed to re-initialize osd
+ 
+ public:
+-    cDisplay4BPPHalf(int x0, int y0, int width, int height, bool upper);
++    cDisplay32BPPHalf(int x0, int y0, int width, int height, bool upper);
+     bool GetUpper() { return Upper; }
+-    void SetUpper(bool upper) 
++    void SetUpper(bool upper)
+         { if (Upper!=upper) { Upper=upper; InitOSD(); } }
+ protected:
+     void InitOSD();
+ };
+ 
+ 
+-
+-
+ #endif
+diff --git a/displaybase.c b/displaybase.c
+index a65b5d9..c9a8162 100644
+--- a/displaybase.c
++++ b/displaybase.c
+@@ -15,34 +15,79 @@
+ 
+ #include <strings.h>
+ #include <time.h>
++#include <vdr/tools.h>
+ #include "displaybase.h"
+ #include "txtfont.h"
++#include <iostream>
+ 
++std::string cDisplay::GFXFontFootprint = "";
++std::string cDisplay::TXTFontFootprint = "";
++int cDisplay::realFontWidths[8] = {0};
+ 
+ cDisplay::cDisplay(int width, int height)
+     : Zoom(Zoom_Off), Concealed(false), Blinked(false), FlushLock(0),
+       Boxed(false), Width(width), Height(height), Background(clrGray50),
+-      osd(NULL), ScaleX(1), ScaleY(1), OffsetX(0), OffsetY(0),
++      osd(NULL), outputWidth(0), outputScaleX(1.0),
++      outputHeight(0), outputScaleY(1.0),
++      ScaleX(1), ScaleY(1), OffsetX(0), OffsetY(0),
+       MessageFont(cFont::GetFont(fontSml)), MessageX(0), MessageY(0),
+-      MessageW(0), MessageH(0)
++      MessageW(0), MessageH(0),
++      GFXFont(0), GFXDblWFont(0), GFXDblHFont(0), GFXDblHWFont(0),
++      TXTFont(0), TXTDblWFont(0), TXTDblHFont(0), TXTDblHWFont(0)
+ {
+ }
+ 
+ cDisplay::~cDisplay() {
+     DELETENULL(osd);
++    DELETENULL(GFXFont);
++    DELETENULL(GFXDblWFont);
++    DELETENULL(GFXDblHFont);
++    DELETENULL(GFXDblHWFont);
++    DELETENULL(TXTFont);
++    DELETENULL(TXTDblWFont);
++    DELETENULL(TXTDblHFont);
++    DELETENULL(TXTDblHWFont);
++}
++
++// This is an ugly hack, any ideas on how to get font size with characters (glyphs) of specified width/height?
++cFont *cDisplay::GetFont(const char *name, int fontIndex, int height, int width) {
++    cFont *font = cFont::CreateFont(name, height, width);
++    if (font != NULL) {
++        int realWidth = font->Width(' ');
++        for (int i = width * width / realWidth; i < width * 4; i++) {
++            DELETENULL(font);
++            font = cFont::CreateFont(name, height, i);
++            if (font != NULL) {
++                realWidth = font->Width(' ');
++                if (realWidth > width) {
++                    DELETENULL(font);
++                    width = i - 1;
++                    font = cFont::CreateFont(name, height, width);
++                    realFontWidths[fontIndex] = width;
++                    break;
++                }
++            }
++        }
++    }
++    return font;
++}
++
++std::string cDisplay::GetFontFootprint(const char *name) {
++    return std::string(cString::sprintf("%s_%d_%d_%d", name, fontWidth, fontHeight, Zoom));
+ }
+ 
+ void cDisplay::InitScaler() {
+     // Set up the scaling factors. Also do zoom mode by
+     // scaling differently.
+ 
+-    if (!osd) return;
+-    
++    outputScaleX = (double)outputWidth/480.0;
++    outputScaleY = (double)outputHeight/250.0;
++
+     int height=Height-6;
+     int width=Width-6;
+     OffsetX=3;
+     OffsetY=3;
+-    
++
+     switch (Zoom) {
+     case Zoom_Upper:
+         height=height*2;
+@@ -53,42 +98,61 @@ void cDisplay::InitScaler() {
+         break;
+     default:;
+     }
+-    
++
+     ScaleX=(480<<16)/width;
+     ScaleY=(250<<16)/height;
+-}
+ 
+-void cDisplay::InitPalette() {
+-    cBitmap *bm;
+-    if (!osd) return;
++    fontWidth = outputWidth * 2 / 40;
++    if (Zoom == Zoom_Off) {
++        fontHeight = outputHeight * 2 / 25;
++    } else {
++        fontHeight = outputHeight * 2 / 13;
++    }
+ 
+-    int Area=0;
+-    while ((bm=osd->GetBitmap(Area))) {
+-        enumTeletextColor c;
+-        
+-        bm->Reset(); 
+-        // reset palette
+-        
+-        for (c=ttcFirst;c<=ttcLast;c++) bm->Index(GetColorRGB(c,Area));
+-        // Announce all palette colors in defined order
+-        
+-        int x1,y1,x2,y2;
+-        if (!bm->Dirty(x1,y1,x2,y2)) {
+-            // force bitmap dirty to update palette
+-            bm->SetIndex(bm->X0(),bm->Y0(),*bm->Data(bm->X0(),bm->Y0()));
+-            // otherwise palette change wont be displayed on flush
+-        }
++    int gfxFontWidth = fontWidth;
++    int gfxFontHeight = fontHeight;
++    const char *gfxFontName = "teletext2:Medium";
++    std::string footprint = GetFontFootprint(gfxFontName);
++
++    if (footprint.compare(GFXFontFootprint) == 0) {
++        GFXFont      = cFont::CreateFont(gfxFontName, gfxFontHeight / 2, realFontWidths[0]);
++        GFXDblWFont  = cFont::CreateFont(gfxFontName, gfxFontHeight / 2, realFontWidths[1]);
++        GFXDblHFont  = cFont::CreateFont(gfxFontName, gfxFontHeight , realFontWidths[2]);
++        GFXDblHWFont = cFont::CreateFont(gfxFontName, gfxFontHeight, realFontWidths[3]);
++    } else {
++        GFXFontFootprint = footprint;
++        GFXFont      = GetFont(gfxFontName, 0, gfxFontHeight / 2, gfxFontWidth / 2);
++        GFXDblWFont  = GetFont(gfxFontName, 1, gfxFontHeight / 2, gfxFontWidth);
++        GFXDblHFont  = GetFont(gfxFontName, 2, gfxFontHeight , gfxFontWidth / 2);
++        GFXDblHWFont = GetFont(gfxFontName, 3, gfxFontHeight, gfxFontWidth);
++    }
+ 
+-        Area++;
++
++    int txtFontWidth = fontWidth;
++    int txtFontHeight = fontHeight;
++    const char *txtFontName = ttSetup.txtFontName;
++    footprint = GetFontFootprint(txtFontName);
++
++    if (footprint.compare(TXTFontFootprint) == 0) {
++        TXTFont      = cFont::CreateFont(txtFontName, txtFontHeight / 2, realFontWidths[4]);
++        TXTDblWFont  = cFont::CreateFont(txtFontName, txtFontHeight / 2, realFontWidths[5]);
++        TXTDblHFont  = cFont::CreateFont(txtFontName, txtFontHeight, realFontWidths[6]);
++        TXTDblHWFont = cFont::CreateFont(txtFontName, txtFontHeight, realFontWidths[7]);
++    } else {
++        TXTFontFootprint = footprint;
++        TXTFont      = GetFont(txtFontName, 4, txtFontHeight / 2, txtFontWidth / 2);
++        TXTDblWFont  = GetFont(txtFontName, 5, txtFontHeight / 2, txtFontWidth);
++        TXTDblHFont  = GetFont(txtFontName, 6, txtFontHeight, txtFontWidth / 2);
++        TXTDblHWFont = GetFont(txtFontName, 7, txtFontHeight, txtFontWidth);
+     }
+ }
+ 
+ bool cDisplay::SetBlink(bool blink) {
+     int x,y;
+     bool Change=false;
+-    
++
+     if (blink==Blinked) return false;
+-    
++
+     // touch all blinking chars
+     for (y=0;y<25;y++) {
+         for (x=0;x<40;x++) {
+@@ -100,7 +164,7 @@ bool cDisplay::SetBlink(bool blink) {
+     }
+     Blinked=blink;
+     if (Change) Dirty=true;
+-    
++
+     Flush();
+ 
+     return Change;
+@@ -109,9 +173,9 @@ bool cDisplay::SetBlink(bool blink) {
+ bool cDisplay::SetConceal(bool conceal) {
+     int x,y;
+     bool Change=false;
+-    
++
+     if (conceal==Concealed) return false;
+-    
++
+     // touch all concealed chars
+     for (y=0;y<25;y++) {
+         for (x=0;x<40;x++) {
+@@ -123,48 +187,39 @@ bool cDisplay::SetConceal(bool conceal) {
+     }
+     Concealed=conceal;
+     if (Change) Dirty=true;
+-    
++
+     Flush();
+-    
++
+     return Change;
+ }
+ 
+ void cDisplay::SetZoom(enumZoom zoom) {
+-    
++
+     if (!osd) return;
+     if (Zoom==zoom) return;
+     Zoom=zoom;
+ 
+-    // Re-initialize scaler to let zoom take effect 
++    // Re-initialize scaler to let zoom take effect
+     InitScaler();
+-    
++
+     // Clear screen - mainly clear border
+     CleanDisplay();
+-     
++
+     Flush();
+ }
+ 
+ void cDisplay::SetBackgroundColor(tColor c) {
+     Background=c;
+-    InitPalette();
+     CleanDisplay();
+     Flush();
+ }
+ 
+ void cDisplay::CleanDisplay() {
+-    cBitmap *bm;
+     enumTeletextColor bgc=(Boxed)?(ttcTransparent):(ttcBlack);
+-    int Area=0;
+-    while ((bm=osd->GetBitmap(Area))) {
+-        // Draw rect in two steps to avoid zapping palette
+-        bm->DrawRectangle(bm->X0(), bm->Y0()  , bm->X0()+bm->Width()-1, bm->Y0()               , bm->Color(GetColorIndex(bgc,Area)));
+-        bm->DrawRectangle(bm->X0(), bm->Y0()+1, bm->X0()+bm->Width()-1, bm->Y0()+bm->Height()-1, bm->Color(GetColorIndex(bgc,Area)));
+-        // Yes, this *is* stupid.
+-        // Otherwise, ttcTransparent would shift into 0 index of palette,
+-        // causing palette re-organization and flicker on page change
+-        Area++; 
+-    }
+-    
++    if (!osd) return;
++
++    osd->DrawRectangle(0, 0, Width, Height, GetColorRGB(bgc,0));
++
+     // repaint all
+     Dirty=true;
+     DirtyAll=true;
+@@ -198,9 +253,9 @@ void cDisplay::RenderTeletextCode(unsigned char *PageCode) {
+     HoldFlush();
+ 
+     cRenderPage::ReadTeletextHeader(PageCode);
+-        
++
+     if (!Boxed && (Flags&0x60)!=0) {
+-        Boxed=true;     
++        Boxed=true;
+         CleanDisplay();
+     } else if (Boxed && (Flags&0x60)==0) {
+         Boxed=false;
+@@ -217,7 +272,7 @@ void cDisplay::RenderTeletextCode(unsigned char *PageCode) {
+ void cDisplay::DrawDisplay() {
+     int x,y;
+     int cnt=0;
+-    
++
+     if (!IsDirty()) return;
+     // nothing to do
+ 
+@@ -262,96 +317,95 @@ inline bool IsPureChar(unsigned int *bitmap) {
+ }
+ 
+ 
+-    
++
+ void cDisplay::DrawChar(int x, int y, cTeletextChar c) {
+-    unsigned int buffer[10];
+-    unsigned int *charmap;
+-    cBitmap *bm;
+-    
+-    // Get character face:
+-    charmap=GetFontChar(c,buffer);
+-    if (!charmap) {
+-        // invalid - clear buffer
+-        bzero(&buffer,sizeof buffer);
+-        charmap=buffer;
+-    }
+-    
+     // Get colors
+     enumTeletextColor ttfg=c.GetFGColor();
+     enumTeletextColor ttbg=c.GetBGColor();
+-    
++
+     if (c.GetBoxedOut()) {
+         ttbg=ttcTransparent;
+-        ttfg=ttcTransparent;    
++        ttfg=ttcTransparent;
++    }
++
++    if (!osd) return;
++
++    tColor fg=GetColorRGB(ttfg, 0);
++    tColor bg=GetColorRGB(ttbg, 0);
++
++    char buf[5];
++    uint t = GetVTXChar(c);
++    int tl = Utf8CharSet(t, buf);
++    buf[tl] = 0;
++
++    const cFont *font;
++    int charset = c.GetCharset();
++    int fontType = 0;
++    int w = fontWidth / 2;
++    int h = fontHeight / 2;
++    if (c.GetDblWidth() != dblw_Normal) {
++        fontType |= 1;
++        w = fontWidth;
++    }
++
++    if (c.GetDblHeight() != dblh_Normal) {
++        fontType |= 2;
++        h = fontHeight;
+     }
+-        
+-    // Virtual box area of the character
+-    cBox box;
+-    box.SetToCharacter(x,y);
+-    
+-    // OSD top left pixel of char
+-    cVirtualCoordinate TopLeft;
+-    TopLeft.VirtualToPixel(this,box.XMin,box.YMin);
+-    // This pixel overlaps the box, but may be almost outside.
+-    
+-    // Move in OSD pixel units until we are inside the box
+-    while (TopLeft.VirtX<box.XMin) TopLeft.IncPixelX(this);
+-    while (TopLeft.VirtY<box.YMin) TopLeft.IncPixelY(this);
+-
+-    // Move through all areas
+-    int Area=0;
+-    while ((bm=osd->GetBitmap(Area))) {
+-        cVirtualCoordinate BMTopLeft=TopLeft;
+-        
+-        // Correct for bitmap offset
+-        BMTopLeft.OsdX-=bm->X0();
+-        BMTopLeft.OsdY-=bm->Y0();
+-    
+-        // Map color to local
+-        int fg=GetColorIndex(ttfg,Area);
+-        int bg=GetColorIndex(ttbg,Area);
+-        if (ttfg!=ttbg && fg==bg && !IsPureChar(charmap)) {
+-            // Color collision
+-            bg=GetColorIndexAlternate(ttbg,Area);
++
++    if (charset == CHARSET_GRAPHICS_G1 || charset == CHARSET_GRAPHICS_G1_SEP) {
++        switch(fontType) {
++            case 0:
++                font = GFXFont;
++                break;
++            case 1:
++                font = GFXDblWFont;
++                break;
++            case 2:
++                font = GFXDblHFont;
++                break;
++            case 3:
++                font = GFXDblHWFont;
++                break;
+         }
+-    
+-        // Now draw the character. Start at the top left corner, and walk
+-        // through all pixels on OSD. To speed up, keep one pointer to OSD pixel
+-        // and one to virtual box coordinates, and move them together.
+-        
+-        cVirtualCoordinate p=BMTopLeft;
+-        while (p.VirtY<=box.YMax) {
+-            // run through OSD lines
+-            
+-            // OSD line in this bitmap?
+-            if (0<=p.OsdY && p.OsdY<bm->Height()) {
+-                // bits for this line
+-                int bitline;
+-                bitline=charmap[(p.VirtY-box.YMin)>>16];
+-        
+-                p.OsdX=BMTopLeft.OsdX;
+-                p.VirtX=BMTopLeft.VirtX;
+-                while (p.VirtX<=box.XMax) {
+-                    // run through line pixels
+-                    
+-                    // pixel insied this bitmap?
+-                    if (0<=p.OsdX && p.OsdX<bm->Width()) {
+-                        // pixel offset in bitline:
+-                        int bit=(p.VirtX-box.XMin)>>16;
+-                        
+-                        if (bitline&(0x8000>>bit)) {
+-                            bm->SetIndex(p.OsdX,p.OsdY,fg);
+-                        } else {
+-                            bm->SetIndex(p.OsdX,p.OsdY,bg);
+-                        }
+-                    }
+-                    p.IncPixelX(this);
+-                }
+-            }
+-            p.IncPixelY(this);
++    } else {
++        switch(fontType) {
++            case 0:
++                font = TXTFont;
++                break;
++            case 1:
++                font = TXTDblWFont;
++                break;
++            case 2:
++                font = TXTDblHFont;
++                break;
++            case 3:
++                font = TXTDblHWFont;
++                break;
+         }
+-        Area++;
+     }
++
++    if (Zoom == Zoom_Lower) {
++        y -=11;
++    }
++
++    int vx = x * fontWidth / 2;
++    int vy = y * fontHeight / 2;
++
++    //~ std::cout << ">> " << std::hex << c.GetC() << "," << t << std::dec << "\t@ " << x << "," << y << "\tfont " << std::hex << c.GetCharset() << "\t" << buf << "\tcolor " << fg << ":" << bg << "\tblink " << c.GetBlink() << "\tdw " << c.GetDblWidth() << "\tdh " << c.GetDblHeight() << "\tbox " << c.GetBoxedOut() << "\tconceal " << c.GetConceal() << std::dec << std::endl;
++    bool drawChar = true;
++    if (c.GetDblWidth() == dblw_Right) {
++        drawChar = false;
++    }
++    if (c.GetDblHeight() == dblh_Bottom) {
++        drawChar = false;
++    }
++
++    if (drawChar) {
++        osd->DrawRectangle(vx, vy, vx + w - 1, vy + h - 1, bg);
++        osd->DrawText(vx, vy, buf, fg, bg, font);
++    }
++
+ }
+ 
+ void cDisplay::DrawText(int x, int y, const char *text, int len) {
+@@ -370,7 +424,7 @@ void cDisplay::DrawText(int x, int y, const char *text, int len) {
+         x++;
+         len--;
+     }
+-    
++
+     // Fill remaining chars with spaces
+     c.SetChar(' ');
+     while (len>0) {
+@@ -386,7 +440,7 @@ void cDisplay::DrawClock() {
+     char text[9];
+     time_t t=time(0);
+     struct tm loct;
+-    
++
+     localtime_r(&t, &loct);
+     sprintf(text, "%02d:%02d:%02d", loct.tm_hour, loct.tm_min, loct.tm_sec);
+ 
+@@ -395,45 +449,38 @@ void cDisplay::DrawClock() {
+ 
+ void cDisplay::DrawMessage(const char *txt) {
+     const int border=5;
+-    cBitmap *bm;
+-    
++
+     if (!osd) return;
+-    
++
+     HoldFlush();
+     // Hold flush until done
+-    
++
+     ClearMessage();
+     // Make sure old message is gone
+-    
++
+     if (IsDirty()) DrawDisplay();
+     // Make sure all characters are out, so we can draw on top
+-    
++
+     int w=MessageFont->Width(txt)+4*border;
+     int h=MessageFont->Height(txt)+4*border;
+-    int x=(Width-w)/2;
+-    int y=(Height-h)/2;
+-
+-    int Area=0;
+-    while ((bm=osd->GetBitmap(Area))) {
+-        // Walk through all OSD areas
+-
+-        // Get local color mapping      
+-        tColor fg=bm->Color(GetColorIndex(ttcWhite,Area));
+-        tColor bg=bm->Color(GetColorIndex(ttcBlack,Area));
+-        if (fg==bg) bg=bm->Color(GetColorIndexAlternate(ttcBlack,Area));
+-        
+-        // Draw framed box
+-        bm->DrawRectangle(x         ,y         ,x+w-1       ,y+border-1  ,fg);
+-        bm->DrawRectangle(x         ,y+h-border,x+w-1       ,y+h-1       ,fg);
+-        bm->DrawRectangle(x         ,y         ,x+border-1  ,y+h-1       ,fg);
+-        bm->DrawRectangle(x+w-border,y         ,x+w-1       ,y+h-1       ,fg);
+-        bm->DrawRectangle(x+border  ,y+border  ,x+w-border-1,y+h-border-1,bg);
+-
+-        // Draw text
+-        bm->DrawText(x+2*border,y+2*border,txt, fg, bg, MessageFont);
+-
+-        Area++;
+-    }
++    int x=(outputWidth-w)/2;
++    int y=(outputHeight-h)/2;
++
++    // Get local color mapping
++    tColor fg=GetColorRGB(ttcWhite,0);
++    tColor bg=GetColorRGB(ttcBlack,0);
++    if (fg==bg) bg=GetColorRGBAlternate(ttcBlack,0);
++
++    // Draw framed box
++    osd->DrawRectangle(x         ,y         ,x+w-1       ,y+border-1  ,fg);
++    osd->DrawRectangle(x         ,y+h-border,x+w-1       ,y+h-1       ,fg);
++    osd->DrawRectangle(x         ,y         ,x+border-1  ,y+h-1       ,fg);
++    osd->DrawRectangle(x+w-border,y         ,x+w-1       ,y+h-1       ,fg);
++    osd->DrawRectangle(x+border  ,y+border  ,x+w-border-1,y+h-border-1,bg);
++
++    // Draw text
++    osd->DrawText(x+2*border,y+2*border,txt, fg, bg, MessageFont);
++
+ 
+     // Remember box
+     MessageW=w;
+@@ -448,29 +495,27 @@ void cDisplay::DrawMessage(const char *txt) {
+ void cDisplay::ClearMessage() {
+     if (!osd) return;
+     if (MessageW==0 || MessageH==0) return;
+-    
++
+     // map OSD pixel to virtual coordinate, use center of pixel
+     int x0=(MessageX-OffsetX)*ScaleX+ScaleX/2;
+     int y0=(MessageY-OffsetY)*ScaleY+ScaleY/2;
+     int x1=(MessageX+MessageW-1-OffsetX)*ScaleX+ScaleX/2;
+     int y1=(MessageY+MessageH-1-OffsetY)*ScaleY+ScaleY/2;
+-    
++
+     // map to character
+     x0=x0/(12<<16);
+     y0=y0/(10<<16);
+     x1=(x1+(12<<16)-1)/(12<<16);
+     y1=(y1+(10<<16)-1)/(10<<16);
+-    
++
+     for (int x=x0;x<=x1;x++) {
+         for (int y=y0;y<=y1;y++) {
+             MakeDirty(x,y);
+         }
+     }
+-    
++
+     MessageW=0;
+     MessageH=0;
+-    
++
+     Flush();
+ }
+-
+-
+diff --git a/displaybase.h b/displaybase.h
+index c85f3a3..245a62d 100644
+--- a/displaybase.h
++++ b/displaybase.h
+@@ -17,14 +17,16 @@
+ #define OSDTELETEXT_DISPLAYBASE_H_
+ 
+ #include "txtrender.h"
++#include "setup.h"
+ #include <vdr/osd.h>
++#include <string>
+ 
+ class cDisplay : public cRenderPage {
+     // Class that extends the virtual cRenderPage with the capability
+     // to render its contents to an OSD of variable size.
+     // Renders incrementally - just changes
+     // plus adds some more display features like message display.
+-    
++
+ public:
+     enum enumZoom {
+         // Zoom up upper/lower half of page
+@@ -36,35 +38,55 @@ public:
+ protected:
+     bool Concealed;
+     // Hidden text internal state
+-    
++
+     bool Blinked;
+     // Blinking text internal state
+-    
++
+     int FlushLock;
+     // Lock counter for bundeling OSD flushes
+-    
++
+     bool Boxed;
+     // Page is 'boxed mode' transparent
+-    
++
+     int Width;
+     int Height;
+     // OSD pixel dimension
+-    
++
+     tColor Background;
+     // Color to be used for black background
+     // - allow transparency
+ 
+     cOsd *osd;
+     // The osd object. If creation fails, may be NULL
+-    
++
++    int outputWidth;
++    double outputScaleX;
++    int outputHeight;
++    double outputScaleY;
++    // for 32bpp true color, If creation fails, may be NULL
++
+     int ScaleX,ScaleY;
+     int OffsetX,OffsetY;
+     // Virtual coordinate system, see InitScaler
+-    
++
+     const cFont *MessageFont;
+     int MessageX,MessageY,MessageW,MessageH;
+     // Message overlay window, position and font
+ 
++    const cFont *GFXFont;
++    const cFont *GFXDblWFont;
++    const cFont *GFXDblHFont;
++    const cFont *GFXDblHWFont;
++    const cFont *TXTFont;
++    const cFont *TXTDblWFont;
++    const cFont *TXTDblHFont;
++    const cFont *TXTDblHWFont;
++    int fontHeight;
++    int fontWidth;
++
++    static int realFontWidths[8];
++
++
+     class cBox {
+         // helper class. Represents a character's box in virtual coordinates
+     public:
+@@ -72,7 +94,7 @@ protected:
+         inline void SetToCharacter(int x, int y);
+     };
+     friend class cBox;
+-    
++
+     class cVirtualCoordinate {
+         // helper class. Represents a coordinate in virtual display space
+         // and in OSD pixel coordinates.
+@@ -84,26 +106,32 @@ protected:
+         inline void IncPixelY(cDisplay *Display);
+     };
+     friend class cVirtualCoordinate;
+-    
++
+ public:
+     cDisplay(int width, int height);
+     virtual ~cDisplay();
+     bool Valid() { return (osd!=NULL); }
+     // After creation, check for Valid(). Destroy, if not valid.
+-        
+-protected:  
++
++    void setOutputWidth(int w) { outputWidth = w; };
++    void setOutputHeight(int h) { outputHeight = h; };
++
++    static std::string GFXFontFootprint;
++    static std::string TXTFontFootprint;
++
++protected:
+     void InitScaler();
+     // Initialize transformation for OSD->Virtual coordinates
+     // Some words about scaling:
+-    
++
+     // OSD display is variable width x height, with 3 pixels border
+     // on all sides. There is a virtual coordinate system projected
+-    // on this, with (3,3) mapped to (0,0) and (width-3,height-3) 
++    // on this, with (3,3) mapped to (0,0) and (width-3,height-3)
+     // mapped to (480<<16,250<<16).
+     // The idea is, that each font pixel uses a virtual rectangle
+     // of (1<<16,1<<16) size.
+-    
+-    // ScaleX,ScaleY represent the (virtual) width and height of a 
++
++    // ScaleX,ScaleY represent the (virtual) width and height of a
+     // physical OSD pixel.
+     // OffsetX,OffsetY default to 3,3 to represent the border offset,
+     // but may be used differently.
+@@ -113,12 +141,12 @@ public:
+     bool SetBlink(bool blink);
+     // Switch blink frequently to get blinking chars
+     // Returns true if there are blinking characters.
+-    
++
+     bool GetConceal() { return Concealed; }
+     bool SetConceal(bool conceal);
+     // Hidden text. Set to true to see hidden text.
+     // Returns true if there are concealed characters.
+-    
++
+     enumZoom GetZoom() { return Zoom; }
+     void SetZoom(enumZoom zoom);
+     // Zoom to upper/lower half of page
+@@ -136,45 +164,25 @@ public:
+     // Map this teletext color to an OSD color in #Area, but dont
+     // return same as GetColorRGB(). Used to solve conflicts if
+     // foreground and background are mapped to same color.
+-    // Defaults to 1:1 identity. Not needed if all colors actually 
++    // Defaults to 1:1 identity. Not needed if all colors actually
+     // supported by OSD.
+ 
+-    int GetColorIndex(enumTeletextColor ttc, int Area) {
+-        // Map this teletext color to an OSD color index in #Area.
+-        if (!osd) return 0;
+-        cBitmap *bm=osd->GetBitmap(Area);
+-        if (!bm) return 0;
+-        return bm->Index(GetColorRGB(ttc,Area));
+-    }
+-        
+-    int GetColorIndexAlternate(enumTeletextColor ttc, int Area) {
+-        // Map this teletext color to an OSD color index in #Area.
+-        if (!osd) return 0;
+-        cBitmap *bm=osd->GetBitmap(Area);
+-        if (!bm) return 0;
+-        return bm->Index(GetColorRGBAlternate(ttc,Area));
+-    }
+-
+-        
+-    
+ protected:
+-    void InitPalette();
+-    // Initialize palette(s) for OSD
+ 
+     void DrawDisplay();
+     // Draw all dirty characters from cRenderPage buffer to OSD
+-    
++
+     void CleanDisplay();
+     // Clean OSD completely
+-    
++
+     virtual void DrawChar(int x, int y, cTeletextChar c);
+     // Draw a single character to OSD
+-    
++
+ 
+ public:
+     void HoldFlush() { FlushLock++; }
+     // Hold all OSD flush updates to bundle operations.
+-    
++
+     void ReleaseFlush() { FlushLock--; Flush(); }
+     // Release hold of flush updates. After last release,
+     // the flush will be done
+@@ -184,14 +192,13 @@ protected:
+         // Commit all changes from OSD internal bitmaps to device
+         // All draw operations inside cDisplay should call it,
+         // no one outside should need to call it.
+-        
+         if (FlushLock>0) return;
+         if (!osd) return;
+         if (IsDirty()) DrawDisplay();
+         osd->Flush();
+     }
+ 
+-public: 
++public:
+     void RenderTeletextCode(unsigned char *PageCode);
+     // Interprete teletext code referenced by PageCode
+     // and draw the whole page content into OSD.
+@@ -200,19 +207,24 @@ public:
+     void DrawText(int x, int y, const char *text, int len);
+     // Draw some characters in teletext page.
+     // Max len chars, fill up with spaces
+-    
++
+     void DrawClock();
+     // Draw current time to OSD
+-    
+-    void DrawPageId(const char *text)   
++
++    void DrawPageId(const char *text)
+         { DrawText(0,0,text,8); }
+-    // Draw Page ID string to OSD   
+-        
++    // Draw Page ID string to OSD
++
+     void DrawMessage(const char *txt);
+     // Draw a framed, centered message box to OSD
+-    
++
+     void ClearMessage();
+     // Remove message box and redraw hidden content
++
++
++private:
++    cFont *GetFont(const char *name, int index, int height, int width);
++    std::string GetFontFootprint(const char *name);
+ };
+ 
+ 
+@@ -226,10 +238,10 @@ inline void cDisplay::cBox::SetToCharacter(int x, int y) {
+ }
+ 
+ inline void cDisplay::cVirtualCoordinate::VirtualToPixel(cDisplay *Display, int x, int y) {
+-    // Map virtual coordinate to OSD pixel  
++    // Map virtual coordinate to OSD pixel
+     OsdX=x/Display->ScaleX+Display->OffsetX;
+     OsdY=y/Display->ScaleY+Display->OffsetY;
+-    
++
+     // map OSD pixel back to virtual coordinate, use center of pixel
+     VirtX=(OsdX-Display->OffsetX)*Display->ScaleX+Display->ScaleX/2;
+     VirtY=(OsdY-Display->OffsetY)*Display->ScaleY+Display->ScaleY/2;
+diff --git a/menu.c b/menu.c
+index 79f04e1..5044efa 100644
+--- a/menu.c
++++ b/menu.c
+@@ -73,11 +73,21 @@ void TeletextBrowser::Show(void) {
+ }
+ 
+ bool TeletextBrowser::CheckIsValidChannel(int number) {
+-   return (Channels.GetByNumber(number) != 0);
++#if APIVERSNUM >= 20301
++    LOCK_CHANNELS_READ;
++    return (Channels->GetByNumber(number) != 0);
++#else
++    return (Channels.GetByNumber(number) != 0);
++#endif
+ }
+ 
+ void TeletextBrowser::ChannelSwitched(int ChannelNumber) {
++#if APIVERSNUM >= 20301
++   LOCK_CHANNELS_READ;
++   const cChannel *chan=Channels->GetByNumber(ChannelNumber);
++#else
+    cChannel *chan=Channels.GetByNumber(ChannelNumber);
++#endif
+    
+    if (!chan)
+       return;
+@@ -643,7 +653,8 @@ TeletextSetup::TeletextSetup()
+     //because there is no advantage, but a possible problem when VDR's value is change
+     //after the plugin has stored its own value.
+     inactivityTimeout(Setup.MinUserInactivity),
+-    HideMainMenu(false)
++    HideMainMenu(false),
++    txtFontName("teletext2:Medium")
+ {
+    //init key bindings
+    for (int i=0;i<10;i++)
+@@ -652,4 +663,3 @@ TeletextSetup::TeletextSetup()
+    mapKeyToAction[2]=HalfPage;   
+    mapKeyToAction[0]=SwitchChannel;
+ }
+-
+diff --git a/osdteletext.c b/osdteletext.c
+index 2cd772a..e2dadf1 100644
+--- a/osdteletext.c
++++ b/osdteletext.c
+@@ -14,6 +14,7 @@
+ #include <vdr/config.h>
+ 
+ #include <getopt.h>
++#include <iostream>
+ 
+ using namespace std;
+ 
+@@ -272,6 +273,7 @@ bool cPluginTeletextosd::SetupParse(const char *Name, const char *Value)
+   else if (!strcasecmp(Name, "OSDVAlign")) ttSetup.OSDVAlign=atoi(Value);
+   else if (!strcasecmp(Name, "inactivityTimeout")) /*ttSetup.inactivityTimeout=atoi(Value)*/;
+   else if (!strcasecmp(Name, "HideMainMenu")) ttSetup.HideMainMenu=atoi(Value);
++  else if (!strcasecmp(Name, "txtFontName")) ttSetup.txtFontName=strdup(Value);
+   else {
+      for (int i=0;i<LastActionKey;i++) {
+         if (!strcasecmp(Name, cTeletextSetupPage::actionKeyNames[i].internalName)) {
+@@ -313,7 +315,9 @@ void cTeletextSetupPage::Store(void) {
+    ttSetup.OSDHAlign=temp.OSDHAlign;
+    ttSetup.OSDVAlign=temp.OSDVAlign;
+    ttSetup.HideMainMenu=temp.HideMainMenu;
++   ttSetup.txtFontName=temp.txtFontNames[temp.txtFontIndex];
+    //ttSetup.inactivityTimeout=temp.inactivityTimeout;
++   std::cout << "store " << (const char *)temp.txtFontName << " " << temp.txtFontIndex << std::endl;
+    
+    for (int i=0;i<LastActionKey;i++) {
+       SetupStore(actionKeyNames[i].internalName, ttSetup.mapKeyToAction[i]);
+@@ -328,6 +332,7 @@ void cTeletextSetupPage::Store(void) {
+    SetupStore("OSDHAlign", ttSetup.OSDHAlign);
+    SetupStore("OSDVAlign", ttSetup.OSDVAlign);
+    SetupStore("HideMainMenu", ttSetup.HideMainMenu);
++   SetupStore("txtFontName", ttSetup.txtFontName);
+    //SetupStore("inactivityTimeout", ttSetup.inactivityTimeout);
+ }
+ 
+@@ -355,8 +360,16 @@ cTeletextSetupPage::cTeletextSetupPage(void) {
+    temp.OSDHAlign=ttSetup.OSDHAlign;
+    temp.OSDVAlign=ttSetup.OSDVAlign;
+    temp.HideMainMenu=ttSetup.HideMainMenu;
++   temp.txtFontName=ttSetup.txtFontName;
+    //temp.inactivityTimeout=ttSetup.inactivityTimeout;
+ 
++   cFont::GetAvailableFontNames(&temp.txtFontNames, true);
++   temp.txtFontIndex = temp.txtFontNames.Find(ttSetup.txtFontName);
++   if (temp.txtFontIndex < 0) {
++       temp.txtFontIndex = 0;
++   }
++
++
+    Add(new cMenuEditIntItem(tr("Background transparency"), &tempConfiguredClrBackground, 0, 255)); 
+    
+    Add(new cMenuEditBoolItem(tr("Show clock"), &temp.showClock ));
+@@ -371,6 +384,7 @@ cTeletextSetupPage::cTeletextSetupPage(void) {
+    Add(new cMenuEditIntItem(tr("OSD horizontal align"), &temp.OSDHAlign, 0, 100));
+    Add(new cMenuEditIntItem(tr("OSD vertical align"), &temp.OSDVAlign, 0, 100));
+    Add(new cMenuEditBoolItem(tr("Hide mainmenu entry"), &temp.HideMainMenu));
++   Add(new cMenuEditStraItem(tr("Text Font"), &temp.txtFontIndex, temp.txtFontNames.Size(), &temp.txtFontNames[0]));
+    
+    //Using same string as VDR's setup menu
+    //Add(new cMenuEditIntItem(tr("Setup.Miscellaneous$Min. user inactivity (min)"), &temp.inactivityTimeout));
+diff --git a/po/ca_ES.po b/po/ca_ES.po
+index bfa9d13..49e9ba3 100644
+--- a/po/ca_ES.po
++++ b/po/ca_ES.po
+@@ -9,7 +9,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: VDR 1.5.7\n"
+ "Report-Msgid-Bugs-To: <see README>\n"
+-"POT-Creation-Date: 2013-03-10 17:21+0100\n"
++"POT-Creation-Date: 2016-02-17 21:25+0100\n"
+ "PO-Revision-Date: 2008-05-04 15:33+0200\n"
+ "Last-Translator: Jordi Vilà <jvila@tinet.org>\n"
+ "Language-Team: Catalan <vdr@linuxtv.org>\n"
+@@ -72,6 +72,9 @@ msgstr ""
+ msgid "Hide mainmenu entry"
+ msgstr ""
+ 
++msgid "Text Font"
++msgstr ""
++
+ msgid "Key bindings"
+ msgstr ""
+ 
+diff --git a/po/de_DE.po b/po/de_DE.po
+index 60a73e4..d3c4bbc 100644
+--- a/po/de_DE.po
++++ b/po/de_DE.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: VDR 1.5.7\n"
+ "Report-Msgid-Bugs-To: <see README>\n"
+-"POT-Creation-Date: 2013-03-10 17:21+0100\n"
++"POT-Creation-Date: 2016-02-17 21:25+0100\n"
+ "PO-Revision-Date: 2008-05-04 15:33+0200\n"
+ "Last-Translator: Klaus Schmidinger <Klaus.Schmidinger@tvdr.de>\n"
+ "Language-Team: German <vdr@linuxtv.org>\n"
+@@ -70,6 +70,9 @@ msgstr "OSD vertikale Anordnung"
+ msgid "Hide mainmenu entry"
+ msgstr "Hauptmenüeintrag verstecken"
+ 
++msgid "Text Font"
++msgstr ""
++
+ msgid "Key bindings"
+ msgstr "Tastenzuweisung"
+ 
+diff --git a/po/es_ES.po b/po/es_ES.po
+index b7e476d..9e373f4 100644
+--- a/po/es_ES.po
++++ b/po/es_ES.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: VDR 1.5.7\n"
+ "Report-Msgid-Bugs-To: <see README>\n"
+-"POT-Creation-Date: 2013-03-10 17:21+0100\n"
++"POT-Creation-Date: 2016-02-17 21:25+0100\n"
+ "PO-Revision-Date: 2008-05-04 15:33+0200\n"
+ "Last-Translator: Ruben Nunez Francisco <ruben.nunez@tang-it.com>\n"
+ "Language-Team: Spanish <vdr@linuxtv.org>\n"
+@@ -70,6 +70,9 @@ msgstr ""
+ msgid "Hide mainmenu entry"
+ msgstr ""
+ 
++msgid "Text Font"
++msgstr ""
++
+ msgid "Key bindings"
+ msgstr ""
+ 
+diff --git a/po/fi_FI.po b/po/fi_FI.po
+index 3d2b32a..5b88212 100644
+--- a/po/fi_FI.po
++++ b/po/fi_FI.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: VDR 1.5.7\n"
+ "Report-Msgid-Bugs-To: <see README>\n"
+-"POT-Creation-Date: 2013-03-10 17:21+0100\n"
++"POT-Creation-Date: 2016-02-17 21:25+0100\n"
+ "PO-Revision-Date: 2008-05-04 15:33+0200\n"
+ "Last-Translator: Rolf Ahrenberg <rahrenbe@cc.hut.fi>\n"
+ "Language-Team: Finnish <vdr@linuxtv.org>\n"
+@@ -70,6 +70,9 @@ msgstr "Vaakakeskitys"
+ msgid "Hide mainmenu entry"
+ msgstr "Piilota valinta päävalikosta"
+ 
++msgid "Text Font"
++msgstr ""
++
+ msgid "Key bindings"
+ msgstr "Näppäintoiminnot"
+ 
+diff --git a/po/fr_FR.po b/po/fr_FR.po
+index 1c74bf0..9745603 100644
+--- a/po/fr_FR.po
++++ b/po/fr_FR.po
+@@ -10,7 +10,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: VDR 1.5.7\n"
+ "Report-Msgid-Bugs-To: <see README>\n"
+-"POT-Creation-Date: 2013-03-10 17:21+0100\n"
++"POT-Creation-Date: 2016-02-17 21:25+0100\n"
+ "PO-Revision-Date: 2009-01-10 19:32+0100\n"
+ "Last-Translator: Nival Michaël\n"
+ "Language-Team: French <vdr@linuxtv.org>\n"
+@@ -73,6 +73,9 @@ msgstr "Alignement vertical de l'OSD"
+ msgid "Hide mainmenu entry"
+ msgstr ""
+ 
++msgid "Text Font"
++msgstr ""
++
+ msgid "Key bindings"
+ msgstr "Attribution des touches"
+ 
+diff --git a/po/it_IT.po b/po/it_IT.po
+index fb496ba..80e5622 100644
+--- a/po/it_IT.po
++++ b/po/it_IT.po
+@@ -11,7 +11,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: VDR 1.5.7\n"
+ "Report-Msgid-Bugs-To: <see README>\n"
+-"POT-Creation-Date: 2013-03-10 17:21+0100\n"
++"POT-Creation-Date: 2016-02-17 21:25+0100\n"
+ "PO-Revision-Date: 2010-11-06 19:59+0100\n"
+ "Last-Translator: Diego Pierotto <vdr-italian@tiscali.it>\n"
+ "Language-Team: Italian <vdr@linuxtv.org>\n"
+@@ -77,6 +77,9 @@ msgstr "Allineamento verticale OSD"
+ msgid "Hide mainmenu entry"
+ msgstr "Nascondi voce menu principale"
+ 
++msgid "Text Font"
++msgstr ""
++
+ msgid "Key bindings"
+ msgstr "Tasti associati"
+ 
+diff --git a/po/pt_PT.po b/po/pt_PT.po
+index 70537e0..d8e8336 100644
+--- a/po/pt_PT.po
++++ b/po/pt_PT.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: VDR 1.5.7\n"
+ "Report-Msgid-Bugs-To: <see README>\n"
+-"POT-Creation-Date: 2013-03-10 17:21+0100\n"
++"POT-Creation-Date: 2016-02-17 21:25+0100\n"
+ "PO-Revision-Date: 2008-05-04 15:33+0200\n"
+ "Last-Translator: Chris Silva <hudokkow@gmail.com>\n"
+ "Language-Team: Portuguese <vdr@linuxtv.org>\n"
+@@ -70,6 +70,9 @@ msgstr "Alinhamento Vertical do OSD"
+ msgid "Hide mainmenu entry"
+ msgstr ""
+ 
++msgid "Text Font"
++msgstr ""
++
+ msgid "Key bindings"
+ msgstr "Tecla alocada"
+ 
+diff --git a/po/ru_RU.po b/po/ru_RU.po
+index 3ea7877..aeb07ad 100644
+--- a/po/ru_RU.po
++++ b/po/ru_RU.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: VDR 1.5.7\n"
+ "Report-Msgid-Bugs-To: <see README>\n"
+-"POT-Creation-Date: 2013-03-10 17:21+0100\n"
++"POT-Creation-Date: 2016-02-17 21:25+0100\n"
+ "PO-Revision-Date: 2008-12-30 13:52+0100\n"
+ "Last-Translator: Oleg Roitburd <oleg@roitburd.de>\n"
+ "Language-Team: Russian <vdr@linuxtv.org>\n"
+@@ -71,6 +71,9 @@ msgstr "Вертикальное положение OSD"
+ msgid "Hide mainmenu entry"
+ msgstr ""
+ 
++msgid "Text Font"
++msgstr ""
++
+ msgid "Key bindings"
+ msgstr "Привязка кнопок"
+ 
+diff --git a/po/sk_SK.po b/po/sk_SK.po
+index 8f8fa7d..5bf267f 100644
+--- a/po/sk_SK.po
++++ b/po/sk_SK.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: osdteletext-0.9.0\n"
+ "Report-Msgid-Bugs-To: <see README>\n"
+-"POT-Creation-Date: 2013-03-10 17:21+0100\n"
++"POT-Creation-Date: 2016-02-17 21:25+0100\n"
+ "PO-Revision-Date: 2011-02-15 21:11+0100\n"
+ "Last-Translator: Milan Hrala <hrala.milan@gmail.com>\n"
+ "Language-Team: Slovak <hrala.milan@gmail.com>\n"
+@@ -70,6 +70,9 @@ msgstr "OSD zvyslé zarovnanie"
+ msgid "Hide mainmenu entry"
+ msgstr "Schovať položku v hlavnom menu"
+ 
++msgid "Text Font"
++msgstr ""
++
+ msgid "Key bindings"
+ msgstr "Klávesové skratky"
+ 
+diff --git a/po/uk_UA.po b/po/uk_UA.po
+index 6bd15dd..b1d35c1 100644
+--- a/po/uk_UA.po
++++ b/po/uk_UA.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: VDR 1.5.7\n"
+ "Report-Msgid-Bugs-To: <see README>\n"
+-"POT-Creation-Date: 2013-03-10 17:21+0100\n"
++"POT-Creation-Date: 2016-02-17 21:25+0100\n"
+ "PO-Revision-Date: 2009-05-25 20:33+0200\n"
+ "Last-Translator: Yarema P. aka Knedlyk <yupadmin@gmail.com>\n"
+ "Language-Team: Ukrainian <vdr@linuxtv.org>\n"
+@@ -70,6 +70,9 @@ msgstr "Вертикальне положення OSD"
+ msgid "Hide mainmenu entry"
+ msgstr ""
+ 
++msgid "Text Font"
++msgstr ""
++
+ msgid "Key bindings"
+ msgstr "Призначення клавіш"
+ 
+diff --git a/setup.h b/setup.h
+index a56809e..8856b48 100644
+--- a/setup.h
++++ b/setup.h
+@@ -46,6 +46,9 @@ public:
+    int OSDVAlign;
+    int inactivityTimeout;
+    int HideMainMenu;
++   cString txtFontName;
++   cStringList txtFontNames;
++   int txtFontIndex;
+ };
+ 
+ extern TeletextSetup ttSetup;
+diff --git a/txtfont.c b/txtfont.c
+index 5cb9174..28a16fd 100644
+--- a/txtfont.c
++++ b/txtfont.c
+@@ -1642,7 +1642,7 @@ unsigned int TXT_Font[][11]= {
+    0xFC00,  // ######****** ****
+    0x0000,  // ************ ****
+    0x0000,  // ************ ****
+-   0x0000   // ************ ****
++   0x0000   // ************ ****11
+   },
+   { // 0xA7 = 0x27a
+    0xFFF0,  // ############ ****
+@@ -3106,7 +3106,7 @@ unsigned int TXT_Font[][11]= {
+ };
+    
+ 
+-
++#if 0
+ int NationalOptionSubsetG0Default[13]=
+     {0x23,0x94,0x80,0   ,0   ,0   ,0x5e,0x5f,0   ,0   ,0   ,0   ,0   };
+ 
+@@ -3136,7 +3136,37 @@ int NationalOptionSubsetSV_FI[13]=
+     {0x23,0x94,0x90,0x5b,0x5c,0x9d,0x5d,0x5f,0x91,0x7b,0x7c,0x99,0x7d};
+ int NationalOptionSubsetTR[13]=
+     {0   ,0   ,0   ,0   ,0x5c,0xd7,0x5d,0   ,0   ,0   ,0x7c,0xcc,0x7d};
++#else
++int NationalOptionSubsetG0Default[13]=
++    {0x23,0xa4,0x40,0   ,0   ,0   ,0x5e,0x5f,0   ,0   ,0   ,0   ,0   };
+ 
++int NationalOptionSubsetCZ_SK[13]=
++    {0x23,0x84,0x85,0x95,0x93,0x92,0xed,0x87,0x91,0xeb,0x8f,0xef,0x86};
++int NationalOptionSubsetEN[13]=
++    {0x83,0x24,0x80,0x8b,0x8c,0x8d,0x8e,0x23,0x81,0x82,0x88,0x89,0x8a};
++int NationalOptionSubsetEE[13]=
++    {0x23,0xc6,0   ,0x5b,0x5c,0   ,0x5d,0xd6,0   ,0x7b,0x7c,0   ,0x7d};
++int NationalOptionSubsetFR[13]=
++    {0xd3,0xd4,0xd0,0xdb,0xdc,0xc1,0xde,0x23,0xd1,0xd2,0xd8,0xd9,0xcc};
++int NationalOptionSubsetDE[13]=
++    {0x23,0x24,0xa7,0xc4,0xd6,0xdc,0x5e,0x5f,0x60,0xe4,0xf6,0xfc,0xdf};
++int NationalOptionSubsetIT[13]=
++    {0x83,0x24,0xd3,0x60,0xcc,0x8d,0x8e,0x23,0xdd,0xc1,0xc8,0xc9,0xca};
++int NationalOptionSubsetLV_LT[13]=
++    {0x23,0x24,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   };
++int NationalOptionSubsetPL[13]=
++    {0x23,0   ,0   ,0   ,0   ,0   ,0   ,0xee,0   ,0   ,0   ,0   ,0   };
++int NationalOptionSubsetPT_ES[13]=
++    {0xcc,0x24,0xe0,0xeb,0xec,0xed,0xee,0xef,0xe1,0x7d,0xe8,0xc9,0xc2};
++int NationalOptionSubsetRO[13]=
++    {0x23,0x94,0   ,0   ,0   ,0   ,0   ,0   ,0   ,0xd2,0   ,0   ,0xde};
++int NationalOptionSubsetSR_HR_SL[13]=
++    {0x23,0   ,0   ,0   ,0   ,0xfb,0   ,0xdb,0   ,0   ,0   ,0   ,0   };
++int NationalOptionSubsetSV_FI[13]=
++    {0x23,0x94,0x90,0x5b,0x5c,0x9d,0x5d,0x5f,0x91,0x7b,0x7c,0x99,0x7d};
++int NationalOptionSubsetTR[13]=
++    {0   ,0   ,0   ,0   ,0x5c,0xd7,0x5d,0   ,0   ,0   ,0x7c,0xcc,0x7d};
++#endif
+ 
+ 
+ inline int NationalOptionSubset(int chr) {
+@@ -3380,3 +3410,133 @@ unsigned int* GetFontChar(cTeletextChar c, unsigned int *buffer) {
+     
+     return bitmap;      
+ }
++
++unsigned int GetVTXChar(cTeletextChar c) {
++    // convert  character for character/charset to utf8
++    int convertedChar = 0;
++    enumCharsets font=c.GetCharset();
++    int chr=c.GetChar();
++    int NationalOption=NationalOptionSubset(chr);
++    
++    switch (font) {
++    case CHARSET_LATIN_G0:
++        if (NationalOption>=0) {
++            if (NationalOptionSubsetG0Default[NationalOption]>0)
++                convertedChar = NationalOptionSubsetG0Default[NationalOption];
++        } else {
++            if (chr>=0x20 && chr<0x80) {
++                convertedChar = chr;
++            }
++        }
++        break;
++    case CHARSET_LATIN_G0_EN:
++        if (NationalOption>=0) {
++            if (NationalOptionSubsetEN[NationalOption]>0)
++                convertedChar = NationalOptionSubsetEN[NationalOption];
++        } else {
++            if (chr>=0x20 && chr<0x80) {
++                convertedChar = chr;
++            }
++        }           
++        break;
++    case CHARSET_LATIN_G0_FR:
++        if (NationalOption>=0) {
++            if (NationalOptionSubsetFR[NationalOption]>0)
++                convertedChar = NationalOptionSubsetFR[NationalOption];
++        } else {
++            if (chr>=0x20 && chr<0x80) {
++                convertedChar = chr;
++            }
++        }           
++        break;
++    case CHARSET_LATIN_G0_IT:
++        if (NationalOption>=0) {
++            if (NationalOptionSubsetIT[NationalOption]>0)
++                convertedChar = NationalOptionSubsetIT[NationalOption];
++        } else {
++            if (chr>=0x20 && chr<0x80) {
++                convertedChar = chr;
++            }
++        }           
++        break;
++    case CHARSET_LATIN_G0_PT_ES:
++        if (NationalOption>=0) {
++            if (NationalOptionSubsetPT_ES[NationalOption]>0)
++                convertedChar = NationalOptionSubsetPT_ES[NationalOption];
++        } else {
++            if (chr>=0x20 && chr<0x80) {
++                convertedChar = chr;
++            }
++        }           
++        break;
++    case CHARSET_LATIN_G0_SV_FI:
++        if (NationalOption>=0) {
++            if (NationalOptionSubsetSV_FI[NationalOption]>0)
++                convertedChar = NationalOptionSubsetSV_FI[NationalOption];
++        } else {
++            if (chr>=0x20 && chr<0x80) {
++                convertedChar = chr;
++            }
++        }           
++        break;
++    case CHARSET_LATIN_G0_DE:
++        if (NationalOption>=0) {
++            if (NationalOptionSubsetDE[NationalOption]>0)
++                convertedChar = NationalOptionSubsetDE[NationalOption];
++        } else {
++            if (chr>=0x20 && chr<0x80) {
++                convertedChar = chr;
++            }
++        }
++        break;
++    case CHARSET_LATIN_G0_CZ_SK:
++        if (NationalOption>=0) {
++            if (NationalOptionSubsetCZ_SK[NationalOption]>0)
++                convertedChar = NationalOptionSubsetCZ_SK[NationalOption];
++        } else {
++            if (chr>=0x20 && chr<0x80) {
++                convertedChar = chr;
++	    }
++        }
++        break;
++
++    case CHARSET_LATIN_G0_EE:
++    case CHARSET_LATIN_G0_LV_LT:
++    case CHARSET_LATIN_G0_PL:
++    case CHARSET_LATIN_G0_RO:
++    case CHARSET_LATIN_G0_SR_HR_SL:
++    case CHARSET_LATIN_G0_TR:
++        // Partially supported latin charsets
++        if (chr>=0x20 && chr<0x80 && NationalOption<0) {
++            convertedChar = chr;
++        }
++        break;
++        
++    case CHARSET_LATIN_G2:
++    case CHARSET_CYRILLIC_G0_SR_HR:
++    case CHARSET_CYRILLIC_G0_RU_BG:
++    case CHARSET_CYRILLIC_G0_UK:
++    case CHARSET_CYRILLIC_G2:
++    case CHARSET_GREEK_G0:
++    case CHARSET_GREEK_G2:
++    case CHARSET_ARABIC_G0:
++    case CHARSET_ARABIC_G2:
++    case CHARSET_HEBREW_G0:
++        // totally unsupported
++        break;
++        
++    case CHARSET_GRAPHICS_G1:
++        convertedChar = chr + 0xee00;
++        break;
++    case CHARSET_GRAPHICS_G1_SEP:
++        convertedChar = chr + 0xee00 - 0x20;
++        break;
++        
++    case CHARSET_GRAPHICS_G3:
++    case CHARSET_INVALID:
++        // Totally unsupported
++        break;
++    }
++    return convertedChar;
++    
++}
+diff --git a/txtfont.h b/txtfont.h
+index 90b3cac..551a7ed 100644
+--- a/txtfont.h
++++ b/txtfont.h
+@@ -5,12 +5,6 @@
+ 
+ #include "txtrender.h"
+ 
+-unsigned int* GetFontChar(cTeletextChar c, unsigned int *buffer);
+-// Get a character bitmap for character/charset
+-// Also handle double width/height partial characters
+-// buffer must be an unsigned int[10] buffer, that *may* be used
+-// to store the character - a different pointer may be returned too.
+-// returns NULL if undefined character
+-
++unsigned int GetVTXChar(cTeletextChar c);
+ 
+ #endif
+diff --git a/txtrecv.c b/txtrecv.c
+index f59c804..281927e 100644
+--- a/txtrecv.c
++++ b/txtrecv.c
+@@ -86,7 +86,12 @@ void cTxtStatus::ChannelSwitch(const cDevice *Device, int ChannelNumber, bool Li
+ 
+    // ignore if channel is invalid (highly unlikely, this will ever
+    // be the case, but defensive coding rules!)
+-   cChannel* newLiveChannel = Channels.GetByNumber(ChannelNumber);
++#if APIVERSNUM >= 20301
++   LOCK_CHANNELS_READ;
++   const cChannel* newLiveChannel = Channels->GetByNumber(ChannelNumber);
++#else
++   const cChannel* newLiveChannel = Channels.GetByNumber(ChannelNumber);
++#endif
+    if (newLiveChannel == NULL) return;
+ 
+    // ignore non-live-channel-switching
+@@ -147,7 +152,11 @@ void cTxtReceiver::Activate(bool On)
+      }
+ }
+ 
++#if APIVERSNUM >= 20301
++void cTxtReceiver::Receive(const uchar *Data, int Length)
++#else
+ void cTxtReceiver::Receive(uchar *Data, int Length)
++#endif
+ {
+    cFrame *frame=new cFrame(Data, Length);
+    if (!buffer.Put(frame)) {
+@@ -289,5 +298,3 @@ void cTxtReceiver::DecodeTXT(uchar* TXT_buf)
+       break;
+    }
+ }
+-
+-
+diff --git a/txtrecv.h b/txtrecv.h
+index a1be1f4..823f9ef 100644
+--- a/txtrecv.h
++++ b/txtrecv.h
+@@ -56,7 +56,11 @@ private:
+    Storage *storage;
+ protected:
+    virtual void Activate(bool On);
++#if APIVERSNUM >= 20301
++   virtual void Receive(const uchar *Data, int Length);
++#else
+    virtual void Receive(uchar *Data, int Length);
++#endif
+    virtual void Action();
+ public:
+    cTxtReceiver(const cChannel* chan, bool storeTopText, Storage* storage);
+diff --git a/txtrender.h b/txtrender.h
+index 850927e..208b41b 100644
+--- a/txtrender.h
++++ b/txtrender.h
+@@ -142,7 +142,7 @@ public:
+     // For each parameter encoded into the 32-bit int, there is
+     // a Get...() to read, a Set...() to write, and a To...() to
+     // return a modified copy
+-    
++    inline unsigned int GetC() { return c;};
+     inline unsigned char GetChar() 
+         { return c&CHAR; }
+     inline void SetChar(unsigned char chr)
