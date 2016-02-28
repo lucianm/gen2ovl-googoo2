@@ -14,7 +14,7 @@ LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~amd64 ~x86 ~arm"
 
-IUSE="+dvbcsa dvbca +satipclient"
+IUSE="client_netceiver +client_satip dvbca +dvbcsa embedded static_libs"
 
 REQUIRED_USE="dvbca? ( dvbcsa )"
 
@@ -34,7 +34,14 @@ src_prepare() {
 }
 
 src_compile() {
-	emake DVBCA=$(usex dvbca yes no) DVBCSA=$(usex dvbcsa yes no) SATIPCLIENT=$(usex satipclient yes no)
+	unset LDFLAGS
+	emake \
+		DVBCA=$(usex dvbca yes no) \
+		DVBCSA=$(usex dvbcsa yes no) \
+		SATIPCLIENT=$(usex client_satip yes no) \
+		NETCVCLIENT=$(usex client_netceiver yes no) \
+		EMBEDDED=$(usex embedded yes no) \
+		STATIC=$(usex static_libs yes no)
 }
 
 src_install() {
