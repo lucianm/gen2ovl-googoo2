@@ -9,38 +9,14 @@ depend() {
 }
 
 start() {
+	set -x
 	ebegin "Starting ${DESCRIPTION}"
-	WATCHDOG=`pidof -x oscam_watchdog.sh`
-	[ -z $WATCHDOG ] && killall -q oscam_watchdog.sh
-	[ -f ${PIDFILE} ] && rm -f ${PIDFILE}
-	export MALLOC_CHECK_=0
-	start-stop-daemon --start --quiet --exec ${DAEMONPATH} -- -b ${_OSCAM_OPTS}
-	ebegin "Starting Watchdog for ${DESCRIPTION}"
-	/usr/bin/oscam_watchdog.sh &
+	start-stop-daemon --start --quiet --background --exec ${OSCAM_WD}
 	eend $?
 }
 
 stop() {
 	ebegin "Stopping ${DESCRIPTION}"
-	start-stop-daemon --stop --quiet --signal SIGQUIT --exec ${DAEMONPATH}
-	[ -f ${PIDFILE} ] && rm -f ${PIDFILE}
-	ebegin "Stopping Watchdog for ${DESCRIPTION}"
-	killall -q oscam_watchdog.sh
-	sleep 1
-	if [ -n "$(pidof oscam)" ] ; then
-		ewarn "Waiting for ${DESCRIPTION} termination ..."
-		for in in $(seq 1 10) ; do
-			if [ -z $(pidof oscam) ] ; then
-				break;
-			fi
-			sleep 1
-		done
-		if [ -n "$(pidof oscam)" ]; then
-			eerror  "${DESCRIPTION} does not terminate normally - killing ${DESCRIPTION}"
-			killall -v -KILL oscam
-			sleep 1
-			[ -f ${PIDFILE} ] && rm -f ${PIDFILE}
-		fi
-	fi
-	eend $?
+	kill -9 $(pidof -x ${OSCAM_WD} ${OSCAM_DAEMON}) 2>/dev/null
+	eend 0
 }
