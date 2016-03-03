@@ -14,7 +14,7 @@ BROTHER_MODEL=${BROTHER_MODEL/-drivers/}
 
 
 DESCRIPTION="LPR and CUPS drivers for the Brother MFC-J5320DW Business Smart Plus Inkjet All-in-One"
-HOMEPAGE="http://support.brother.com/g/b/downloadlist.aspx?c=de&lang=de&prod=${BROTHER_MODEL}_eu_as&os=127&flang=English"
+HOMEPAGE="http://support.brother.com/g/b/downloadlist.aspx?c=de&lang=de&prod=mfcj5320dw_eu_as&os=127&flang=English"
 SRC_URI="http://download.brother.com/welcome/dlf101593/${BROTHER_MODEL}lpr-${LPR_VER}.i386.rpm
 	http://download.brother.com/welcome/dlf101594/${BROTHER_MODEL}cupswrapper-${WRAPPER_VER}.i386.rpm"
 #	http://download.brother.com/welcome/dlf101608/brother_${BROTHER_MODEL}_GPL_source_${GPL_VER}.tar.gz"
