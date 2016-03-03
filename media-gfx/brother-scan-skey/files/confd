@@ -1,0 +1,4 @@
+# /etc/conf.d/brscan-skey
+
+# User under which to run the daemon (default is "brscan-skey")
+#BRSCAN-SKEY_USER=""

@@ -1,0 +1,23 @@
+#!/sbin/runscript
+# Copyright 1999-2016 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Id$
+
+name="Brother scan-key tool"
+
+command=/opt/brother/scanner/brscan-skey/brscan-skey
+
+[ -z "${BRSCAN-SKEY_USER}" ] && BRSCAN-SKEY_USER="brscan-skey"
+
+start_stop_daemon_args="--user ${BRSCAN-SKEY_USER}:${BRSCAN-SKEY_USER}"
+
+depend() {
+	use net
+	after udev logger
+}
+
+stop() {
+	ebegin "Stopping ${name}"
+	start-stop-daemon --stop --quiet --exec ${command} -- --terminate
+	eend $?
+}
