@@ -38,7 +38,7 @@ pkg_setup() {
 
 src_install() {
 	cp -r * "${D}" || die
-	
+
 	newinitd "${FILESDIR}/initd" "${MY_PN}"
 	newconfd "${FILESDIR}/confd" "${MY_PN}"
 
@@ -50,6 +50,12 @@ src_install() {
 	fperms ugo+x "/srv/${MY_PN}"
 	fowners -R "${MY_PN}:${MY_PN}" "/srv/${MY_PN}"
 	fowners -R "${MY_PN}:${MY_PN}" "/opt/brother/scanner/${MY_PN}"
+
+	exeinto "/opt/brother/scanner/${MY_PN}/script"
+	cd "${FILESDIR}"
+	for script in $(ls *.sh); do
+		doexe "${FILESDIR}/${script}"
+	done
 }
 
 pkg_postinst() {
