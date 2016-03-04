@@ -1,0 +1,22 @@
+diff -Naur opt_orig/brother/scanner/brscan-skey/brscan-skey opt/brother/scanner/brscan-skey/brscan-skey
+--- opt_orig/brother/scanner/brscan-skey/brscan-skey	2013-05-13 09:47:52.000000000 +0200
++++ opt/brother/scanner/brscan-skey/brscan-skey	2016-03-04 10:59:49.531159766 +0100
+@@ -1,5 +1,6 @@
+ #! /bin/sh
+ 
++export USER="$(whoami)@$(uname -n)"
+ 
+ if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+   if [ "$2" = "2" ];then
+diff -Naur opt_orig/brother/scanner/brscan-skey/brscan-skey-0.2.4-1.sh opt/brother/scanner/brscan-skey/brscan-skey-0.2.4-1.sh
+--- opt_orig/brother/scanner/brscan-skey/brscan-skey-0.2.4-1.sh	2013-05-13 09:47:52.000000000 +0200
++++ opt/brother/scanner/brscan-skey/brscan-skey-0.2.4-1.sh	2016-03-04 11:04:07.166159766 +0100
+@@ -8,7 +8,7 @@
+ 
+ SCRIPTDIR=$BASEDIR"script"
+ 
+-
++export USER="$(whoami)@$(uname -n)"
+ 
+ #------------------------------------
+ mk_scantoimage_script() {

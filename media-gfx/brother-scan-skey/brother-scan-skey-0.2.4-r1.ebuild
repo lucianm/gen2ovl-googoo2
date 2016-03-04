@@ -36,8 +36,14 @@ pkg_setup() {
 	enewuser ${MY_PN} 289 -1 /srv/${MY_PN} ${MY_PN}
 }
 
+src_prepare() {
+	epatch "${FILESDIR}/${MY_PN}-${MY_PV}_USER.patch" || die
+}
+
 src_install() {
 	cp -r * "${D}" || die
+
+	dosym ../../opt/brother/scanner/${MY_PN}/${MY_PN} /usr/bin/${MY_PN}
 
 	newinitd "${FILESDIR}/initd" "${MY_PN}"
 	newconfd "${FILESDIR}/confd" "${MY_PN}"
@@ -50,12 +56,6 @@ src_install() {
 	fperms ugo+x "/srv/${MY_PN}"
 	fowners -R "${MY_PN}:${MY_PN}" "/srv/${MY_PN}"
 	fowners -R "${MY_PN}:${MY_PN}" "/opt/brother/scanner/${MY_PN}"
-
-	exeinto "/opt/brother/scanner/${MY_PN}/script"
-	cd "${FILESDIR}"
-	for script in $(ls *.sh); do
-		doexe "${FILESDIR}/${script}"
-	done
 }
 
 pkg_postinst() {
@@ -65,5 +65,5 @@ pkg_postinst() {
 	einfo "or running the user unit of ${MY_PN} (systemctl --user start ${MY_PN})"
 	einfo ""
 
-	elog "You may need to be in the '${MY_PN}' group in order to use the scanner"
+	elog "You need to be in the '${MY_PN}' group !!!!"
 }
