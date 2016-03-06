@@ -1,0 +1,12 @@
+diff -Naur opt_orig/brother/scanner/brscan-skey/brscan-skey-0.2.4-1.sh opt/brother/scanner/brscan-skey/brscan-skey-0.2.4-1.sh
+--- opt_orig/brother/scanner/brscan-skey/brscan-skey-0.2.4-1.sh	2013-05-13 09:47:52.000000000 +0200
++++ opt/brother/scanner/brscan-skey/brscan-skey-0.2.4-1.sh	2016-03-05 17:31:22.377818711 +0100
+@@ -309,7 +309,7 @@
+ rm -f \$output_file
+ 
+ !MK_SCANTOEMAIL_SCRIPT!
+-chmod 755 $SCRIPTDIR"/scantofile-"$VERSION".sh"
++chmod 755 $SCRIPTDIR"/scantoemail-"$VERSION".sh"
+ }
+ 
+ 

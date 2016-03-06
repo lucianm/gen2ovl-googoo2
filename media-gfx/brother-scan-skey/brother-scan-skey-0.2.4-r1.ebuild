@@ -26,8 +26,14 @@ IUSE=""
 
 RESTRICT="mirror strip"
 
-DEPEND="media-gfx/brother-scan4"
-RDEPEND="${DEPEND}"
+RDEPEND="media-gfx/brother-scan4
+	media-libs/netpbm
+	media-gfx/gimp
+	virtual/mta
+	|| ( app-text/cuneiform
+		app-text/gocr
+		app-text/ocrad )"
+DEPEND="${RDEPEND}"
 
 S=${WORKDIR}
 
@@ -37,7 +43,11 @@ pkg_setup() {
 }
 
 src_prepare() {
-	epatch "${FILESDIR}/${MY_PN}-${MY_PV}_USER.patch" || die
+	epatch "${FILESDIR}/${MY_PN}-${MY_PV}_do-not-remove-SCRIPTDIR.patch" || die
+	epatch "${FILESDIR}/${MY_PN}-${MY_PV}_fix-chmod-scantoemail-script.patch" || die
+	epatch "${FILESDIR}/${MY_PN}-${MY_PV}_generate-scripts-cfg.patch" || die
+	epatch "${FILESDIR}/${MY_PN}-${MY_PV}_scantoimage_gimp_fix.patch" || die
+	epatch "${FILESDIR}/${MY_PN}-${MY_PV}_config-file-settings.patch" || die
 }
 
 src_install() {
@@ -52,10 +62,14 @@ src_install() {
 	systemd_newuserunit "${FILESDIR}/${MY_PN}-user.service" "${MY_PN}.service"
 
 	dodir /srv/${MY_PN}
+	insinto /srv/${MY_PN}
+	doins "${FILESDIR}/.${MY_PN}.conf"
 
 	fperms ugo+x "/srv/${MY_PN}"
 	fowners -R "${MY_PN}:${MY_PN}" "/srv/${MY_PN}"
 	fowners -R "${MY_PN}:${MY_PN}" "/opt/brother/scanner/${MY_PN}"
+	fperms g+w "/opt/brother/scanner/${MY_PN}"
+	fperms g+w "/opt/brother/scanner/${MY_PN}/script"
 }
 
 pkg_postinst() {
@@ -64,6 +78,8 @@ pkg_postinst() {
 	einfo "/etc/conf.d/${MY_PN} if you use OpenRC,"
 	einfo "or running the user unit of ${MY_PN} (systemctl --user start ${MY_PN})"
 	einfo ""
-
-	elog "You need to be in the '${MY_PN}' group !!!!"
+	einfo "You need to be in the '${MY_PN}' group !!!!"
+	einfo ""
+	einfo "You may want to copy '/srv/${MY_PN}/.${MY_PN}.conf' to your own ~/ if"
+	einfo "you want to customize the scripts."
 }

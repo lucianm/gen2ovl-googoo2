@@ -1,0 +1,173 @@
+diff -Naur opt_orig/brother/scanner/brscan-skey/brscan-skey-0.2.4-1.sh opt/brother/scanner/brscan-skey/brscan-skey-0.2.4-1.sh
+--- opt_orig/brother/scanner/brscan-skey/brscan-skey-0.2.4-1.sh	2013-05-13 09:47:52.000000000 +0200
++++ opt/brother/scanner/brscan-skey/brscan-skey-0.2.4-1.sh	2016-03-06 01:03:06.152787756 +0100
+@@ -23,9 +23,11 @@
+ #   $resolution
+ #       100,200,300,400,600
+ #
+-resolution=100
+ device=\$1
+ mkdir -p ~/brscan
++[[ -f ~/.brscan-skey.conf ]] && source ~/.brscan-skey.conf
++resolution=\$SCANTOIMAGE_RES
++: \${resolution:=200}
+ if [ "\`which usleep  2>/dev/null \`" != '' ];then
+     usleep 100000
+ else
+@@ -33,14 +35,16 @@
+ fi
+ output_file=\`mktemp ~/brscan/brscan.XXXXXX\`
+ #echo "scan from \$2(\$device) to \$output_file"
+-scanimage --device-name "\$device" --resolution \$resolution> \$output_file 2>/dev/null
++scanimage --device-name "\$device" \$SCANTOIMAGE_DEVOPTS --resolution=\$resolution> \$output_file 2>/dev/null
++sleep 2
+ if [ ! -s \$output_file ];then
+   if [ "\`which usleep  2>/dev/null \`" != '' ];then
+     usleep 1000000
+   else
+     sleep  1
+   fi
+-  scanimage --device-name "\$device" --resolution \$resolution> \$output_file 2>/dev/null
++  scanimage --device-name "\$device" \$SCANTOIMAGE_DEVOPTS --resolution=\$resolution> \$output_file 2>/dev/null
++  sleep 2
+ fi
+ echo gimp -n \$output_file  2>/dev/null \;rm -f \$output_file | sh & 
+ !MK_SCANTOIMAGE_SCRIPT!
+@@ -63,24 +67,29 @@
+ #   $resolution
+ #       100,200,300,400,600
+ #
+-resolution=100
+ device=\$1
+ mkdir -p ~/brscan
++[[ -f ~/.brscan-skey.conf ]] && source ~/.brscan-skey.conf
++resolution=\$SCANTOFILE_RES
++: \${resolution:=200}
++format=\$SCANTOFILE_FMT
++: \${format:=pnm}
+ if [ "\`which usleep  2>/dev/null \`" != '' ];then
+     usleep 100000
+ else
+     sleep  0.1
+ fi
+-output_file=~/brscan/brscan_"\`date +%Y-%m-%d-%H-%M-%S\`"".pnm"
++output_file=~/brscan/brscan_"\`date +%Y-%m-%d-%H-%M-%S\`"".\$format"
+ #echo "scan from \$2(\$device) to \$output_file"
+-scanimage --device-name "\$device" --resolution \$resolution> \$output_file  2>/dev/null
++scanimage --device-name "\$device" \$SCANTOFILE_DEVOPTS --format=\$format --resolution=\$resolution> \$output_file  2>/dev/null
++sleep 2
+ if [ ! -s \$output_file ];then
+   if [ "\`which usleep  2>/dev/null \`" != '' ];then
+     usleep 1000000
+   else
+     sleep  1
+   fi
+-  scanimage --device-name "\$device" --resolution \$resolution> \$output_file  2>/dev/null
++  scanimage --device-name "\$device" \$SCANTOFILE_DEVOPTS --format=\$format --resolution=\$resolution> \$output_file  2>/dev/null
+ fi
+ echo  \$output_file is created.
+ !MK_SCANTOFILE_SCRIPT!
+@@ -120,9 +129,11 @@
+ sendmail_log='0'
+ #-----------------------
+ log=''
+-resolution=100
+ device=\$1
+ mkdir -p ~/brscan
++[[ -f ~/.brscan-skey.conf ]] && source ~/.brscan-skey.conf
++resolution=\$SCANTOEMAIL_RES
++: \${resolution:=200}
+ if [ "\`which usleep  2>/dev/null \`" != '' ];then
+     usleep 100000
+ else
+@@ -144,9 +155,9 @@
+ if [ "\$scanimage_disable" != 'yes' ];then
+     tmpscnfile=\`mktemp ~/brscan/brscan-tmp.XXXXXX\`
+     if [ "\$device" = '' ];then
+-	scanimage --resolution \$resolution  2>/dev/null > \$tmpscnfile
++	scanimage \$SCANTOEMAIL_DEVOPTS --resolution=\$resolution  2>/dev/null > \$tmpscnfile
+     else
+-	scanimage --device-name "\$device" --resolution \$resolution \
++	scanimage --device-name "\$device" \$SCANTOEMAIL_DEVOPTS --resolution=\$resolution \
+ 	    2>/dev/null  > \$tmpscnfile
+     fi
+ 
+@@ -157,9 +168,9 @@
+         sleep  1
+       fi
+       if [ "\$device" = '' ];then
+-	scanimage --resolution \$resolution  2>/dev/null > \$tmpscnfile
++	scanimage \$SCANTOEMAIL_DEVOPTS --resolution=\$resolution  2>/dev/null > \$tmpscnfile
+       else
+-	scanimage --device-name "\$device" --resolution \$resolution \
++	scanimage --device-name "\$device" \$SCANTOEMAIL_DEVOPTS --resolution=\$resolution \
+ 	    2>/dev/null  > \$tmpscnfile
+       fi
+     fi
+@@ -391,9 +402,11 @@
+ #   $resolution
+ #       100,200,300,400,600
+ #
+-resolution=300
+ device=\$1
+ mkdir -p ~/brscan
++[[ -f ~/.brscan-skey.conf ]] && source ~/.brscan-skey.conf
++resolution=\$SCANTOOCR_RES
++: \${resolution:=300}
+ if [ "\`which usleep  2>/dev/null \`" != '' ];then
+     usleep 100000
+ else
+@@ -401,23 +414,44 @@
+ fi
+ output_file=~/brscan/brscan_"\`date +%Y-%m-%d-%H-%M-%S\`"".pnm"
+ #echo "scan from \$2(\$device) to \$output_file"
+-scanimage --device-name "\$device" --resolution \$resolution> \$output_file  2>/dev/null
++scanimage --device-name "\$device" \$SCANTOOCR_DEVOPTS --resolution=\$resolution> \$output_file  2>/dev/null
++sleep 2
+ if [ ! -s \$output_file ];then
+   if [ "\`which usleep  2>/dev/null \`" != '' ];then
+     usleep 1000000
+   else
+     sleep  1
+   fi
+-  scanimage --device-name "\$device" --resolution \$resolution> \$output_file  2>/dev/null
++  scanimage --device-name "\$device" \$SCANTOOCR_DEVOPTS --resolution=\$resolution> \$output_file  2>/dev/null
++  sleep 2
+ fi
+ 
+-#if [ "\$(which cuneiform  2>/dev/null )" != "" ];then
+-#  cuneiform "\$output_file" -o  "\$output_file".txt
+-#  echo  "\$output_file".txt is created.
+-#else
+-#  echo "cuneiform is required."
+-#fi
+-
++case \$SCANTOOCR_TOOL in
++	gocr)
++		if [ "\$(which gocr  2>/dev/null )" != "" ];then
++			gocr -f UTF8 -i "\$output_file" -o  "\$output_file".txt
++			echo  "\$output_file".txt is created.
++		else
++			echo "gocr is required."
++		fi
++	;;
++	ocrad)
++		if [ "\$(which ocrad  2>/dev/null )" != "" ];then
++			ocrad "\$output_file" -o  "\$output_file".txt
++			echo  "\$output_file".txt is created.
++		else
++			echo "ocrad is required."
++		fi
++	;;
++	*)
++		if [ "\$(which cuneiform  2>/dev/null )" != "" ];then
++			cuneiform "\$output_file" -o  "\$output_file".txt
++			echo  "\$output_file".txt is created.
++		else
++			echo "cuneiform is required."
++		fi
++	;;
++esac
+ rm -f \$output_file
+ !MK_SCANTOOCR_SCRIPT!
+ chmod 755 $SCRIPTDIR"/scantoocr-"$VERSION".sh"

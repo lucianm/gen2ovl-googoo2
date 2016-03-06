@@ -1,0 +1,14 @@
+diff -Naur opt_orig/brother/scanner/brscan-skey/brscan-skey-0.2.4-1.sh opt/brother/scanner/brscan-skey/brscan-skey-0.2.4-1.sh
+--- opt_orig/brother/scanner/brscan-skey/brscan-skey-0.2.4-1.sh	2013-05-13 09:47:52.000000000 +0200
++++ opt/brother/scanner/brscan-skey/brscan-skey-0.2.4-1.sh	2016-03-05 21:21:31.733636142 +0100
+@@ -42,7 +42,9 @@
+   fi
+   scanimage --device-name "\$device" --resolution \$resolution> \$output_file 2>/dev/null
+ fi
+-echo gimp -n \$output_file  2>/dev/null \;rm -f \$output_file | sh & 
++sleep 2
++DISPLAY=:0.0 gimp -n \$output_file  2>/dev/null
++rm -f \$output_file
+ !MK_SCANTOIMAGE_SCRIPT!
+ chmod 755 $SCRIPTDIR"/scantoimage-"$VERSION".sh"
+ }

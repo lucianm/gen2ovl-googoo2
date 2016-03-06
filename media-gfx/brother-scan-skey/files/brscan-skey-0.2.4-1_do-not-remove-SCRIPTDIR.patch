@@ -1,0 +1,19 @@
+diff -Naur opt_orig/brother/scanner/brscan-skey/brscan-skey-0.2.4-1.sh opt/brother/scanner/brscan-skey/brscan-skey-0.2.4-1.sh
+--- opt_orig/brother/scanner/brscan-skey/brscan-skey-0.2.4-1.sh	2013-05-13 09:47:52.000000000 +0200
++++ opt/brother/scanner/brscan-skey/brscan-skey-0.2.4-1.sh	2016-03-05 17:18:50.916866548 +0100
+@@ -471,7 +471,6 @@
+        rm -f "$SCRIPTDIR"/scantofile-"$VERSION".sh
+        rm -f "$SCRIPTDIR"/scantoemail-"$VERSION".sh
+        rm -f "$SCRIPTDIR"/scantoocr-"$VERSION".sh
+-       rm -fR $SCRIPTDIR
+        ;;
+     "R")
+        rm -f "$BASECONFDIR"brscan-skey-"$BINVERSION".cfg
+@@ -481,7 +480,6 @@
+        rm -f "$SCRIPTDIR"/scantoocr-"$VERSION".sh
+        rm -f "$BASECONFDIR"brscan_mail.config
+        rm -f "$BASECONFDIR"brscan_mailmessage.txt
+-       rm -fR $SCRIPTDIR
+        ;;
+ 
+     * )

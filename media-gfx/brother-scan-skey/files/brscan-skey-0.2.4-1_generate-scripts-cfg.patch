@@ -1,0 +1,29 @@
+diff -Naur opt_orig/brother/scanner/brscan-skey/brscan-skey opt/brother/scanner/brscan-skey/brscan-skey
+--- opt_orig/brother/scanner/brscan-skey/brscan-skey	2013-05-13 09:47:52.000000000 +0200
++++ opt/brother/scanner/brscan-skey/brscan-skey	2016-03-05 19:47:06.926317616 +0100
+@@ -20,16 +20,22 @@
+   exit 0
+ fi
+ 
++BRSCAN_SKEY="/opt/brother/scanner/brscan-skey/brscan-skey-0.2.4-0"
++BRSCAN_SKEY_SH="/opt/brother/scanner/brscan-skey/brscan-skey-0.2.4-1.sh"
++
++# generate scripts & config
++[[ ! -f "${BRSCAN_SKEY}.cfg" ]] && ${BRSCAN_SKEY_SH}
++
+ if [ "$1" = "-l" ] || [ "$1" = "--list" ]; then
+-	/opt/brother/scanner/brscan-skey/brscan-skey-0.2.4-0 $*
++	${BRSCAN_SKEY} $*
+ 	exit 0
+ fi
+ 
+ 
+ if [ "$1" = "-f" ];then
+-	/opt/brother/scanner/brscan-skey/brscan-skey-0.2.4-0 $*
++	${BRSCAN_SKEY} $*
+ else
+-	/opt/brother/scanner/brscan-skey/brscan-skey-0.2.4-0 $*&
++	${BRSCAN_SKEY} $*&
+ fi
+ 
+ 
