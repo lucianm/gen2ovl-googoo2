@@ -7,4 +7,4 @@
 #                                                where the the database
 #                                                file shall be located.
 
-_EXTRAOPTS="--db-dir=/var/vdr"
+_EXTRAOPTS="--db-dir=/var/cache/vdr/plugins/upnp"

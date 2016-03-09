@@ -1,8 +1,8 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
-EAPI="5"
+EAPI=5
 
 inherit vdr-plugin-2 git-2
 
@@ -30,7 +30,6 @@ RDEPEND="${DEPEND}
 	>=media-plugins/vdr-streamdev-0.6.0[server,upnp]"
 
 src_prepare() {
-
 	vdr-plugin-2_src_prepare
 	# no need to install the license file on gentoo
 	sed -i Makefile -e "s: COPYING::"
@@ -43,7 +42,6 @@ src_prepare() {
 	epatch ${FILESDIR}/${VDRPLUGIN}-db-connection-flag.diff
 	epatch ${FILESDIR}/${VDRPLUGIN}-no-initial-rec-scan.diff
 	epatch ${FILESDIR}/${VDRPLUGIN}-logging-consistent.diff
-
 }
 
 src_install() {
@@ -52,4 +50,6 @@ src_install() {
 	INSDOCDIR="/usr/share/doc/${P}" \
 	vdr-plugin-2_src_install
 
+	dodir /var/cache/vdr/plugins/${VDRPLUGIN}
+	fowners -R vdr:vdr /var/cache/vdr/plugins/${VDRPLUGIN}
 }

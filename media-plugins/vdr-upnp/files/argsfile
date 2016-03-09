@@ -1,0 +1,21 @@
+# Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
+
+# upnp (1.0.0) - UPnP/DLNA compliant Media Server functionality for VDR
+
+[upnp]
+
+#  The UPnP/DLNA server is designed to detect everything automatically.
+#  Therefore the user is not required to change most of the settings.
+#  
+#  -d <DB directory>    --db-dir=<DB directory>  Specifies the directory
+#                                                where the the database
+--db-dir=/var/cache/vdr/plugins/upnp
+#                                                file shall be located.
+#  -a <IP address>      --address=<IP address>   Binds the server to the
+#                                                specific IP address.
+#  -i <Interface>       --interface=<Interface>  Binds the server to the
+#                                                specific network
+#                                                interface.
+#  -p <Port>            --port=<Port>            Sets the port where the
+#                                                UPnP server shall listen
+#                                                on.
