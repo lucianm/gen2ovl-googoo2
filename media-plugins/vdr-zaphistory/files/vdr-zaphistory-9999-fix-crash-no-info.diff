@@ -1,0 +1,30 @@
+From 98112b6f52561fca8002b29f00fd6b086b029853 Mon Sep 17 00:00:00 2001
+From: Lucian Muresan <lucianm@users.sourceforge.net>
+Date: Wed, 9 Mar 2016 21:36:14 +0100
+Subject: [PATCH] fix crash noinfo
+
+---
+ zaphistoryosd.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/zaphistoryosd.c b/zaphistoryosd.c
+index 71d45e6..e7bb4a7 100644
+--- a/zaphistoryosd.c
++++ b/zaphistoryosd.c
+@@ -240,7 +240,12 @@ eOSState cMenuZappedChannels::ShowInfo() {
+     LOCK_CHANNELS_READ;
+     return AddSubMenu( new cMenuEvent(Timers, Channels, schedule->GetEventAround(time(NULL)) ) );
+ #else
+-    return AddSubMenu( new cMenuEvent(schedule->GetEventAround(time(NULL)) ) );
++    const cEvent *event = schedule->GetEventAround(time(NULL));
++    if (event) {
++	return AddSubMenu( new cMenuEvent(event) );
++    } else {
++	return osUnknown;
++    }
+ #endif
+ }
+ 
+-- 
+2.6.0
+
