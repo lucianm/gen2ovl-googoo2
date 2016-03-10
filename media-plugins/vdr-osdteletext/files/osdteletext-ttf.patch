@@ -374,10 +374,10 @@ index 1e21deb..9d6f813 100644
 -
  #endif
 diff --git a/displaybase.c b/displaybase.c
-index a65b5d9..601281b 100644
+index a65b5d9..bb61058 100644
 --- a/displaybase.c
 +++ b/displaybase.c
-@@ -15,34 +15,74 @@
+@@ -15,34 +15,78 @@
  
  #include <strings.h>
  #include <time.h>
@@ -415,23 +415,27 @@ index a65b5d9..601281b 100644
 +cFont *cDisplay::GetFont(const char *name, int fontIndex, int height, int width) {
 +    cFont *font = cFont::CreateFont(name, height, width);
 +    if (font != NULL) {
-+        int realWidth = font->Width(' ');
-+        for (int i = width * width / realWidth; i < width * 4; i++) {
-+            DELETENULL(font);
-+            font = cFont::CreateFont(name, height, i);
-+            if (font != NULL) {
-+                realWidth = font->Width(' ');
-+                if (realWidth > width) {
-+                    DELETENULL(font);
-+                    width = i - 1;
-+                    font = cFont::CreateFont(name, height, width);
-+                    realFontWidths[fontIndex] = width;
-+                    break;
++        int realWidth = font->Width('g');
++        if (realWidth > 0) {
++            for (int i = width * width / realWidth; i < width * 4; i++) {
++                DELETENULL(font);
++                font = cFont::CreateFont(name, height, i);
++                if (font != NULL) {
++                    realWidth = font->Width('g');
++                    if (realWidth > width) {
++                        DELETENULL(font);
++                        width = i - 1;
++                        font = cFont::CreateFont(name, height, width);
++                        realFontWidths[fontIndex] = width;
++                        break;
++                    }
 +                }
 +            }
++        } else {
++            esyslog("OSD-Teletext: font %s returned realWidth of 0 (should not happen, please try a different font)", name);
 +        }
 +    }
-+    isyslog("OSD-Teletext: font %s index %d probed size (w/h) = (%d/%d), char width: %d", name, fontIndex, width, height, font->Width(" "));
++    isyslog("OSD-Teletext: font %s index %d probed size (w/h) = (%d/%d), char width: %d", name, fontIndex, width, height, font->Width("g"));
 +    return font;
 +}
 +
@@ -457,7 +461,7 @@ index a65b5d9..601281b 100644
      switch (Zoom) {
      case Zoom_Upper:
          height=height*2;
-@@ -53,42 +93,44 @@ void cDisplay::InitScaler() {
+@@ -53,42 +97,50 @@ void cDisplay::InitScaler() {
          break;
      default:;
      }
@@ -466,11 +470,20 @@ index a65b5d9..601281b 100644
      ScaleX=(480<<16)/width;
      ScaleY=(250<<16)/height;
 -}
--
+ 
 -void cDisplay::InitPalette() {
 -    cBitmap *bm;
 -    if (!osd) return;
--
++    fontWidth = (outputWidth * 2 / 40) & 0xfffe;
++    if (Zoom == Zoom_Off) {
++        fontHeight = (outputHeight * 2 / 25) & 0xfffe;
++    } else {
++        fontHeight = (outputHeight * 2 / 13) & 0xfffe;
++    }
++    // use even font size for double sized characters (prevents rounding errors during character display)
++    fontWidth &= 0xfffe;
++    fontHeight &= 0xfffe;
+ 
 -    int Area=0;
 -    while ((bm=osd->GetBitmap(Area))) {
 -        enumTeletextColor c;
@@ -489,16 +502,11 @@ index a65b5d9..601281b 100644
 -        }
  
 -        Area++;
-+    fontWidth = outputWidth * 2 / 40;
-+    if (Zoom == Zoom_Off) {
-+        fontHeight = outputHeight * 2 / 25;
-+    } else {
-+        fontHeight = outputHeight * 2 / 13;
-+    }
 +    isyslog("OSD-Teletext: osd width = %d, height = %d", outputWidth, outputHeight);
 +    isyslog("OSD-Teletext: font width * 2 = %d, height = %d", fontWidth, fontHeight);
 +
 +    int txtFontWidth = fontWidth;
++//    int txtFontHeight = (fontHeight * 17 / 20) & 0xfffe;
 +    int txtFontHeight = fontHeight;
 +    const char *txtFontName = ttSetup.txtFontName;
 +    std::string footprint = GetFontFootprint(txtFontName);
@@ -528,7 +536,7 @@ index a65b5d9..601281b 100644
      // touch all blinking chars
      for (y=0;y<25;y++) {
          for (x=0;x<40;x++) {
-@@ -100,7 +142,7 @@ bool cDisplay::SetBlink(bool blink) {
+@@ -100,7 +152,7 @@ bool cDisplay::SetBlink(bool blink) {
      }
      Blinked=blink;
      if (Change) Dirty=true;
@@ -537,7 +545,7 @@ index a65b5d9..601281b 100644
      Flush();
  
      return Change;
-@@ -109,9 +151,9 @@ bool cDisplay::SetBlink(bool blink) {
+@@ -109,9 +161,9 @@ bool cDisplay::SetBlink(bool blink) {
  bool cDisplay::SetConceal(bool conceal) {
      int x,y;
      bool Change=false;
@@ -549,7 +557,7 @@ index a65b5d9..601281b 100644
      // touch all concealed chars
      for (y=0;y<25;y++) {
          for (x=0;x<40;x++) {
-@@ -123,48 +165,39 @@ bool cDisplay::SetConceal(bool conceal) {
+@@ -123,48 +175,39 @@ bool cDisplay::SetConceal(bool conceal) {
      }
      Concealed=conceal;
      if (Change) Dirty=true;
@@ -608,7 +616,7 @@ index a65b5d9..601281b 100644
      // repaint all
      Dirty=true;
      DirtyAll=true;
-@@ -198,9 +231,9 @@ void cDisplay::RenderTeletextCode(unsigned char *PageCode) {
+@@ -198,9 +241,9 @@ void cDisplay::RenderTeletextCode(unsigned char *PageCode) {
      HoldFlush();
  
      cRenderPage::ReadTeletextHeader(PageCode);
@@ -620,7 +628,7 @@ index a65b5d9..601281b 100644
          CleanDisplay();
      } else if (Boxed && (Flags&0x60)==0) {
          Boxed=false;
-@@ -217,7 +250,7 @@ void cDisplay::RenderTeletextCode(unsigned char *PageCode) {
+@@ -217,7 +260,7 @@ void cDisplay::RenderTeletextCode(unsigned char *PageCode) {
  void cDisplay::DrawDisplay() {
      int x,y;
      int cnt=0;
@@ -629,7 +637,7 @@ index a65b5d9..601281b 100644
      if (!IsDirty()) return;
      // nothing to do
  
-@@ -262,96 +295,128 @@ inline bool IsPureChar(unsigned int *bitmap) {
+@@ -262,96 +305,131 @@ inline bool IsPureChar(unsigned int *bitmap) {
  }
  
  
@@ -777,6 +785,7 @@ index a65b5d9..601281b 100644
 +            }
 +
 +            cBitmap charBm(w, h, 24);
++            charBm.DrawRectangle(0, 0, w, h, bg);
 +
 +            // draw scaled graphics char
 +            int virtY = 0;
@@ -806,8 +815,8 @@ index a65b5d9..601281b 100644
 +                    int bit=(virtX * 12 / w);
 +                    if (bitline&(0x8000>>bit)) {
 +                        charBm.DrawPixel(virtX,virtY,fg);
-+                    } else {
-+                        charBm.DrawPixel(virtX,virtY,bg);
++//                    } else {
++//                        charBm.DrawPixel(virtX,virtY,bg);
                      }
 -                    p.IncPixelX(this);
 +                    virtX++;
@@ -824,7 +833,9 @@ index a65b5d9..601281b 100644
 +            osd->DrawText(vx, vy, buf, fg, bg, font);
 +#else
 +            cBitmap charBm(w, h, 24);
-+            charBm.DrawText(0, 0, buf, fg, bg, font);
++            charBm.DrawRectangle(0, 0, w, h, bg);
++//            charBm.DrawText(0, 0, buf, fg, bg, font);
++            charBm.DrawText(0, 0, buf, fg, 0, font);
 +            osd->DrawBitmap(vx, vy, charBm);
 +#endif
          }
@@ -834,7 +845,7 @@ index a65b5d9..601281b 100644
  }
  
  void cDisplay::DrawText(int x, int y, const char *text, int len) {
-@@ -370,7 +435,7 @@ void cDisplay::DrawText(int x, int y, const char *text, int len) {
+@@ -370,7 +448,7 @@ void cDisplay::DrawText(int x, int y, const char *text, int len) {
          x++;
          len--;
      }
@@ -843,7 +854,7 @@ index a65b5d9..601281b 100644
      // Fill remaining chars with spaces
      c.SetChar(' ');
      while (len>0) {
-@@ -386,7 +451,7 @@ void cDisplay::DrawClock() {
+@@ -386,7 +464,7 @@ void cDisplay::DrawClock() {
      char text[9];
      time_t t=time(0);
      struct tm loct;
@@ -852,7 +863,7 @@ index a65b5d9..601281b 100644
      localtime_r(&t, &loct);
      sprintf(text, "%02d:%02d:%02d", loct.tm_hour, loct.tm_min, loct.tm_sec);
  
-@@ -395,45 +460,38 @@ void cDisplay::DrawClock() {
+@@ -395,45 +473,38 @@ void cDisplay::DrawClock() {
  
  void cDisplay::DrawMessage(const char *txt) {
      const int border=5;
@@ -921,7 +932,7 @@ index a65b5d9..601281b 100644
  
      // Remember box
      MessageW=w;
-@@ -448,29 +506,27 @@ void cDisplay::DrawMessage(const char *txt) {
+@@ -448,29 +519,27 @@ void cDisplay::DrawMessage(const char *txt) {
  void cDisplay::ClearMessage() {
      if (!osd) return;
      if (MessageW==0 || MessageH==0) return;
@@ -1212,7 +1223,7 @@ index c85f3a3..91c3e95 100644
      VirtX=(OsdX-Display->OffsetX)*Display->ScaleX+Display->ScaleX/2;
      VirtY=(OsdY-Display->OffsetY)*Display->ScaleY+Display->ScaleY/2;
 diff --git a/menu.c b/menu.c
-index 79f04e1..7cdf804 100644
+index 79f04e1..795b133 100644
 --- a/menu.c
 +++ b/menu.c
 @@ -7,10 +7,10 @@
@@ -1487,7 +1498,7 @@ index 79f04e1..7cdf804 100644
      inactivityTimeout(Setup.MinUserInactivity),
 -    HideMainMenu(false)
 +    HideMainMenu(false),
-+    txtFontName(DefaultFontFix)
++    txtFontName("FreeMono:Standard")
  {
     //init key bindings
     for (int i=0;i<10;i++)
