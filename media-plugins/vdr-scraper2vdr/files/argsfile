@@ -1,0 +1,10 @@
+# Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
+
+# scraper2vdr (0.1.6) - 'scraper2vdr' plugin
+
+[scraper2vdr]
+
+#  -i <IMAGEDIR>, --imagedir=<IMAGEDIR> Set directory where images are stored
+--imagedir=/var/cache/vdr/epgimages/
+#  -m <MODE>, --mode=<MODE> mode can be client or headless, see README
+--mode=client
