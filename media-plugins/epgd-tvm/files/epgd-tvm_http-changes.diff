@@ -1,0 +1,283 @@
+diff -Naur vdr-epg-daemon_orig/PLUGINS/tvm/tvm.c vdr-epg-daemon/PLUGINS/tvm/tvm.c
+--- vdr-epg-daemon_orig/PLUGINS/tvm/tvm.c	2016-03-12 14:02:42.000000000 +0100
++++ vdr-epg-daemon/PLUGINS/tvm/tvm.c	2016-03-12 17:18:05.905417388 +0100
+@@ -57,17 +57,17 @@
+    //      and source = ?;
+    //      and updflg in (....)
+ 
+-   valueFileRef = new cDbValue(obj->eventsDb->getField(cTableEvents::fiFileRef));
++   valueFileRef = new cDbValue(obj->eventsDb->getField("FileRef"));
+    stmtSetDelByFileref = new cDbStatement(obj->eventsDb);
+    
+    stmtSetDelByFileref->build("update %s set ", obj->eventsDb->TableName());
+-   stmtSetDelByFileref->bind(cTableEvents::fiDelFlg, cDbService::bndIn |cDbService:: bndSet);
+-   stmtSetDelByFileref->bind(cTableEvents::fiUpdFlg, cDbService::bndIn |cDbService:: bndSet, ", ");
+-   stmtSetDelByFileref->bind(cTableEvents::fiFileRef, cDbService::bndIn | cDbService::bndSet, ", ");
+-   stmtSetDelByFileref->bind(cTableEvents::fiUpdSp, cDbService::bndIn | cDbService::bndSet, ", ");
++   stmtSetDelByFileref->bind("DelFlg", cDbService::bndIn |cDbService:: bndSet);
++   stmtSetDelByFileref->bind("UpdFlg", cDbService::bndIn |cDbService:: bndSet, ", ");
++   stmtSetDelByFileref->bind("FileRef", cDbService::bndIn | cDbService::bndSet, ", ");
++   stmtSetDelByFileref->bind("UpdSp", cDbService::bndIn | cDbService::bndSet, ", ");
+    stmtSetDelByFileref->build( " where ");
+    stmtSetDelByFileref->bind(valueFileRef, cDbService::bndIn |cDbService:: bndSet);
+-   stmtSetDelByFileref->bind(cTableEvents::fiSource, cDbService::bndIn | cDbService::bndSet, " and ");
++   stmtSetDelByFileref->bind("Source", cDbService::bndIn | cDbService::bndSet, " and ");
+    stmtSetDelByFileref->build(" and updflg in (%s)", Us::getDeletable());
+ 
+    status += stmtSetDelByFileref->prepare();
+@@ -79,12 +79,12 @@
+    selectId = new cDbStatement(obj->mapDb);
+ 
+    selectId->build("select ");
+-   selectId->bind(cTableChannelMap::fiChannelId, cDBS::bndOut);
+-   selectId->bind(cTableChannelMap::fiMergeSp, cDBS::bndOut, ", ");
+-   selectId->bind(cTableChannelMap::fiMerge, cDBS::bndOut, ", ");
++   selectId->bind("ChannelId", cDBS::bndOut);
++   selectId->bind("MergeSp", cDBS::bndOut, ", ");
++   selectId->bind("Merge", cDBS::bndOut, ", ");
+    selectId->build(" from %s where ", obj->mapDb->TableName());
+-   selectId->bind(cTableChannelMap::fiSource, cDBS::bndIn | cDBS::bndSet);
+-   selectId->bind(cTableChannelMap::fiExternalId, cDBS::bndIn | cDBS::bndSet, " and ");
++   selectId->bind("Source", cDBS::bndIn | cDBS::bndSet);
++   selectId->bind("ExternalId", cDBS::bndIn | cDBS::bndSet, " and ");
+    
+    status += selectId->prepare();
+ 
+@@ -94,9 +94,9 @@
+    
+    selectDistBySource = new cDbStatement(obj->mapDb);
+    selectDistBySource->build("select ");
+-   selectDistBySource->bind(cTableChannelMap::fiExternalId, cDBS::bndOut, "distinct ");
++   selectDistBySource->bind("ExternalId", cDBS::bndOut, "distinct ");
+    selectDistBySource->build(" from %s where ", obj->mapDb->TableName());
+-   selectDistBySource->bind(cTableChannelMap::fiSource, cDBS::bndIn | cDBS::bndSet);
++   selectDistBySource->bind("Source", cDBS::bndIn | cDBS::bndSet);
+ 
+    status += selectDistBySource->prepare();
+ 
+@@ -177,12 +177,12 @@
+    // loop over all extid's of channelmap
+    
+    obj->mapDb->clear();
+-   obj->mapDb->setValue(cTableChannelMap::fiSource, getSource());
++   obj->mapDb->setValue("Source", getSource());
+    
+    for (int res = selectDistBySource->find(); res && !obj->doShutDown(); 
+         res = selectDistBySource->fetch())
+    {
+-      char* extid = strdup(obj->mapDb->getStrValue(cTableChannelMap::fiExternalId));
++      char* extid = strdup(obj->mapDb->getStrValue("ExternalId"));
+       int found;
+       char* url;
+       char* filename;      // the file to be downloaded
+@@ -198,11 +198,11 @@
+ 
+       // lookup file information
+          
+-      obj->fileDb->setValue(cTableFileRefs::fiName, filename);
+-      obj->fileDb->setValue(cTableFileRefs::fiSource, getSource());
++      obj->fileDb->setValue("Name", filename);
++      obj->fileDb->setValue("Source", getSource());
+       found = obj->fileDb->find();
+ 
+-      // Don't check the day or the EPG2VDRConfig.upddays
++      // Don't check the day or the EpgdConfig.upddays
+       //   since TVM deliver all days in one file ...
+ 
+       char* fileRef = 0;
+@@ -226,7 +226,7 @@
+ 
+       asprintf(&fileRef, "%s-%s", filename, data.tag);
+ 
+-      if (found && obj->fileDb->hasValue(cTableFileRefs::fiFileRef, fileRef))
++      if (found && obj->fileDb->hasValue("FileRef", fileRef))
+       {
+          tell(2, "Skipping download of id %s due to non-update", extid);
+ 
+@@ -273,7 +273,7 @@
+             free(tmp);
+          }
+ 
+-         asprintf(&fileRef, "%s-%s", obj->fileDb->getStrValue(cTableFileRefs::fiName), data.tag);
++         asprintf(&fileRef, "%s-%s", obj->fileDb->getStrValue("Name"), data.tag);
+             
+          // #TODO if ((status = processFile(extid, &data, fileRef)) != success)
+ 
+@@ -292,20 +292,20 @@
+                // and 'fake' fileref to new to avoid deletion at cleanup
+ 
+                obj->eventsDb->clear();
+-               obj->eventsDb->setValue(cTableEvents::fiDelFlg, "Y");
+-               obj->eventsDb->setValue(cTableEvents::fiUpdFlg, "D");
+-               obj->eventsDb->setValue(cTableEvents::fiFileRef, fileRef);                    // new fileref
+-               obj->eventsDb->setValue(cTableEvents::fiUpdSp, time(0));
+-               obj->eventsDb->setValue(cTableEvents::fiSource, getSource());
+-               valueFileRef->setValue(obj->fileDb->getStrValue(cTableFileRefs::fiFileRef));  // old fileref
++               obj->eventsDb->setValue("DelFlg", "Y");
++               obj->eventsDb->setValue("UpdFlg", "D");
++               obj->eventsDb->setValue("FileRef", fileRef);                    // new fileref
++               obj->eventsDb->setValue("UpdSp", time(0));
++               obj->eventsDb->setValue("Source", getSource());
++               valueFileRef->setValue(obj->fileDb->getStrValue("FileRef"));  // old fileref
+                stmtSetDelByFileref->execute();
+             }
+                
+             // Confirm processing of file
+                
+-            obj->fileDb->setValue(cTableFileRefs::fiExternalId, extid);
+-            obj->fileDb->setValue(cTableFileRefs::fiTag, data.tag);
+-            obj->fileDb->setValue(cTableFileRefs::fiFileRef, fileRef);
++            obj->fileDb->setValue("ExternalId", extid);
++            obj->fileDb->setValue("Tag", data.tag);
++            obj->fileDb->setValue("FileRef", fileRef);
+             obj->fileDb->store();
+ 
+             obj->connection->commit();
+@@ -352,10 +352,10 @@
+    tell(0, "Extracting '%s'", fileRef);
+ 
+    asprintf(&command, "unzip -o -qq -P %s -d %s/%s %s/%s/%s",
+-            password, EPG2VDRConfig.cachePath, getSource(), 
+-            EPG2VDRConfig.cachePath, getSource(), fileRef);
++            password, EpgdConfig.cachePath, getSource(), 
++            EpgdConfig.cachePath, getSource(), fileRef);
+ 
+-   asprintf(&tmp, "%s/%s/%s.tv1", EPG2VDRConfig.cachePath, getSource(), extid);
++   asprintf(&tmp, "%s/%s/%s.tv1", EpgdConfig.cachePath, getSource(), extid);
+ 
+    if (system(command) < 0 || !fileExists(tmp))
+    {
+@@ -389,12 +389,12 @@
+    // process 'all' events for 'all' configured channles of this extid
+ 
+    obj->mapDb->clear();
+-   obj->mapDb->setValue(cTableChannelMap::fiExternalId, extid);
+-   obj->mapDb->setValue(cTableChannelMap::fiSource, getSource());
++   obj->mapDb->setValue("ExternalId", extid);
++   obj->mapDb->setValue("Source", getSource());
+ 
+    for (int f = selectId->find(); f && obj->dbConnected(); f = selectId->fetch())
+    {
+-      const char* channelId = obj->mapDb->getStrValue(cTableChannelMap::fiChannelId);
++      const char* channelId = obj->mapDb->getStrValue("ChannelId");
+ 
+       for (xmlNodePtr node = xmlRoot->xmlChildrenNode; node && obj->dbConnected(); node = node->next)
+       {
+@@ -422,13 +422,13 @@
+          // create event ..
+          
+          obj->eventsDb->clear();
+-         obj->eventsDb->setValue(cTableEvents::fiEventId, id);
+-         obj->eventsDb->setValue(cTableEvents::fiChannelId, channelId);
++         obj->eventsDb->setValue("EventId", id);
++         obj->eventsDb->setValue("ChannelId", channelId);
+          
+          insert = !obj->eventsDb->find();
+ 
+-         obj->eventsDb->setValue(cTableEvents::fiSource, getSource());
+-         obj->eventsDb->setValue(cTableEvents::fiFileRef, fileRef);
++         obj->eventsDb->setValue("Source", getSource());
++         obj->eventsDb->setValue("FileRef", fileRef);
+ 
+          // auto parse and set other fields
+ 
+@@ -436,18 +436,18 @@
+ 
+          // compressed ..
+ 
+-         if (!obj->eventsDb->isNull(cTableEvents::fiTitle))
++         if (!obj->eventsDb->isNull("Title"))
+          {
+-            comp = obj->eventsDb->getStrValue(cTableEvents::fiTitle);
++            comp = obj->eventsDb->getStrValue("Title");
+             prepareCompressed(comp);
+-            obj->eventsDb->setValue(cTableEvents::fiCompTitle, comp.c_str());
++            obj->eventsDb->setValue("COMPTITLE", comp.c_str());
+          }
+ 
+-         if (!obj->eventsDb->isNull(cTableEvents::fiShortText))
++         if (!obj->eventsDb->isNull("ShortText"))
+          {
+-            comp = obj->eventsDb->getStrValue(cTableEvents::fiShortText);
++            comp = obj->eventsDb->getStrValue("ShortText");
+             prepareCompressed(comp);
+-            obj->eventsDb->setValue(cTableEvents::fiCompShortText, comp.c_str());
++            obj->eventsDb->setValue("COMPSHORTTEXT", comp.c_str());
+          }
+ 
+          // store ..
+@@ -456,18 +456,18 @@
+          {
+             // handle insert
+ 
+-            time_t mergesp = obj->mapDb->getIntValue(cTableChannelMap::fiMergeSp);
+-            long starttime = obj->eventsDb->getIntValue(cTableEvents::fiStartTime);
+-            int merge = obj->mapDb->getIntValue(cTableChannelMap::fiMerge);
+-
+-            obj->eventsDb->setValue(cTableEvents::fiVersion, 0xFF);
+-            obj->eventsDb->setValue(cTableEvents::fiTableId, 0L);
+-            obj->eventsDb->setValue(cTableEvents::fiUseId, 0L);
++            time_t mergesp = obj->mapDb->getIntValue("MergeSp");
++            long starttime = obj->eventsDb->getIntValue("StartTime");
++            int merge = obj->mapDb->getIntValue("Merge");
++
++            obj->eventsDb->setValue("Version", 0xFF);
++            obj->eventsDb->setValue("TableId", 0L);
++            obj->eventsDb->setValue("UseId", 0L);
+ 
+             if (starttime <= mergesp)
+-               obj->eventsDb->setValue(cTableEvents::fiUpdFlg, "I");
++               obj->eventsDb->setValue("UpdFlg", "I");
+             else
+-               obj->eventsDb->setValue(cTableEvents::fiUpdFlg, merge > 1 ? "S" : "A");
++               obj->eventsDb->setValue("UpdFlg", merge > 1 ? "S" : "A");
+ 
+             obj->eventsDb->insert();
+          }
+@@ -522,8 +522,8 @@
+    password[7] = 0;
+ 
+    asprintf(&command, "unzip -o -qq -P %s -d %s/%s %s/%s/%s",
+-            password, EPG2VDRConfig.cachePath, getSource(), 
+-            EPG2VDRConfig.cachePath, getSource(), filename);
++            password, EpgdConfig.cachePath, getSource(), 
++            EpgdConfig.cachePath, getSource(), filename);
+ 
+    if (system(command) < 0)
+    {
+@@ -533,7 +533,7 @@
+    }
+ 
+    char* tmp = 0;
+-   asprintf(&tmp, "%s/%s/%s", EPG2VDRConfig.cachePath, getSource(), filename);
++   asprintf(&tmp, "%s/%s/%s", EpgdConfig.cachePath, getSource(), filename);
+    removeFile(tmp);
+    free(tmp);
+    
+@@ -553,7 +553,7 @@
+    obj->loadFromFs(data, imagename, getSource());
+ 
+    char* tmp = 0;
+-   asprintf(&tmp, "%s/%s/%s", EPG2VDRConfig.cachePath, getSource(), imagename);
++   asprintf(&tmp, "%s/%s/%s", EpgdConfig.cachePath, getSource(), imagename);
+    removeFile(tmp);
+    free(tmp);
+ 
+@@ -581,7 +581,7 @@
+       int ch;
+       int row = 0, col = 0;
+       
+-      asprintf(&filename, "/%s/%s/%s.tv%d", EPG2VDRConfig.cachePath, getSource(), extid, num+1);
++      asprintf(&filename, "/%s/%s/%s.tv%d", EpgdConfig.cachePath, getSource(), extid, num+1);
+       
+       if (!(file = fopen(filename, "r")))
+       {
+@@ -652,7 +652,7 @@
+    xmlData->memory = (char*)malloc(xmlData->size);
+    strcpy(xmlData->memory, xmlBuf.c_str());
+ 
+-   if (EPG2VDRConfig.storeXmlToFs)
++   if (EpgdConfig.storeXmlToFs)
+    {
+       asprintf(&filename, "%s.xml", extid);
+       obj->storeToFs(xmlData, filename, getSource());

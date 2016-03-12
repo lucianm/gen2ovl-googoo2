@@ -19,9 +19,9 @@ LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS=""
 
-IUSE=""
+IUSE="http"
 
-DEPEND="media-tv/epgd"
+DEPEND="media-tv/epgd[http=]"
 
 RDEPEND="${DEPEND}"
 
@@ -30,6 +30,7 @@ src_unpack() {
 }
 
 src_prepare() {
+	use http && epatch "${FILESDIR}/epgd-tvm_http-changes.diff"
 	epatch_user
 }
 
