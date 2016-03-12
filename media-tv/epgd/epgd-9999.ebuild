@@ -19,7 +19,7 @@ LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS=""
 
-IUSE="-debug +plugins +http"
+IUSE="-debug +plugins +http systemd"
 
 DEPEND="app-arch/libarchive
         >=net-misc/curl-7.10
@@ -28,7 +28,8 @@ DEPEND="app-arch/libarchive
         >=dev-db/mysql-5.1.70
         dev-libs/libzip
         dev-libs/openssl
-        dev-libs/jansson"
+        dev-libs/jansson
+        systemd? ( sys-apps/systemd )"
 
 RDEPEND="${DEPEND}"
 
@@ -38,9 +39,17 @@ src_unpack() {
 
 src_prepare() {
 	epatch "${FILESDIR}/pluginsdir_systemd_service.patch"
-	sed -i Make.config -e "s/\/local//"
-	sed -i Make.config -e "s/lib/\$(LIBDIR)/"
-	use debug && sed -i Make.config -e "s/# DEBUG/DEBUG/"
+	sed -i Make.config -e "s/\/local//" || die
+	sed -i Make.config -e "s/lib/\$(LIBDIR)/" || die
+	if use debug; then
+		sed -i Make.config -e "s/#DEBUG        =/DEBUG        =/"
+	else
+		sed -i Make.config -e "s/DEBUG        =/#DEBUG        =/"
+	fi
+	if use systemd; then
+		sed -i Make.config -e "s/#SYSD_NOTIFY/SYSD_NOTIFY/" || die
+		sed -i Make.config -e "s/#SYSDLIB_209/SYSDLIB_209/" || die
+	fi
 	epatch_user
 }
 
@@ -65,7 +74,7 @@ src_install() {
 	doins $(find -name "mysql*.so")
 
 	# documentation
-	dodoc README HISTORY.h TODO
+	dodoc README HISTORY.h TODO README-import-epgsearch
 	newdoc epglv/README README.epglv
 
 	# init system stuff
@@ -102,6 +111,7 @@ src_install() {
 	insinto /etc/epgd
 	doins configs2/* || die
 	doins configs/recording.py
+	doins configs/epg.dat
 	dobin scripts/epgd-*
 
 	# development stuff for further, externally-built plugins
