@@ -1,0 +1,11 @@
+[Unit]
+Description=EPGd HTTP daemon
+After=epgd.service
+Requires=epgd.service
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/epghttpd -c /etc/epgd -n
+
+[Install]
+WantedBy=multi-user.target

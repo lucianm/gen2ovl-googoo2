@@ -1,0 +1,5 @@
+NAME="EPGd HTTPd"
+DESC="EPGd HTTP daemon"
+DAEMON="/usr/bin/epghttpd"
+CONFIG=" -c /etc/epgd/ -n"
+UTF8="1"

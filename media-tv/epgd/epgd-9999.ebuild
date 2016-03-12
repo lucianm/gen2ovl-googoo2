@@ -1,10 +1,10 @@
-# Copyright 1999-2014 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
 EAPI=5
 
-inherit multilib systemd git-2
+inherit multilib systemd git-2 eutils
 
 DESCRIPTION="This daemon is used to download EPG data from the internet and manage it in a mysql database."
 HOMEPAGE="http://projects.vdr-developer.org/projects/vdr-epg-daemon"
@@ -19,7 +19,7 @@ LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS=""
 
-IUSE="-debug +plugins"
+IUSE="-debug +plugins +http"
 
 DEPEND="app-arch/libarchive
         >=net-misc/curl-7.10
@@ -37,6 +37,7 @@ src_unpack() {
 }
 
 src_prepare() {
+	epatch "${FILESDIR}/pluginsdir_systemd_service.patch"
 	sed -i Make.config -e "s/\/local//"
 	sed -i Make.config -e "s/lib/\$(LIBDIR)/"
 	use debug && sed -i Make.config -e "s/# DEBUG/DEBUG/"
@@ -44,7 +45,9 @@ src_prepare() {
 }
 
 src_compile() {
-	emake ${PN}
+	emake -C lib
+	emake "${PN}"
+	use http && emake epghttpd
 	emake lv
 	use plugins && emake plugins
 }
@@ -52,22 +55,28 @@ src_compile() {
 src_install() {
 	# daemon
 	dobin epgd
+	use http && dobin epghttpd
 #	DESTDIR="${D}" emake install-config
-#	DESTDIR="${D}" emake install-scripts
-#	use plugins && DESTDIR="${D}" LIBDIR="$(get_abi_LIBDIR)" emake install-plugins
+	DESTDIR="${D}" emake install-scripts
+	use plugins && DESTDIR="${D}" LIBDIR="$(get_abi_LIBDIR)" emake install-plugins
+	use http && DESTDIR="${D}" emake install-http
+	# mysql plugin
+	insinto $(mysql_config --plugindir) || die
+	doins $(find -name "mysql*.so")
 
 	# documentation
-	dodoc README HISTORY
+	dodoc README HISTORY.h TODO
 	newdoc epglv/README README.epglv
 
 	# init system stuff
 	newinitd "${FILESDIR}"/epgd.initd epgd || die
 	newconfd "${FILESDIR}"/epgd.confd epgd || die
 	systemd_dounit contrib/epgd.service || die
-
-	# mysql plugin
-	insinto $(mysql_config --plugindir) || die
-	doins $(find -name "mysql*.so")
+	if use http; then
+		newinitd "${FILESDIR}"/epghttpd.initd epghttpd || die
+		newconfd "${FILESDIR}"/epghttpd.confd epghttpd || die
+		systemd_dounit "${FILESDIR}"/epghttpd.service || die
+	fi
 
 	# prepare daemon configuration
 	mkdir -p configs2
@@ -92,7 +101,7 @@ src_install() {
 	# now actually install (possibly merged) configs
 	insinto /etc/epgd
 	doins configs2/* || die
-	
+	doins configs/recording.py
 	dobin scripts/epgd-*
 
 	# development stuff for further, externally-built plugins

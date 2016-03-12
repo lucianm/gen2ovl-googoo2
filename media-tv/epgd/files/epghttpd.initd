@@ -4,7 +4,7 @@
 description="This daemon is used to retrieve new EPG data into a mysql database, downloading the information from the Internet"
 
 depend() {
-    need mysql
+    need epgd
 }
 
 
