@@ -29,6 +29,7 @@ DEPEND="app-arch/libarchive
         dev-libs/libzip
         dev-libs/openssl
         dev-libs/jansson
+        media-libs/imlib2
         systemd? ( sys-apps/systemd )"
 
 RDEPEND="${DEPEND}"
