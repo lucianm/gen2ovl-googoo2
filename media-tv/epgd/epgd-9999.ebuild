@@ -34,6 +34,11 @@ DEPEND="app-arch/libarchive
 
 RDEPEND="${DEPEND}"
 
+use_branch() {
+	use "${1}" && [[ "${1}" == "${EGIT_BRANCH}" ]] && return 0
+	return 1
+}
+
 src_unpack() {
 	git-2_src_unpack || default
 }
@@ -57,7 +62,7 @@ src_prepare() {
 src_compile() {
 	emake -C lib
 	emake "${PN}"
-	use http && emake epghttpd
+	use_branch http && emake epghttpd
 	emake lv
 	use plugins && emake plugins
 }
@@ -65,24 +70,29 @@ src_compile() {
 src_install() {
 	# daemon
 	dobin epgd
-	use http && dobin epghttpd
+	use_branch http && dobin epghttpd
 #	DESTDIR="${D}" emake install-config
 	DESTDIR="${D}" emake install-scripts
 	use plugins && DESTDIR="${D}" LIBDIR="$(get_abi_LIBDIR)" emake install-plugins
-	use http && DESTDIR="${D}" emake install-http
+	use_branch http && DESTDIR="${D}" emake install-http
 	# mysql plugin
 	insinto $(mysql_config --plugindir) || die
 	doins $(find -name "mysql*.so")
 
 	# documentation
-	dodoc README HISTORY.h TODO README-import-epgsearch
+	dodoc README
+	if use_branch http; then
+		dodoc HISTORY.h TODO README-import-epgsearch
+	else
+		dodoc HISTORY
+	fi
 	newdoc epglv/README README.epglv
 
 	# init system stuff
 	newinitd "${FILESDIR}"/epgd.initd epgd || die
 	newconfd "${FILESDIR}"/epgd.confd epgd || die
 	systemd_dounit contrib/epgd.service || die
-	if use http; then
+	if use_branch http; then
 		newinitd "${FILESDIR}"/epghttpd.initd epghttpd || die
 		newconfd "${FILESDIR}"/epghttpd.confd epghttpd || die
 		systemd_dounit "${FILESDIR}"/epghttpd.service || die
@@ -111,8 +121,10 @@ src_install() {
 	# now actually install (possibly merged) configs
 	insinto /etc/epgd
 	doins configs2/* || die
-	doins configs/recording.py
-	doins configs/epg.dat
+	if use_branch http; then
+		doins configs/recording.py
+		doins configs/epg.dat
+	fi
 	dobin scripts/epgd-*
 
 	# development stuff for further, externally-built plugins
