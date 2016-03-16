@@ -29,7 +29,8 @@ IUSE=""
 
 DEPEND=">=media-video/vdr-1.7.27
 	sys-apps/util-linux
-	>=dev-db/mysql-5.1.70"
+	>=dev-db/mysql-5.1.70
+	media-libs/imlib2"
 
 RDEPEND="${DEPEND}"
 
