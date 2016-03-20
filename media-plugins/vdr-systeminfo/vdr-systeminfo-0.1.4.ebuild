@@ -29,6 +29,8 @@ src_prepare() {
 
 	# Makefile correction, .eclass fails in some Makefiles
 	sed -e "s:(VDRINCDIR):(VDRDIR)/include:" -i Makefile
+
+	sed -e "s:#define BARLEN 30:#define BARLEN 70:" -i displayinfo.c || die
 }
 
 src_install() {
