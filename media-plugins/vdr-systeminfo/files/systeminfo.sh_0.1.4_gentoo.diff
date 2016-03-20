@@ -1,0 +1,99 @@
+diff -Naur systeminfo-0.1.4_orig/scripts/systeminfo.sh systeminfo-0.1.4/scripts/systeminfo.sh
+--- systeminfo-0.1.4_orig/scripts/systeminfo.sh	2016-03-20 10:51:45.000000000 +0100
++++ systeminfo-0.1.4/scripts/systeminfo.sh	2016-03-20 15:32:17.005562692 +0100
+@@ -20,7 +20,9 @@
+ # test with: for i in $(seq 1 16); do systeminfo.sh $i;echo;done
+ #
+ 
+-PATH=/usr/bin:/bin:/sbin
++PATH=/usr/bin:/bin:/sbin:/usr/sbin
++
++source /etc/conf.d/vdr.systeminfo
+ 
+ case "$1" in
+ 	1)	# kernel version (static)
+@@ -87,56 +89,68 @@
+ 		;;
+ 
+ 	7)	# fan speeds
+-		CPU=$( sensors | grep -i 'CPU FAN' | tr -s ' ' | cut -d' ' -f 3)
+-		CASE=$(sensors | grep -i 'SYS Fan' | tr -s ' ' | cut -d' ' -f 3)
+-		echo -ne "Fans:\tCPU: "$CPU" rpm\tCase: "$CASE" rpm"
++		CPU=$( sensors | grep -i "${FAN_1:=FAN1}" | tr -s ' ' | cut -d' ' -f 4)
++		CASE=$(sensors | grep -i "${FAN_2:=Fan2}" | tr -s ' ' | cut -d' ' -f 4)
++		PSU=$( sensors | grep -i "${FAN_3:=Fan3}" | tr -s ' ' | cut -d' ' -f 4)
++		PSU="${PSU:=0}"
++		echo -ne "Fans:\tCPU: "$CPU" rpm\tCase: "$CASE" rpm\tPSU: "$PSU" rpm"
+ 		exit
+         	;;
+ 
+ 	8)	# temperature of CPU and mainboard
+-		CPU=$(sensors | grep -i 'CPU TEMP' | tr -s ' ' | cut -d' ' -f 3)
+-		MB=$( sensors | grep -i 'Sys temp' | tr -s ' ' | cut -d' ' -f 3)
++		CPU=$(sensors | grep -i "${CPU_TEMP:=CPU Temp}" | tr -s ' ' | cut -d' ' -f 3)
++		MB=$( sensors | grep -i "${MOBO_TEMP:=M/B Temp}" | tr -s ' ' | cut -d' ' -f 3)
+ 		echo -ne "Temperatures:\tCPU: "$CPU"\tMB: "$MB
+ 		exit
+         	;;
+ 
+ 	9)	# temperature of hard disks
+-		DISK1=$(hddtemp /dev/sda | cut -d: -f1,3)
+-		DISK2=$(hddtemp /dev/sdb | cut -d: -f1,3)
+-		echo -ne "\t"$DISK1"\t"$DISK2
++		for disk in $DISKS; do
++			disk_temp=$(hddtemp ${disk:=/dev/sda} 2>/dev/null| cut -d: -f1,3)
++			echo -ne "\t"$disk_temp
++		done
++		exit
++        	;;
++
++	10)	# temperature of GPU if available
++		if [[ -x /usr/bin/nvidia-settings ]] && ! [[ -z $NVXUSER ]]; then
++			GPU=$(sudo -u $NVXUSER DISPLAY=:0.0 nvidia-settings -tq gpuCoreTemp)
++			GPU="${GPU:=0.0}"
++		fi
++		echo -ne "\tGPU: "${GPU}°C
+ 		exit
+         	;;
+ 
+-	10)	# CPU usage
++	11)	# CPU usage
+ 		echo -e "CPU time:\tCPU%"
+ 		exit
+         	;;
+ 
+-	11)	# header (static)
++	12)	# header (static)
+ 		echo -ne "s\t\ttotal / free"
+ 		exit
+ 		;;
+ 
+-	12)	# video disk usage
+-		VAR=$(df -Pk /video0 | tail -n 1 | tr -s ' ' | cut -d' ' -f 2,4)
+-		echo -ne "Video Disk:\t"$VAR
++	13)	# video disk usage
++		VAR=$(df -Pk | grep "${VIDEOPART:=/video}" | tail -n 1 | tr -s ' ' | cut -d' ' -f 2,4);
++		echo -ne "$VIDEOPART":\\t$VAR;
+ 		exit
+         	;;
+ 
+-	13)	# memory usage
++	14)	# memory usage
+ 		VAR=$( grep -E 'MemTotal|MemFree' /proc/meminfo | cut -d: -f2 | tr -d ' ')
+ 		echo -ne "Memory:\t"$VAR
+ 		exit
+         	;;
+ 
+-	14)	# swap usage
++	15)	# swap usage
+ 		VAR=$(grep -E 'SwapTotal|SwapFree' /proc/meminfo | cut -d: -f2 | tr -d ' ')
+ 		echo -ne "Swap:\t"$VAR
+ 		exit
+         	;;
+ 	test)
+ 		echo ""
+-		echo "Usage: systeminfo.sh {1|2|3|4|...}"
++		echo "Usage: systeminfo.sh {1|2|3|4|...15}"
+ 		echo ""
+ 		exit 1
+ 		;;

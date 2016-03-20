@@ -1,4 +1,4 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
@@ -23,10 +23,9 @@ RDEPEND="sys-apps/lm_sensors
 
 src_prepare() {
 	vdr-plugin-2_src_prepare
-
-	if has_version ">=media-video/vdr-2.3.1"; then
-		epatch "${FILESDIR}/${P}_vdr-2.3.1.patch"
-	fi
+	
+	# adapt script
+	epatch "${FILESDIR}/systeminfo.sh_0.1.4_gentoo.diff"
 
 	# Makefile correction, .eclass fails in some Makefiles
 	sed -e "s:(VDRINCDIR):(VDRDIR)/include:" -i Makefile
@@ -37,5 +36,5 @@ src_install() {
 
 	insinto /usr/share/vdr/plugins/systeminfo/
 	insopts -m0755
-	doins "${FILESDIR}"/systeminfo.sh
+	doins scripts/systeminfo.sh
 }

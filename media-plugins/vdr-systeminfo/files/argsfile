@@ -1,0 +1,9 @@
+# Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
+
+# systeminfo (0.1.4) - Display various system informations
+
+[systeminfo]
+
+#  -s SCRIPT, --script=SCRIPT   optional name and path of system info script
+#                               (default: '/usr/local/bin/systeminfo.sh')
+--script=/usr/share/vdr/plugins/systeminfo/systeminfo.sh
