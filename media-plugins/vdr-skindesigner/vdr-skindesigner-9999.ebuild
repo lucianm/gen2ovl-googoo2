@@ -23,7 +23,7 @@ HOMEPAGE="http://projects.vdr-developer.org/projects/plg-${VDRPLUGIN}"
 
 SLOT="0"
 LICENSE="GPL-2 Apache-2.0"
-IUSE=""
+IUSE="-skininstaller"
 
 FONT_SUFFIX="ttf"
 FONT_S="${S}/fonts/VDROpenSans"
@@ -53,6 +53,7 @@ src_prepare() {
 	for script in config.h $(ls ${S}/scripts/temperatures*); do
 		sed -i "s:/tmp/${VDRPLUGIN}:${SKINDESIGNER_CACHEDIR}:" $script || die
 	done
+	use skininstaller || sed -i "s:CONFIG += -DUSE_SKININSTALLER:#CONFIG += -DUSE_SKININSTALLER:" Makefile || die
 	BUILD_PARAMS+=" PREFIX=/usr SKINDESIGNER_SCRIPTDIR=/etc/vdr/plugins/${VDRPLUGIN}/scripts"
 }
 
