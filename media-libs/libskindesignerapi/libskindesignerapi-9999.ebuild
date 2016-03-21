@@ -13,7 +13,7 @@ if [ "${PV}" = "9999" ]; then
 	KEYWORDS=""
 	S="${WORKDIR}/${P}/${PN}"
 else
-	MY_PV="0.8.5"
+	MY_PV="0.9.1"
 	SRC_URI="http://projects.vdr-developer.org/git/vdr-plugin-skindesigner.git/snapshot/vdr-plugin-skindesigner-${MY_PV}.tar.bz2"
 	KEYWORDS="~amd64 ~x86"
 	S="${WORKDIR}/vdr-plugin-skindesigner-${MY_PV}/${PN}"
