@@ -9,7 +9,12 @@ inherit multilib systemd git-2 eutils
 DESCRIPTION="This daemon is used to download EPG data from the internet and manage it in a mysql database."
 HOMEPAGE="http://projects.vdr-developer.org/projects/vdr-epg-daemon"
 : ${EGIT_REPO_URI:=${EPGD_GIT_REPO_URI:-git://projects.vdr-developer.org/vdr-epg-daemon.git}}
-: ${EGIT_BRANCH:=${EPGD_GIT_BRANCH:-master}}
+if use http; then
+	my_branch="http"
+else
+	my_branch="master"
+fi
+: ${EGIT_BRANCH:=${EPGD_GIT_BRANCH:-${my_branch}}}
 
 SRC_URI=""
 
