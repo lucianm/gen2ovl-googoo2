@@ -1,0 +1,37 @@
+--- ffmpeg-2.8.6.ebuild	2016-03-20 17:58:41.000000000 +0100
++++ ffmpeg-2.8.6-r3.ebuild	2016-03-22 16:41:16.000000000 +0100
+@@ -92,7 +92,7 @@
+ 	aac:libvo-aacenc amrenc:libvo-amrwbenc mp3:libmp3lame
+ 	aacplus:libaacplus faac:libfaac snappy:libsnappy theora:libtheora
+ 	twolame:libtwolame wavpack:libwavpack webp:libwebp x264:libx264 x265:libx265
+-	xvid:libxvid
++	xvid:libxvid nvenc:nvenc
+ )
+ 
+ IUSE="
+@@ -165,6 +165,7 @@
+ 		amrenc? ( >=media-libs/vo-amrwbenc-0.1.2-r1[${MULTILIB_USEDEP}] )
+ 		faac? ( >=media-libs/faac-1.28-r3[${MULTILIB_USEDEP}] )
+ 		mp3? ( >=media-sound/lame-3.99.5-r1[${MULTILIB_USEDEP}] )
++		nvenc? ( media-video/nvidia_video_sdk )
+ 		snappy? ( >=app-arch/snappy-1.1.2-r1[${MULTILIB_USEDEP}] )
+ 		theora? (
+ 			>=media-libs/libtheora-1.1.1[encode,${MULTILIB_USEDEP}]
+@@ -280,7 +281,7 @@
+ 	${GPL_REQUIRED_USE}
+ 	${CPU_REQUIRED_USE}"
+ RESTRICT="
+-	encode? ( faac? ( bindist ) aacplus? ( bindist ) )
++	encode? ( faac? ( bindist ) aacplus? ( bindist ) nvenc? ( bindist ) )
+ 	gpl? ( openssl? ( bindist ) fdk? ( bindist ) )
+ "
+ 
+@@ -312,7 +313,7 @@
+ 		if use aac || use amrenc ; then
+ 			myconf+=( --enable-version3 )
+ 		fi
+-		if use aacplus || use faac ; then
++		if use aacplus || use faac || use nvenc ; then
+ 			myconf+=( --enable-nonfree )
+ 		fi
+ 	else
