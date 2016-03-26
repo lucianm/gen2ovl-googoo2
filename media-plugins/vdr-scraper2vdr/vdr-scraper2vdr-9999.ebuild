@@ -1,4 +1,4 @@
-# Copyright 1999-2014 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
@@ -10,8 +10,10 @@ VERSION="1402" # every bump, new version
 
 if [ "${PV}" = "9999" ]; then
 	inherit git-2
-	EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-${VDRPLUGIN}.git"
+	#EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-${VDRPLUGIN}.git"
+	EGIT_REPO_URI="https://github.com/horchi/${VDRPLUGIN}.git"
 	KEYWORDS=""
+	EGIT_BRANCH="http"
 else
 	SRC_URI="mirror://vdr-developerorg/${VERSION}/${P}.tgz"
 	KEYWORDS="~amd64 ~x86"
@@ -27,7 +29,9 @@ IUSE=""
 DEPEND=">=media-video/vdr-1.7.27
 	>=dev-db/mysql-5.1.70
 	|| ( media-gfx/imagemagick
-	     media-gfx/graphicsmagick )"
+	     media-gfx/graphicsmagick )
+	virtual/jpeg
+	media-libs/imlib2"
 
 RDEPEND="${DEPEND}"
 
