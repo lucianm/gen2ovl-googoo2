@@ -4,25 +4,28 @@
 
 EAPI=5
 
-inherit multilib systemd git-2 eutils
+inherit multilib systemd eutils
+
+PKG_NAME="vdr-epg-daemon"
 
 DESCRIPTION="This daemon is used to download EPG data from the internet and manage it in a mysql database."
-HOMEPAGE="http://projects.vdr-developer.org/projects/vdr-epg-daemon"
-: ${EGIT_REPO_URI:=${EPGD_GIT_REPO_URI:-git://projects.vdr-developer.org/vdr-epg-daemon.git}}
-if use http; then
+HOMEPAGE="http://projects.vdr-developer.org/projects/${PKG_NAME}"
+
+if [ "${PV}" = "9999" ]; then
+	inherit git-r3
+	: ${EGIT_REPO_URI:=${EPGD_GIT_REPO_URI:-https://projects.vdr-developer.org/git/${PKG_NAME}.git}}
 	my_branch="http"
+	: ${EGIT_BRANCH:=${EPGD_GIT_BRANCH:-${my_branch}}}
+	KEYWORDS=""
+	S="${WORKDIR}/${P}"
 else
-	my_branch="master"
+	SRC_URI="https://projects.vdr-developer.org/git/${PKG_NAME}.git/snapshot/${PKG_NAME}-${PV}.tar.bz2"
+	KEYWORDS="~amd64 ~x86 ~arm"
+	S="${WORKDIR}/${PKG_NAME}-${PV}"
 fi
-: ${EGIT_BRANCH:=${EPGD_GIT_BRANCH:-${my_branch}}}
-
-SRC_URI=""
-
-S="${WORKDIR}/${P}"
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS=""
 
 IUSE="-debug +plugins +http systemd"
 
@@ -40,15 +43,6 @@ DEPEND="app-arch/libarchive
         systemd? ( sys-apps/systemd )"
 
 RDEPEND="${DEPEND}"
-
-use_branch() {
-	use "${1}" && [[ "${1}" == "${EGIT_BRANCH}" ]] && return 0
-	return 1
-}
-
-src_unpack() {
-	git-2_src_unpack || default
-}
 
 src_prepare() {
 	sed -i Make.config -e "s/\/local//" || die
@@ -69,7 +63,7 @@ src_prepare() {
 src_compile() {
 	emake -C lib
 	emake "${PN}"
-	use_branch http && emake epghttpd
+	use http && emake epghttpd
 	emake lv
 	use plugins && emake plugins
 }
@@ -77,29 +71,24 @@ src_compile() {
 src_install() {
 	# daemon
 	dobin epgd
-	use_branch http && dobin epghttpd
+	use http && dobin epghttpd
 #	DESTDIR="${D}" emake install-config
 	DESTDIR="${D}" emake install-scripts
 	use plugins && DESTDIR="${D}" LIBDIR="$(get_abi_LIBDIR)" emake install-plugins
-	use_branch http && DESTDIR="${D}" emake install-http
+	use http && DESTDIR="${D}" emake install-http
 	# mysql plugin
 	insinto $(mysql_config --plugindir) || die
 	doins $(find -name "mysql*.so")
 
 	# documentation
-	dodoc README
-	if use_branch http; then
-		dodoc HISTORY.h TODO README-import-epgsearch
-	else
-		dodoc HISTORY
-	fi
+	dodoc README HISTORY.h TODO README-import-epgsearch
 	newdoc epglv/README README.epglv
 
 	# init system stuff
 	newinitd "${FILESDIR}"/epgd.initd epgd || die
 	newconfd "${FILESDIR}"/epgd.confd epgd || die
 	systemd_dounit contrib/epgd.service || die
-	if use_branch http; then
+	if use http; then
 		newinitd "${FILESDIR}"/epghttpd.initd epghttpd || die
 		newconfd "${FILESDIR}"/epghttpd.confd epghttpd || die
 		systemd_dounit "${FILESDIR}"/epghttpd.service || die
@@ -128,10 +117,8 @@ src_install() {
 	# now actually install (possibly merged) configs
 	insinto /etc/epgd
 	doins configs2/* || die
-	if use_branch http; then
-		doins configs/recording.py
-		doins configs/epg.dat
-	fi
+	doins configs/recording.py
+	doins configs/epg.dat
 	dobin scripts/epgd-*
 
 	# development stuff for further, externally-built plugins
@@ -148,6 +135,6 @@ src_install() {
 
 pkg_postinst() {
 	einfo "Please refer to the wiki for assistance with the setup"
-	einfo "located at http://projects.vdr-developer.org/projects/vdr-epg-daemon/wiki"
+	einfo "located at http://projects.vdr-developer.org/projects/${PKG_NAME}/wiki"
 	einfo "You can use \"epgd-tool\" for installing the MySQL Database"
 }
