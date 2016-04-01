@@ -6,9 +6,9 @@ EAPI=5
 
 inherit vdr-plugin-2
 
-DESCRIPTION="VDR Plugin: systeminfo"
-HOMEPAGE="http://firefly.vdr-developer.org/systeminfo/"
-SRC_URI="http://firefly.vdr-developer.org/systeminfo/${P}.tar.bz2"
+DESCRIPTION="VDR Plugin: ${VDRPLUGIN}"
+HOMEPAGE="http://firefly.vdr-developer.org/${VDRPLUGIN}/"
+SRC_URI="http://firefly.vdr-developer.org/${VDRPLUGIN}/${P}.tar.bz2"
 
 LICENSE="GPL-2"
 SLOT="0"
@@ -25,18 +25,22 @@ src_prepare() {
 	vdr-plugin-2_src_prepare
 	
 	# adapt script
-	epatch "${FILESDIR}/systeminfo.sh_0.1.4_gentoo.diff"
+	epatch "${FILESDIR}/${VDRPLUGIN}.sh_0.1.4_gentoo.diff"
 
 	# Makefile correction, .eclass fails in some Makefiles
 	sed -e "s:(VDRINCDIR):(VDRDIR)/include:" -i Makefile
 
-	sed -e "s:#define BARLEN 30:#define BARLEN 70:" -i displayinfo.c || die
+	sed -e "s:#define BARLEN 30:#define BARLEN 35:" -i displayinfo.c || die
 }
 
 src_install() {
 	vdr-plugin-2_src_install
 
-	insinto /usr/share/vdr/plugins/systeminfo/
+	insinto /usr/share/vdr/plugins/${VDRPLUGIN}/
 	insopts -m0755
-	doins scripts/systeminfo.sh
+	doins scripts/${VDRPLUGIN}.sh
+
+	insinto /etc/sudoers.d
+	insopts -m440
+	newins "${FILESDIR}/${PN}.sudo" ${PN}
 }
