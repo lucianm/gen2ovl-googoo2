@@ -23,17 +23,17 @@ stop()
    ebegin "Stopping $DESC"
    start-stop-daemon --stop --exec $DAEMON
    sleep 1
-   if [ -n "$(pidof epgd)" ] ; then
+   if [ -n "$(pidof $DAEMON)" ] ; then
      ewarn "Waiting for $DESC termination ..."
      for in in $(seq 1 10) ; do
-       if [ -z $(pidof epgd) ] ; then
+       if [ -z $(pidof $DAEMON) ] ; then
          break;
        fi
        sleep 1
      done
-     if [ -n "$(pidof epgd)" ]; then
+     if [ -n "$(pidof $DAEMON)" ]; then
        eerror  "$DESC does not terminate normally - killing $DESC"
-       killall -v -KILL epgd
+       killall -v -KILL $DAEMON
        sleep 1
      fi
    fi

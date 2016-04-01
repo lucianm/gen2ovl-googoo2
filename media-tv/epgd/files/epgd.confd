@@ -1,5 +1,5 @@
 NAME="EPGd"
 DESC="EPG Data Daemon"
 DAEMON="/usr/bin/epgd"
-CONFIG=" -c /etc/epgd/"
+CONFIG=" -c /etc/epgd -p /usr/lib/epgd/plugins"
 UTF8="1"

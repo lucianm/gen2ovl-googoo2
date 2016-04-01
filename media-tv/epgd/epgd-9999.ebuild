@@ -51,9 +51,9 @@ src_unpack() {
 }
 
 src_prepare() {
-	epatch "${FILESDIR}/pluginsdir_systemd_service.patch"
 	sed -i Make.config -e "s/\/local//" || die
 	sed -i Make.config -e "s/lib/\$(LIBDIR)/" || die
+	sed -i contrib/epgd.service -e "s:-c /etc/epgd:-c /etc/epgd -p /usr/$(get_abi_LIBDIR)/epgd/plugins:" || die
 	if use debug; then
 		sed -i Make.config -e "s/#DEBUG        =/DEBUG        =/"
 	else
