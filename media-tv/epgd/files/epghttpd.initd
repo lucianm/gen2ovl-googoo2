@@ -12,7 +12,7 @@ start()
 {
    ebegin "Starting $DESC"
    [ $UTF8 -eq 1 ] && export LANG="de_DE.UTF-8"
-   start-stop-daemon --start --backgrond --exec $DAEMON -- $CONFIG
+   start-stop-daemon --start --background --exec $DAEMON -- $CONFIG
    eend 0
 }
 
