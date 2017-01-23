@@ -1,14 +1,13 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/media-video/vdr/vdr-2.0.2-r1.ebuild,v 1.2 2013/07/07 09:52:20 hd_brummy Exp $
+# $Id$
 
 EAPI=5
 
 inherit eutils flag-o-matic multilib toolchain-funcs
 
 # Switches supported by extensions-patch
-EXT_PATCH_FLAGS="alternatechannel graphtft naludump permashift_v1 pinplugin
-				mainmenuhooks menuorg menuselection resumereset ttxtsubs"
+EXT_PATCH_FLAGS="alternatechannel permashift_v1 pinplugin graphtft naludump mainmenuhooks menuorg menuselection resumereset ttxtsubs"
 
 # names of the use-flags
 EXT_PATCH_FLAGS_RENAMED=""
@@ -16,24 +15,24 @@ EXT_PATCH_FLAGS_RENAMED=""
 # names ext-patch uses internally, here only used for maintainer checks
 EXT_PATCH_FLAGS_RENAMED_EXT_NAME="bidi no_kbd sdnotify"
 
-IUSE="bidi debug kbd html systemd vanilla ${EXT_PATCH_FLAGS} ${EXT_PATCH_FLAGS_RENAMED}"
+IUSE="bidi debug +kbd html systemd vanilla ${EXT_PATCH_FLAGS} ${EXT_PATCH_FLAGS_RENAMED}"
 
 MY_PV="${PV%_p*}"
 MY_P="${PN}-${MY_PV}"
 S="${WORKDIR}/${MY_P}"
 
-EXT_P="extpng-${P}-gentoo-edition-v1"
+EXT_P="extpng-${P}-gentoo-edition-v3"
 
 DESCRIPTION="Video Disk Recorder - turns a pc into a powerful set top box for DVB"
 HOMEPAGE="http://www.tvdr.de/"
-SRC_URI="ftp://ftp.tvdr.de/vdr/Developer/${MY_P}.tar.bz2
-	http://dev.gentoo.org/~hd_brummy/distfiles/${EXT_P}.patch.bz2"
+SRC_URI="ftp://ftp.tvdr.de/vdr/Developer/${MY_P}.tar.bz2"
+#	http://dev.gentoo.org/~hd_brummy/distfiles/${EXT_P}.patch.bz2"
 
-KEYWORDS="~arm ~amd64 ~ppc ~x86"
+KEYWORDS="~amd64 ~arm ~arm64 ~ppc ~x86"
 SLOT="0"
 LICENSE="GPL-2"
 
-COMMON_DEPEND="virtual/jpeg
+COMMON_DEPEND="virtual/jpeg:*
 	sys-libs/libcap
 	>=media-libs/fontconfig-2.4.2
 	>=media-libs/freetype-2"
@@ -44,7 +43,7 @@ DEPEND="${COMMON_DEPEND}
 
 RDEPEND="${COMMON_DEPEND}
 	dev-lang/perl
-	>=media-tv/gentoo-vdr-scripts-2.5_rc1
+	>=media-tv/gentoo-vdr-scripts-2.7
 	media-fonts/corefonts
 	bidi? ( dev-libs/fribidi )
 	systemd? ( sys-apps/systemd )"
@@ -145,6 +144,7 @@ src_prepare() {
 		DVBDIR			= ${DVBDIR}
 		PLUGINLIBDIR	= ${PLUGIN_LIBDIR}
 		CONFDIR			= ${CONF_DIR}
+		ARGSDIR			= \$(CONFDIR)/conf.d
 		VIDEODIR		= /var/vdr/video
 		LOCDIR			= \$(PREFIX)/share/locale
 		INCDIR			= \$(PREFIX)/include
@@ -163,7 +163,8 @@ src_prepare() {
 	if ! use vanilla; then
 
 		# Now apply extensions patch
-		epatch "${WORKDIR}/${EXT_P}.patch"
+		#epatch "${WORKDIR}/${EXT_P}.patch"
+		epatch "${FILESDIR}/${EXT_P}.patch.bz2"
 
 		# This allows us to start even if some plugin does not exist
 		# or is not loadable.
@@ -211,9 +212,6 @@ src_prepare() {
 		eend $? "make depend failed"
 	fi
 
-	epatch "${FILESDIR}/${P}_CommandLineHelp-relocated.patch"
-	epatch "${FILESDIR}/${P}_generate-arg-file-templates-to-DIR.patch"
-	epatch "${FILESDIR}/${P}_generate-arg-file-templates-to-tmp.patch"
 	epatch "${FILESDIR}/${P}_gentoo.patch"
 
 	# fix some makefile issues
@@ -258,6 +256,10 @@ src_install() {
 
 	keepdir "${PLUGIN_LIBDIR}"
 
+	# config dir for new plugin conf path
+	keepdir "${CONF_DIR}/conf.avail"
+#	keepdir "${ARGSDIR}"
+
 	# backup for plugins they don't be able to create this dir
 	keepdir "${CONF_DIR}"/plugins
 
@@ -265,7 +267,7 @@ src_install() {
 		dohtml *.html
 	fi
 
-	dodoc MANUAL INSTALL README* HISTORY CONTRIBUTORS
+	nonfatal dodoc MANUAL INSTALL README* HISTORY CONTRIBUTORS
 
 	insinto /usr/share/vdr
 	doins "${CAP_FILE}"
@@ -278,19 +280,27 @@ src_install() {
 	chown -R vdr:vdr "${D}/${CONF_DIR}"
 }
 
-pkg_preinstall() {
-
-	has_version "<${CATEGORY}/${PN}-2.2"
-	previous_less_than_2_2=$
-}
-
 pkg_postinst() {
 
-	if [[ $previous_less_than_2_2 = 0 ]] ; then
-		elog "\n\t---- 15 YEARS ANNIVERSARY EDITON ----\n"
-		elog "\tA lot of thanks to Klaus Schmiedinger"
-		elog "\tfor this nice piece of Software...\n"
-	fi
+	eerror "WARNING:"
+	eerror "========\n"
+
+	eerror "This is a *developer* version. Even though *I* use it in my productive"
+	eerror "environment, I strongly recommend that you only use it under controlled"
+	eerror "conditions and for testing and debugging.\n"
+
+	eerror "*** PLEASE BE VERY CAREFUL WHEN USING THIS DEVELOPER VERSION, ESPECIALLY"
+	eerror "*** IF YOU ENABLE THE NEW SVDRP PEERING! KEEP BACKUPS OF ALL YOUR TIMERS"
+	eerror "*** AND OBSERVE VERY CLOSELY WHETHER EVERYTHING WORKS AS EXPECTED. THIS"
+	eerror "*** VERSION INTRODUCES SOME MAJOR CHANGES IN HANDLING GLOBAL LISTS AND"
+	eerror "*** LOCKING, SO ANYTHING CAN HAPPEN! YOU HAVE BEEN WARNED!\n"
+
+	eerror "The main focus of this developer version is on the new locking mechanism"
+	eerror "for global lists, and the ability to handle remote timers."
+	eerror "Any plugins that access the global lists of timers, channels, schedules"
+	eerror "or recordings, will need to be adjusted (see below for details). Please"
+	eerror "do initial tests with plain vanilla VDR and just the output plugin you"
+	eerror "need.\n"
 
 	elog "It is a good idea to run vdrplugin-rebuild now."
 
@@ -301,3 +311,5 @@ pkg_postinst() {
 	elog "To get an idea how to proceed now, have a look at our vdr-guide:"
 	elog "\thttps://wiki.gentoo.org/wiki/VDR"
 }
+
+# repoman test wrt  bug 585864
