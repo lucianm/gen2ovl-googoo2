@@ -10,11 +10,12 @@ KEYWORDS="~amd64 ~x86"
 
 case ${PV} in
 9999)
-	if use opengl; then
-		EGIT_REPO_URI="https://github.com/lucianm/softhddevice-unified.git"
-	else
+#	if use opengl; then
+#		#EGIT_REPO_URI="https://github.com/lucianm/softhddevice-unified.git"
+#		EGIT_REPO_URI="https://github.com/lucianm/vdr-plugin-softhddevice.git"
+#	else
 		EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-${VDRPLUGIN}.git"
-	fi
+#	fi
 	inherit git-r3
 	KEYWORDS=""
 	S="${WORKDIR}/vdr-${VDRPLUGIN}-${PV}"
@@ -42,7 +43,7 @@ HOMEPAGE="http://projects.vdr-developer.org/projects/show/plg-${VDRPLUGIN}"
 
 LICENSE="AGPL-3"
 SLOT="0"
-IUSE="alsa debug opengl oss vaapi vdpau -xscreensaver"
+IUSE="alsa debug opengl openglosd oss vaapi vdpau -xscreensaver"
 
 #RESTRICT="test"
 
@@ -54,9 +55,9 @@ RDEPEND=">=media-video/vdr-2
 	x11-libs/xcb-util-renderutil
 	alsa? ( media-libs/alsa-lib )
 	opengl? ( virtual/opengl
-			media-libs/glew
-			media-libs/freeglut
-			media-libs/glm )
+			media-libs/glu
+			media-libs/mesa
+			media-plugins/vdr-psl-oglosd )
 	vaapi? ( x11-libs/libva
 			virtual/ffmpeg[vaapi] )
 	vdpau? ( x11-libs/libvdpau
@@ -86,6 +87,7 @@ src_prepare() {
 	BUILD_PARAMS+=" ALSA=$(usex alsa 1 0)"
 	BUILD_PARAMS+=" OPENGL=$(usex opengl 1 0)"
 	use opengl && sed -i "s:#OPENGLOSD ?= 1:OPENGLOSD ?= 1:" Makefile || die
+	BUILD_PARAMS+=" OPENGLOSD=$(usex openglosd 1 0)"
 	BUILD_PARAMS+=" OSS=$(usex oss 1 0)"
 	BUILD_PARAMS+=" VAAPI=$(usex vaapi 1 0)"
 	BUILD_PARAMS+=" VDPAU=$(usex vdpau 1 0)"
