@@ -1,14 +1,11 @@
-# Copyright 2016 Lucian Muresan, Daniel 'herrnst' Scheller, Team Kodi
-# Original copyright 1999-2015 Gentoo Foundation
+# Copyright 2016-2017 Lucian Muresan, Daniel 'herrnst' Scheller, Team Kodi
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
-# Imported from official Gentoo portage tree
-
-EAPI=5
+EAPI=6
 
 # Does not work with py3 here
-# It might work with py:2.5 but I didn't test that
 PYTHON_COMPAT=( python2_7 )
 PYTHON_REQ_USE="sqlite"
 
@@ -19,28 +16,34 @@ case ${PV} in
 	EGIT_REPO_URI="git://github.com/xbmc/xbmc.git"
 	inherit git-r3
 	;;
-*|*_p*)
+*|*_p*|*_r*|*_a*|*_b*|*_alpha*|*_beta*)
 	inherit kodi-versionator
 	CODENAME="$(codename_from_kodiversion $(get_version_component_range 1))"
 	MY_PV=${PV/_p/_r}
+	MY_PV=${MY_PV//_alpha/a}
+	MY_PV=${MY_PV//_beta/b}
+	MY_PV=${MY_PV//_rc/rc}
 	MY_P="${PN}-${MY_PV}"
-	SRC_URI="http://mirrors.kodi.tv/releases/source/${MY_PV}-${CODENAME}.tar.gz -> ${P}.tar.gz
-		https://github.com/xbmc/xbmc/archive/${PV}-${CODENAME}.tar.gz -> ${P}.tar.gz
-		!java? ( http://mirrors.kodi.tv/releases/source/${MY_P}-generated-addons.tar.xz
+	SRC_URI="https://github.com/xbmc/xbmc/archive/${MY_PV}-${CODENAME}.tar.gz -> ${MY_P}.tar.gz
+		https://dev.gentoo.org/~soap/distfiles/${PN}-${PV}-gcc-6.patch
+		!java? ( https://github.com/candrews/gentoo-kodi/raw/master/${MY_P}-generated-addons-r1.tar.xz
 			 https://github.com/lucianm/gen2ovl-googoo2/raw/master/media-tv/${PN}/files/${MY_P}-generated-addons.tar.xz )"
 	KEYWORDS="~amd64 ~x86"
 
-	S=${WORKDIR}/xbmc-${PV}-${CODENAME}
+	S=${WORKDIR}/xbmc-${MY_PV}-${CODENAME}
 	;;
 esac
 
 DESCRIPTION="Kodi is a free and open source media-player and entertainment hub"
-HOMEPAGE="http://kodi.tv/ http://kodi.wiki/"
+HOMEPAGE="https://kodi.tv/ http://kodi.wiki/"
 
 LICENSE="GPL-2"
 SLOT="0"
-IUSE="airplay +alsa avahi bluetooth bluray caps +cec css dbus debug gles java joystick midi mysql nfs +opengl profile pulseaudio rtmp +samba sftp +ffmpeg test +texturepacker udisks upnp upower +usb vaapi vdpau webserver +X"
+IUSE="airplay alsa bluetooth bluray caps cec css dbus debug gles java joystick midi mysql nfs +opengl profile pulseaudio rtmp +samba sftp systemd test +texturepacker udisks upnp upower +usb vaapi vdpau webserver +X zeroconf"
+# gles/vaapi: http://trac.kodi.tv/ticket/10552 #464306
 REQUIRED_USE="
+	|| ( gles opengl )
+	?? ( gles vaapi )
 	udisks? ( dbus )
 	upower? ( dbus )
 "
@@ -51,7 +54,7 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	app-arch/zip
 	app-i18n/enca
 	airplay? ( app-pda/libplist )
-	dev-libs/boost
+	dev-libs/boost:=
 	dev-libs/expat
 	dev-libs/fribidi
 	dev-libs/libcdio[-minimal]
@@ -61,7 +64,7 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	dev-libs/libxslt
 	>=dev-libs/lzo-2.04
 	dev-libs/tinyxml[stl]
-	dev-libs/yajl
+	>=dev-libs/yajl-2
 	dev-python/simplejson[${PYTHON_USEDEP}]
 	media-fonts/corefonts
 	media-fonts/roboto
@@ -69,7 +72,7 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	media-libs/flac
 	media-libs/fontconfig
 	media-libs/freetype
-	media-libs/jasper
+	media-libs/jasper:=
 	media-libs/jbigkit
 	>=media-libs/libass-0.9.7
 	bluray? ( >=media-libs/libbluray-0.7.0 )
@@ -78,18 +81,18 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	media-libs/libmodplug
 	media-libs/libmpeg2
 	media-libs/libogg
-	media-libs/libpng
+	media-libs/libpng:0=
 	media-libs/libsamplerate
 	joystick? ( media-libs/libsdl2 )
 	>=media-libs/taglib-1.8
 	media-libs/libvorbis
-	media-libs/tiff
+	media-libs/tiff:0=
+	media-sound/dcadec
 	pulseaudio? ( media-sound/pulseaudio )
 	media-sound/wavpack
-	ffmpeg? ( >=media-video/ffmpeg-2.6:=[encode] )
+	>=media-video/ffmpeg-2.6:=[encode]
 	rtmp? ( media-video/rtmpdump )
-	avahi? ( net-dns/avahi )
-	nfs? ( net-fs/libnfs )
+	nfs? ( net-fs/libnfs:= )
 	webserver? ( net-libs/libmicrohttpd[messages] )
 	sftp? ( net-libs/libssh[sftp] )
 	net-misc/curl
@@ -98,13 +101,13 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	dbus? ( sys-apps/dbus )
 	caps? ( sys-libs/libcap )
 	sys-libs/zlib
-	virtual/jpeg
-	usb? ( virtual/libusb )
+	virtual/jpeg:0=
+	usb? ( virtual/libusb:1 )
 	mysql? ( virtual/mysql )
 	opengl? (
 		virtual/glu
 		virtual/opengl
-		>=media-libs/glew-1.5.6
+		>=media-libs/glew-1.5.6:=
 	)
 	gles? (
 		media-libs/mesa[gles2]
@@ -112,7 +115,7 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	vaapi? ( x11-libs/libva[opengl] )
 	vdpau? (
 		|| ( >=x11-libs/libvdpau-1.1 >=x11-drivers/nvidia-drivers-180.51 )
-		ffmpeg? ( media-video/ffmpeg[vdpau] )
+		media-video/ffmpeg[vdpau]
 	)
 	X? (
 		x11-apps/xdpyinfo
@@ -120,26 +123,41 @@ COMMON_DEPEND="${PYTHON_DEPS}
 		x11-libs/libXinerama
 		x11-libs/libXrandr
 		x11-libs/libXrender
-	)"
+	)
+	zeroconf? ( net-dns/avahi[dbus] )
+"
 RDEPEND="${COMMON_DEPEND}
 	!media-tv/xbmc
 	udisks? ( sys-fs/udisks:0 )
-	upower? ( || ( sys-power/upower sys-power/upower-pm-utils ) )"
+	upower? (
+		systemd? ( sys-power/upower )
+		!systemd? (
+			|| ( sys-power/upower-pm-utils sys-power/upower )
+		)
+	)"
 DEPEND="${COMMON_DEPEND}
 	app-arch/xz-utils
 	dev-lang/swig
 	dev-libs/crossguid
 	dev-util/gperf
 	texturepacker? ( media-libs/giflib )
-	media-sound/dcadec
 	X? ( x11-proto/xineramaproto )
 	dev-util/cmake
 	x86? ( dev-lang/nasm )
 	java? ( virtual/jre )
-	test? ( dev-cpp/gtest )"
+	test? ( dev-cpp/gtest )
+	virtual/pkgconfig"
 # Force java for latest git version to avoid having to hand maintain the
 # generated addons package.  #488118
 [[ ${PV} == "9999" ]] && DEPEND+=" virtual/jre"
+
+PATCHES=(
+	"${FILESDIR}"/${PN}-9999-no-arm-flags.patch #400618887
+	"${FILESDIR}"/${PN}-9999-texturepacker.patch
+	"${FILESDIR}"/${PN}-16-ffmpeg3.patch
+	"${DISTDIR}"/${PN}-${PV}-gcc-6.patch #592446
+	"${FILESDIR}"/${PN}-${PV}-GUIFontTTFGL-loses-precision.patch
+)
 
 CONFIG_CHECK="~IP_MULTICAST"
 ERROR_IP_MULTICAST="
@@ -157,8 +175,7 @@ src_unpack() {
 }
 
 src_prepare() {
-	epatch "${FILESDIR}"/${PN}-9999-no-arm-flags.patch #400617
-	epatch "${FILESDIR}"/${PN}-9999-texturepacker.patch
+	default
 
 	# some dirs ship generated autotools, some dont
 	multijob_init
@@ -171,16 +188,34 @@ src_prepare() {
 		pushd ${d/%configure/.} >/dev/null || die
 		AT_NOELIBTOOLIZE="yes" AT_TOPLEVEL_EAUTORECONF="yes" \
 		multijob_child_init eautoreconf
-		popd >/dev/null
+		popd >/dev/null || die
 	done
 	multijob_finish
 	elibtoolize
 
-	# since templates are subject to be patched, do patching before
-	# doing codegen
-	epatch_user #293109
+	# Cross-compiler support
+	# We need JsonSchemaBuilder and TexturePacker binaries for the host system
+	# Later we need libsquish for the target system
+	if tc-is-cross-compiler ; then
+		mkdir "${WORKDIR}"/${CBUILD} || die
+		pushd "${WORKDIR}"/${CBUILD} >/dev/null || die
+		einfo "Building host tools"
+		cp -a "$S"/{tools,xbmc} ./ || die
+		local tools=( JsonSchemaBuilder )
+		use texturepacker && tools+=( TexturePacker )
+		for tool in "${tools[@]}" ; do
+			tc-env_build emake -C tools/depends/native/$tool
+			mkdir "$S"/tools/depends/native/$tool/bin || die
+			ln -s "${WORKDIR}"/${CBUILD}/tools/depends/native/$tool/bin/$tool "$S"/tools/depends/native/$tool/bin/$tool || die
+		done
+		popd >/dev/null || die
 
-	if [[ ${PV} == "9999" ]] || use java ; then #558798
+		emake -f codegenerator.mk
+
+		# Binary kodi.bin links against libsquish,
+		# so we need libsquish compiled for the target system
+		emake -C tools/depends/native/libsquish-native/ CXX=$(tc-getCXX)
+	elif [[ ${PV} == "9999" ]] || use java ; then #558798
 		tc-env_build emake -f codegenerator.mk
 	fi
 
@@ -198,7 +233,7 @@ src_prepare() {
 		xbmc/linux/*.cpp || die
 
 	# Tweak autotool timestamps to avoid regeneration
-	find . -type f -exec touch -r configure {} +
+	find . -type f -exec touch -r configure {} + || die
 }
 
 src_configure() {
@@ -211,24 +246,18 @@ src_configure() {
 	# Requiring java is asine #434662
 	[[ ${PV} != "9999" ]] && export ac_cv_path_JAVA_EXE=$(which $(usex java java true))
 
-	local useffmpeg=shared
-	use ffmpeg || useffmpeg=force
-
 	econf \
-		--docdir=/usr/share/doc/${PF} \
 		--disable-ccache \
 		--disable-optimizations \
-		--with-ffmpeg=${useffmpeg} \
+		--with-ffmpeg=shared \
 		$(use_enable alsa) \
 		$(use_enable airplay) \
-		$(use_enable avahi) \
 		$(use_enable bluray libbluray) \
 		$(use_enable caps libcap) \
 		$(use_enable cec libcec) \
 		$(use_enable css dvdcss) \
 		$(use_enable dbus) \
 		$(use_enable debug) \
-		--disable-fishbmc \
 		$(use_enable gles) \
 		$(use_enable joystick) \
 		$(use_enable midi mid) \
@@ -236,9 +265,7 @@ src_configure() {
 		$(use_enable nfs) \
 		$(use_enable opengl gl) \
 		$(use_enable profile profiling) \
-		--disable-projectm \
 		$(use_enable pulseaudio pulse) \
-		--disable-rsxs \
 		$(use_enable rtmp) \
 		$(use_enable samba) \
 		$(use_enable sftp ssh) \
@@ -248,9 +275,9 @@ src_configure() {
 		$(use_enable upnp) \
 		$(use_enable vaapi) \
 		$(use_enable vdpau) \
-		--disable-waveform \
 		$(use_enable webserver) \
-		$(use_enable X x11)
+		$(use_enable X x11) \
+		$(use_enable zeroconf avahi)
 }
 
 src_compile() {
@@ -259,29 +286,18 @@ src_compile() {
 
 src_install() {
 	default
-	rm "${ED}"/usr/share/doc/*/{LICENSE.GPL,copying.txt}*
+	rm "${ED%/}"/usr/share/doc/*/{LICENSE.GPL,copying.txt}* || die
 
 	domenu tools/Linux/kodi.desktop
 	newicon media/icon48x48.png kodi.png
 
-	# Remove optional addons (platform specific and disabled by USE flag).
-	local disabled_addons=(
-		repository.pvr-{android,ios,osx{32,64},win32}.xbmc.org
-	)
-
-	rm -rf "${disabled_addons[@]/#/${ED}/usr/share/kodi/addons/}"
-
-	# Remove fonconfig settings that are used only on MacOSX.
+	# Remove fontconfig settings that are used only on MacOSX.
 	# Can't be patched upstream because they just find all files and install
 	# them into same structure like they have in git.
-	rm -rf "${ED}"/usr/share/kodi/system/players/dvdplayer/etc
+	rm -rf "${ED%/}"/usr/share/kodi/system/players/dvdplayer/etc || die
 
-	# Replace bundled fonts with system ones
-	# teletext.ttf: unknown
-	# bold-caps.ttf: unknown
-	# roboto: roboto-bold, roboto-regular
-	# arial.ttf: font mashed from droid/roboto, not removed wrt bug#460514
-	rm -rf "${ED}"/usr/share/kodi/addons/skin.confluence/fonts/Roboto-*
+	# Replace bundled fonts with system ones.
+	rm "${ED%/}"/usr/share/kodi/addons/skin.confluence/fonts/Roboto-* || die
 	dosym /usr/share/fonts/roboto/Roboto-Regular.ttf \
 		/usr/share/kodi/addons/skin.confluence/fonts/Roboto-Regular.ttf
 	dosym /usr/share/fonts/roboto/Roboto-Bold.ttf \

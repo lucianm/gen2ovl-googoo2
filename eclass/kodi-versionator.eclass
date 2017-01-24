@@ -1,4 +1,4 @@
-# Copyright 2016, Lucian Muresan, Team Kodi
+# Copyright 2017, Lucian Muresan, Team Kodi
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
@@ -10,7 +10,7 @@
 inherit versionator
 
 case "${EAPI:-0}" in
-	4|5)
+	4|5|6)
 		EXPORT_FUNCTIONS codename_from_kodiversion codename_from_installedkodi
 		;;
 	*) die "EAPI=${EAPI} is not supported" ;;
