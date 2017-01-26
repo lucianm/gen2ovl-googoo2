@@ -14,7 +14,9 @@ case ${PV} in
 #		#EGIT_REPO_URI="https://github.com/lucianm/softhddevice-unified.git"
 #		EGIT_REPO_URI="https://github.com/lucianm/vdr-plugin-softhddevice.git"
 #	else
-		EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-${VDRPLUGIN}.git"
+		#EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-${VDRPLUGIN}.git"
+		EGIT_REPO_URI="https://github.com/pesintta/vdr-plugin-${VDRPLUGIN}.git"
+		EGIT_BRANCH="vpp_support"
 #	fi
 	inherit git-r3
 	KEYWORDS=""
@@ -107,3 +109,4 @@ src_install() {
 
 	nonfatal dodoc ChangeLog Todo
 }
+
