@@ -212,6 +212,7 @@ src_prepare() {
 		eend $? "make depend failed"
 	fi
 
+	epatch "${FILESDIR}/${P}-fixrecordingshandlerlock-2.diff"
 	epatch "${FILESDIR}/${P}_gentoo.patch"
 
 	# fix some makefile issues
