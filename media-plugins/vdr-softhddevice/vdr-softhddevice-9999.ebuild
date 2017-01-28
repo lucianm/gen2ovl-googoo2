@@ -11,12 +11,12 @@ KEYWORDS="~amd64 ~x86"
 case ${PV} in
 9999)
 #	if use opengl; then
-#		#EGIT_REPO_URI="https://github.com/lucianm/softhddevice-unified.git"
-#		EGIT_REPO_URI="https://github.com/lucianm/vdr-plugin-softhddevice.git"
+		EGIT_REPO_URI="https://github.com/lucianm/softhddevice-unified.git"
+		#EGIT_REPO_URI="https://github.com/lucianm/vdr-plugin-softhddevice.git"
 #	else
 		#EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-${VDRPLUGIN}.git"
-		EGIT_REPO_URI="https://github.com/pesintta/vdr-plugin-${VDRPLUGIN}.git"
-		EGIT_BRANCH="vpp_support"
+#		EGIT_REPO_URI="https://github.com/pesintta/vdr-plugin-${VDRPLUGIN}.git"
+#		EGIT_BRANCH="vpp_support"
 #	fi
 	inherit git-r3
 	KEYWORDS=""
@@ -45,7 +45,7 @@ HOMEPAGE="http://projects.vdr-developer.org/projects/show/plg-${VDRPLUGIN}"
 
 LICENSE="AGPL-3"
 SLOT="0"
-IUSE="alsa debug opengl openglosd oss vaapi vdpau -xscreensaver"
+IUSE="alsa debug gles2 opengl openglosd oss vaapi vdpau -xscreensaver"
 
 #RESTRICT="test"
 
@@ -88,6 +88,7 @@ src_prepare() {
 	sed -i "s:#CONFIG += -DHAVE_PTHREAD_NAME:CONFIG += -DHAVE_PTHREAD_NAME:" Makefile || die
 	BUILD_PARAMS+=" ALSA=$(usex alsa 1 0)"
 	BUILD_PARAMS+=" OPENGL=$(usex opengl 1 0)"
+	BUILD_PARAMS+=" GLES2=$(usex gles2 1 0)"
 	use opengl && sed -i "s:#OPENGLOSD ?= 1:OPENGLOSD ?= 1:" Makefile || die
 	BUILD_PARAMS+=" OPENGLOSD=$(usex openglosd 1 0)"
 	BUILD_PARAMS+=" OSS=$(usex oss 1 0)"
