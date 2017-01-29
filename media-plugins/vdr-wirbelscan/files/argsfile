@@ -1,0 +1,8 @@
+# Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
+
+# wirbelscan (2016.08.14) - DVB channel scan for VDR
+
+[wirbelscan]
+
+# This plugin has no command line arguments!
+
