@@ -1,4 +1,4 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
@@ -18,6 +18,8 @@ IUSE=""
 DEPEND="media-video/vdr
 	>=media-plugins/vdr-wirbelscan-0.0.9"
 RDEPEND="${DEPEND}"
+
+PATCHES=( "${FILESDIR}/wirbelscancontrol-0.0.2_vdr-2.3.1.patch" )
 
 src_prepare() {
 	vdr-plugin-2_src_prepare
