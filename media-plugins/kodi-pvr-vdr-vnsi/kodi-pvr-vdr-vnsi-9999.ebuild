@@ -31,7 +31,7 @@ DEPEND="
 	"
 
 src_unpack() {
-#	EGIT_BRANCH="$(addon_branch)"
+	[[ "${PV}" == "9999" ]] && EGIT_BRANCH="$(addon_branch)"
 	if [[ "${PV}" == "2.1.1" ]]; then
 		EGIT_COMMIT="894555c62ff83feb7dd56e18fe199ecafabfd878"
 		# PVR API: 4.2.0
