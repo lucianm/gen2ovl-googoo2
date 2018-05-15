@@ -1,4 +1,4 @@
-# Copyright 1999-2014 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
@@ -7,7 +7,7 @@ EAPI=5
 inherit linux-info systemd
 
 DESCRIPTION="Portage tree and overlays squasher scripts"
-HOMEPAGE="http://en.gentoo-wiki.com/wiki/Squashed_Portage_Tree"
+HOMEPAGE="https://github.com/init6/init_6/wiki/squashed-portage-tree"
 
 LICENSE="GPL-2"
 SLOT="0"
@@ -23,10 +23,10 @@ S="${WORKDIR}"
 
 pkg_setup() {
 	# define required kernel modules (or built-ins) to check for
-	CONFIG_CHECK="BLK_DEV_LOOP SQUASHFS ~AUFS_FS"
+	CONFIG_CHECK="BLK_DEV_LOOP SQUASHFS ~OVERLAY_FS"
 	ERROR_BLK_DEV_LOOP="${P} requires CONFIG_BLK_DEV_LOOP support in the kernel"
 	ERROR_SQUASHFS="${P} requires CONFIG_SQUASHFS support in the kernel"
-	ERROR_AUFS_FS="${P} requires CONFIG_AUFS_FS support in the kernel (either patch the kernel or use sys-kernel/aufs-sources or emerge sys-fs/aufs3"
+	ERROR_OVERLAY_FS="${P} requires CONFIG_OVERLAY_FS support in the kernel"
 
 	# now do those checks
 	linux-info_pkg_setup
