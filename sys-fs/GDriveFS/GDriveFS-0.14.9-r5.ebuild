@@ -39,3 +39,8 @@ src_prepare() {
 
 	distutils-r1_src_prepare
 }
+
+src_install() {
+	distutils-r1_src_install
+	dosym /usr/bin/gdfs /sbin/mount.gdfs
+}
