@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright 1999-2013 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 #
@@ -24,6 +24,7 @@
 # 2013-11-03, v.0.3.1    lucianm <lucianm@users.sourceforge.net>
 # 2014-05-12, v.0.3.2    lucianm <lucianm@users.sourceforge.net>
 # 2018-05-16, v.0.4.0    lucianm <lucianm@users.sourceforge.net>
+# 2018-12-19, v.0.4.1    lucianm <lucianm@users.sourceforge.net>
 
 
 #set -x

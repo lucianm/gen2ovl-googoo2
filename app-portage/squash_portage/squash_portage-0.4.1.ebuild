@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
-EAPI=5
+EAPI=7
 
 inherit linux-info systemd
 
@@ -12,7 +12,7 @@ HOMEPAGE="https://github.com/init6/init_6/wiki/squashed-portage-tree"
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
-IUSE="systemd"
+IUSE="systemd no_kernel_check"
 
 RDEPEND="sys-libs/elog-functions
 	sys-fs/squashfs-tools
@@ -22,14 +22,16 @@ RDEPEND="sys-libs/elog-functions
 S="${WORKDIR}"
 
 pkg_setup() {
-	# define required kernel modules (or built-ins) to check for
-	CONFIG_CHECK="BLK_DEV_LOOP SQUASHFS ~OVERLAY_FS"
-	ERROR_BLK_DEV_LOOP="${P} requires CONFIG_BLK_DEV_LOOP support in the kernel"
-	ERROR_SQUASHFS="${P} requires CONFIG_SQUASHFS support in the kernel"
-	ERROR_OVERLAY_FS="${P} requires CONFIG_OVERLAY_FS support in the kernel"
+	if ! use no_kernel_check; then
+		# define required kernel modules (or built-ins) to check for
+		CONFIG_CHECK="BLK_DEV_LOOP SQUASHFS ~OVERLAY_FS"
+		ERROR_BLK_DEV_LOOP="${P} requires CONFIG_BLK_DEV_LOOP support in the kernel"
+		ERROR_SQUASHFS="${P} requires CONFIG_SQUASHFS support in the kernel"
+		ERROR_OVERLAY_FS="${P} requires CONFIG_OVERLAY_FS support in the kernel"
 
-	# now do those checks
-	linux-info_pkg_setup
+		# now do those checks
+		linux-info_pkg_setup
+	fi
 }
 
 src_install() {
