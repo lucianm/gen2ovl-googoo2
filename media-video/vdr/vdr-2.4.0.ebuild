@@ -1,4 +1,4 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
@@ -7,25 +7,26 @@ EAPI=5
 inherit eutils flag-o-matic multilib toolchain-funcs
 
 # Switches supported by extensions-patch
-EXT_PATCH_FLAGS="alternatechannel permashift_v1 pinplugin graphtft naludump mainmenuhooks menuorg menuselection resumereset ttxtsubs"
+#EXT_PATCH_FLAGS="alternatechannel permashift_v1 pinplugin graphtft naludump mainmenuhooks menuorg menuselection resumereset ttxtsubs"
 
 # names of the use-flags
-EXT_PATCH_FLAGS_RENAMED=""
+#EXT_PATCH_FLAGS_RENAMED=""
 
 # names ext-patch uses internally, here only used for maintainer checks
-EXT_PATCH_FLAGS_RENAMED_EXT_NAME="bidi no_kbd sdnotify"
+EXT_PATCH_FLAGS_RENAMED_EXT_NAME="no_kbd sdnotify"#bidi 
 
-IUSE="bidi debug +kbd html systemd vanilla ${EXT_PATCH_FLAGS} ${EXT_PATCH_FLAGS_RENAMED}"
+IUSE="debug +kbd html systemd vanilla"
+# ${EXT_PATCH_FLAGS} ${EXT_PATCH_FLAGS_RENAMED}"#bidi 
 
 MY_PV="${PV%_p*}"
 MY_P="${PN}-${MY_PV}"
 S="${WORKDIR}/${MY_P}"
 
-EXT_P="extpng-${P}-gentoo-edition-v3"
+#EXT_P="extpng-${P}-gentoo-edition-v3"
 
 DESCRIPTION="Video Disk Recorder - turns a pc into a powerful set top box for DVB"
 HOMEPAGE="http://www.tvdr.de/"
-SRC_URI="ftp://ftp.tvdr.de/vdr/Developer/${MY_P}.tar.bz2"
+SRC_URI="ftp://ftp.tvdr.de/vdr/${MY_P}.tar.bz2"
 #	http://dev.gentoo.org/~hd_brummy/distfiles/${EXT_P}.patch.bz2"
 
 KEYWORDS="~amd64 ~arm ~arm64 ~ppc ~x86"
@@ -45,8 +46,8 @@ RDEPEND="${COMMON_DEPEND}
 	dev-lang/perl
 	>=media-tv/gentoo-vdr-scripts-2.7
 	media-fonts/corefonts
-	bidi? ( dev-libs/fribidi )
 	systemd? ( sys-apps/systemd )"
+#	bidi? ( dev-libs/fribidi )
 
 CONF_DIR=/etc/vdr
 CAP_FILE=${S}/capabilities.sh
@@ -103,7 +104,7 @@ lang_po() {
 
 src_configure() {
 	# support languages, written from right to left
-	export "BIDI=$(usex bidi 1 0)"
+#	export "BIDI=$(usex bidi 1 0)"
 	# systemd notification support
 	export "SDNOTIFY=$(usex systemd 1 0)"
 	# with/without keyboard
@@ -164,7 +165,7 @@ src_prepare() {
 
 		# Now apply extensions patch
 		#epatch "${WORKDIR}/${EXT_P}.patch"
-		epatch "${FILESDIR}/${EXT_P}.patch.bz2"
+#		epatch "${FILESDIR}/${EXT_P}.patch.bz2"
 
 		# This allows us to start even if some plugin does not exist
 		# or is not loadable.
@@ -212,7 +213,7 @@ src_prepare() {
 		eend $? "make depend failed"
 	fi
 
-	epatch "${FILESDIR}/${P}-fixrecordingshandlerlock-2.diff"
+#	epatch "${FILESDIR}/${P}-fixrecordingshandlerlock-2.diff"
 	epatch "${FILESDIR}/${P}_gentoo.patch"
 
 	# fix some makefile issues
@@ -273,10 +274,10 @@ src_install() {
 	insinto /usr/share/vdr
 	doins "${CAP_FILE}"
 
-	if use alternatechannel; then
-		insinto /etc/vdr
-		doins "${FILESDIR}"/channel_alternative.conf
-	fi
+#	if use alternatechannel; then
+#		insinto /etc/vdr
+#		doins "${FILESDIR}"/channel_alternative.conf
+#	fi
 
 	chown -R vdr:vdr "${D}/${CONF_DIR}"
 }
