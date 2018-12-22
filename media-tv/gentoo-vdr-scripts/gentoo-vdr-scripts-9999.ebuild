@@ -37,7 +37,7 @@ pkg_setup() {
 }
 
 src_prepare() {
-	epatch_user
+	eapply_user
 }
 
 src_install() {
