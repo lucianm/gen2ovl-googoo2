@@ -6,7 +6,7 @@ EAPI=7
 
 inherit git-r3 user
 
-EGIT_REPO_URI="git://github.com/lucianm/gentoo-vdr-scripts.git"
+EGIT_REPO_URI="https://github.com/lucianm/gentoo-vdr-scripts.git"
 
 DESCRIPTION="Scripts necessary for use of vdr as a set-top-box"
 HOMEPAGE="http://www.gentoo.org/"
