@@ -49,7 +49,7 @@ src_install() {
 	keepdir "${VDR_HOME}"
 
 local kd
-	for kd in shutdown-data merged-config-files dvd-images; do
+	for kd in shutdown-data merged-config-files dvd-images tmp cache; do
 		keepdir "${VDR_HOME}/${kd}"
 	done
 }
