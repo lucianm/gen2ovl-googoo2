@@ -1,10 +1,10 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/media-tv/gentoo-vdr-scripts/gentoo-vdr-scripts-9999.ebuild,v 1.8 2006/10/13 10:43:30 zzam Exp $
+# $Id$
 
-EAPI=5
+EAPI=7
 
-inherit eutils git-2 user
+inherit git-r3 user
 
 EGIT_REPO_URI="git://github.com/lucianm/gentoo-vdr-scripts.git"
 
