@@ -22,6 +22,8 @@ PDEPEND="media-tv/vdrcm"
 RDEPEND="nvram? ( sys-power/nvram-wakeup )
 	app-admin/sudo
 	sys-process/wait_on_pid
+	sys-apps/kbd
+	sys-apps/util-linux
 	sys-apps/gentoo-functions"
 
 VDR_HOME=/var/vdr
