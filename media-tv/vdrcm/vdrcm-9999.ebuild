@@ -1,8 +1,8 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
-EAPI="5"
+EAPI=7
 
 inherit eutils
 
@@ -40,8 +40,10 @@ IUSE=""
 
 src_prepare() {
 	if [ "${PV}" == "9999" ]; then
-		sed -i "s:-f2):-f2).9999:" Makefile || die "Could not adjust the version in the Makefile"
+		sed -i "s:^script_ver=:script_ver=${PV}.:" ${PN} || die "Could not adjust the version in the ${PN} script"
+		sed -i "s:\$(VERSION):${PV}:" Makefile || die "Could not adjust the version in the Makefile"
 	fi
+	eapply_user
 }
 
 src_install() {
