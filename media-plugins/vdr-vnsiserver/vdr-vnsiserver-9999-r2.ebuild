@@ -1,8 +1,8 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
-EAPI=5
+EAPI=7
 
 inherit vdr-plugin-2
 
@@ -40,6 +40,7 @@ src_prepare() {
 		rm wirbelscan_services.h
 		ln -s /usr/include/wirbelscan_services.h wirbelscan_services.h
 	fi
+	eapply_user
 }
 
 src_install() {
