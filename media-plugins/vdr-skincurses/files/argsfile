@@ -1,0 +1,8 @@
+# Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
+
+# skincurses (2.4.0) - A text only skin
+
+[skincurses]
+
+# This plugin has no command line arguments!
+
