@@ -1,4 +1,4 @@
-# Copyright 1999-2013 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
@@ -14,8 +14,8 @@ inherit eutils cmake-utils systemd
 #
 
 if [ "${OSCAM_VCS}" == "git" ] ; then
-	inherit git-2
-	EGIT_REPO_URI="${OSCAM_EGIT_REPO_URI:-git://github.com/gfto/oscam.git}"
+	inherit git-r3
+	EGIT_REPO_URI="${OSCAM_EGIT_REPO_URI:-https://github.com/nx111/oscam.git}"
 else
 	inherit subversion
 	ESVN_REPO_URI="${OSCAM_ESVN_REPO_URI:-http://streamboard.de.vu/svn/oscam/trunk}"
@@ -81,7 +81,7 @@ RDEPEND="${DEPEND}
 
 RESTRICT="nomirror"
 
-S="${WORKDIR}/${PN}"
+S="${WORKDIR}/${P}"
 
 src_prepare() {
 	if [ "${OSCAM_VCS}" == "git" ] ; then
