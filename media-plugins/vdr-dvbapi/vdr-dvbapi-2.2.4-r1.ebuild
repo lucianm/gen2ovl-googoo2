@@ -3,21 +3,15 @@
 
 EAPI=6
 
-inherit vdr-plugin-2 git-r3
+inherit vdr-plugin-2
 
-EGIT_REPO_URI="${DVBAPI_EGIT_REPO_URI:-https://github.com/manio/vdr-plugin-${VDRPLUGIN}.git}"
-EGIT_BRANCH="${DVBAPI_EGIT_BRANCH:-master}"
-
-#Y_P="vdr-plugin-${VDRPLUGIN}-${PV}"
-MY_P="vdr-${VDRPLUGIN}-${PV}"
+MY_P="vdr-plugin-dvbapi-${PV}"
 
 DESCRIPTION="VDR Plugin: allows connect VDR to OScam"
-HOMEPAGE="https://github.com/manio/vdr-plugin-${VDRPLUGIN}"
-#SRC_URI="https://github.com/manio/vdr-plugin-${VDRPLUGIN}/archive/v${PV}.tar.gz -> ${MY_P}.tar.gz"
-SRC_URI=""
+HOMEPAGE="https://github.com/manio/vdr-plugin-dvbapi"
+SRC_URI="https://github.com/manio/vdr-plugin-dvbapi/archive/v${PV}.tar.gz -> ${MY_P}.tar.gz"
 
-#KEYWORDS="~amd64 ~x86 ~arm"
-KEYWORDS=""
+KEYWORDS="~amd64 ~x86"
 SLOT="0"
 LICENSE="GPL-2+"
 IUSE="cpu_flags_x86_3dnow cpu_flags_x86_mmx cpu_flags_x86_sse cpu_flags_x86_sse2 dvbcsa"
@@ -84,7 +78,7 @@ src_prepare() {
 
 	export PARALLEL
 
-#	eapply "${FILESDIR}/kernel-4.14-fix.diff"
+	eapply "${FILESDIR}/kernel-4.14-fix.diff"
 }
 
 pkg_postinst() {

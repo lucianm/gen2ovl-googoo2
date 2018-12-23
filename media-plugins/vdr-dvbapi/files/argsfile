@@ -1,6 +1,6 @@
 # Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
 
-# dvbapi (2.2.2-GIT-54d41d4) - SoftCAM for OSCam
+# dvbapi (2.2.4) - SoftCAM for OSCam
 
 [dvbapi]
 

@@ -1,5 +1,7 @@
-# dvbapi (1.0.3) - DVBAPI type SOFTCAM
-#
-#  -B N,     --budget=N     forces DVB device N to budget mode (using FFdecsa)
+# dvbapi (2.2.4) - SoftCAM for OSCam
 
-#_EXTRAOPTS="--budget=1"
+#  -o N,     --offset=N     add constant value to all adapter indexes when
+#                           communicating with OSCam (default: 0)
+#  -d,       --disable-exp  disable CW expiration check
+
+#_EXTRAOPTS=""
