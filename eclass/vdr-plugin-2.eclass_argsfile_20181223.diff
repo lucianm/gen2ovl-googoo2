@@ -1,5 +1,5 @@
---- /var/portage/portage/eclass/vdr-plugin-2.eclass	2015-08-09 22:34:51.000000000 +0200
-+++ vdr-plugin-2.eclass	2016-02-16 01:04:21.238875172 +0100
+--- vdr-plugin-2.eclass.orig_20181223	2018-08-15 10:04:34.000000000 +0200
++++ vdr-plugin-2.eclass	2018-12-23 11:49:00.000000000 +0100
 @@ -21,6 +21,20 @@
  # defaults to ${FILESDIR}/confd. Each config file will be installed as e.g.
  # ${D}/etc/conf.d/vdr.${VDRPLUGIN}
@@ -38,12 +38,10 @@
  # The rc-addon files will be sourced by the startscript when the specific plugin
  # has been enabled.
  # rc-addon files may be used to prepare everything that is necessary for the
-@@ -620,26 +644,50 @@
- 	for docfile in README* HISTORY CHANGELOG; do
- 		[[ -f ${docfile} ]] && dodoc ${docfile}
- 	done
--
-+	
+@@ -579,25 +603,49 @@
+ 			done
+ 	fi
+ 
 +	local confd_name="confd"
 +	if has_version ">=media-tv/gentoo-vdr-scripts-2.9.9"; then
 +		confd_name="confd_4argsdir"
