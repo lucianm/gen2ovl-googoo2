@@ -1,17 +1,17 @@
-# Copyright 1999-2013 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-EAPI="5"
+EAPI=7
 
-inherit vdr-plugin-2 git-2
+inherit vdr-plugin-2 git-r3
 
 #VERSION="969" # every bump, new version !
 
 DESCRIPTION="VDR Plugin: Client/Server and http streaming plugin"
 HOMEPAGE="http://projects.vdr-developer.org/projects/plg-streamdev"
-EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-${VDRPLUGIN}.git"
-S="${WORKDIR}/${VDRPLUGIN}"
+EGIT_REPO_URI="https://projects.vdr-developer.org/git/vdr-plugin-${VDRPLUGIN}.git"
+S="${WORKDIR}/${P}"
 
 LICENSE="GPL-2"
 SLOT="0"
@@ -28,7 +28,7 @@ REQUIRED_USE="|| ( client server )
 PO_SUBDIR="client server"
 
 src_prepare() {
-	use upnp && epatch "${FILESDIR}/${P}_upnp.diff"
+	use upnp && eapply "${FILESDIR}/${P}_upnp.diff"
 
 	vdr-plugin-2_src_prepare
 
@@ -56,6 +56,8 @@ src_prepare() {
 	sed -i "s:tools\/:..\/tools\/:" tools/.dependencies
 	sed -i "s:h tools\/:h ..\/tools\/:" tools/.dependencies
 	sed -i "s:h common.h:h ..\/common.h:" tools/.dependencies
+
+	eapply_user
 }
 
 src_compile() {
@@ -65,8 +67,13 @@ src_compile() {
 
 src_install() {
 	cd "${S}"
-	mv ./client/libvdr-${VDRPLUGIN}-client.so libvdr-${VDRPLUGIN}-client.so.${APIVERSION}
+	insinto /etc/vdr/conf.avail
+	if use client; then
+		doins "${FILESDIR}"/${VDRPLUGIN}-client.conf
+		mv ./client/libvdr-${VDRPLUGIN}-client.so libvdr-${VDRPLUGIN}-client.so.${APIVERSION}
+	fi
 	if use server; then
+		doins "${FILESDIR}"/${VDRPLUGIN}-server.conf
 		mv ./server/libvdr-${VDRPLUGIN}-server.so libvdr-${VDRPLUGIN}-server.so.${APIVERSION}
 	fi
 
@@ -84,7 +91,7 @@ src_install() {
 
 		insinto /etc/vdr/plugins/streamdev-server
 		newins streamdev-server/streamdevhosts.conf streamdevhosts.conf
-		fowners vdr:vdr /etc/vdr -R
+		fowners vdr:vdr /etc/vdr/plugins/streamdev-server -R
 	fi
 }
 
