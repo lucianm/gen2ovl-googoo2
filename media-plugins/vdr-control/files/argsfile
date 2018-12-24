@@ -1,6 +1,6 @@
 # Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
 
-# control (0.0.2a) - Control VDR over terminal or telnet
+# control (0.0.2a-kw3) - Control VDR over terminal or telnet
 
 [control]
 
