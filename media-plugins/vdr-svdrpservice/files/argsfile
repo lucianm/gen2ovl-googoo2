@@ -1,0 +1,8 @@
+# Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
+
+# svdrpservice (1.0.0) - SVDRP client
+
+[svdrpservice]
+
+#  IP[:PORT]  Default server IP and optional port (e.g. 192.0.2.1:6419).
+#             If no port is given, the default SVDRP port 6419 is asumed.
