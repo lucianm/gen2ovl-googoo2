@@ -1,6 +1,6 @@
 # Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
 
-# dbus2vdr (28) - control vdr via D-Bus
+# dbus2vdr (31) - control vdr via D-Bus
 
 [dbus2vdr]
 
@@ -27,5 +27,9 @@
 #    enable network support for peer2peer communication
 #    a local dbus-daemon has to be started manually
 #    it has to store its address at $PLUGINDIR/network-address.conf
+#  --nulldevice[=force]
+#    create a primary device which does nothing
+#    useful to suspend in- and output
+#    may force vdr to set this device as primary device on startup
 #  --log=n
 #    set plugin's loglevel
