@@ -1,8 +1,8 @@
-# $Header: /var/cvsroot/gentoo-x86/media-plugins/vdr-live/files/rc-addon-0.2.sh,v 1.2 2012/06/04 19:42:24 hd_brummy Exp $
 #
 # zzam@g.o
 # hd_brummy@g.o
 
+EPGIMAGES_DIR="/var/cache/vdr/epgimages"
 
 plugin_pre_vdr_start() {
 	if [ "${LIVE_USE_SSL:=no}" = "yes" ]; then
@@ -19,16 +19,12 @@ plugin_pre_vdr_start() {
 		fi
 	fi
 
+	if [ -d ${EPGIMAGES_DIR} ]; then
+		add_plugin_param "--epgimages=${EPGIMAGES_DIR}"
+	fi
+
 	local ip
 	for ip in ${LIVE_BIND_IPS:=`hostname -i`}; do
 		add_plugin_param "-i ${ip}"
 	done
-
-	if [ -n "${LIVE_EPGIMGDIR}" ]; then
-		add_plugin_param "--epgimages=${LIVE_EPGIMGDIR}"
-	fi
-
-	if [ -n "${LIVE_TNTNET_LOGLEVEL}" ]; then
-		add_plugin_param "--log=${LIVE_TNTNET_LOGLEVEL}"
-	fi
 }

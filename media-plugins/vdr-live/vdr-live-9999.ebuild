@@ -1,8 +1,7 @@
-# Copyright 1999-2013 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: Exp $
 
-EAPI="5"
+EAPI=6
 
 inherit vdr-plugin-2 ssl-cert
 
@@ -12,13 +11,15 @@ HOMEPAGE="http://live.vdr-developer.org"
 if [[ "${PV}" = "9999" ]]; then
 	SRC_URI=""
 	KEYWORDS=""
-	EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-${VDRPLUGIN}.git"
-	#EGIT_REPO_URI="git://github.com/CReimer/vdr-plugin-${VDRPLUGIN}.git"
-	inherit git-2
+	#EGIT_REPO_URI="https://projects.vdr-developer.org/git/vdr-plugin-${VDRPLUGIN}.git"
+	EGIT_REPO_URI="https://github.com/REELcoder/vdr-plugin-${VDRPLUGIN}.git"
+	inherit git-r3
+	S="${WORKDIR}/${P}"
 else
-	SRC_URI="mirror://gentoo/${P}.tar.bz2
-		http://live.vdr-developer.org/downloads/${P}.tar.gz"
+	MY_P="release_2-3-1"
+	SRC_URI="https://projects.vdr-developer.org/git/vdr-plugin-live.git/snapshot/${MY_P}.tar.bz2"
 	KEYWORDS="~amd64 ~x86"
+	S="${WORKDIR}/${MY_P}"
 fi
 
 
@@ -26,14 +27,14 @@ LICENSE="GPL-2"
 SLOT="0"
 IUSE="pcre ssl"
 
-DEPEND=">=media-video/vdr-2.0.0
-	>=dev-libs/tntnet-2.0[ssl]
-	>=dev-libs/cxxtools-2.0
+DEPEND="media-video/vdr
+	>=dev-libs/tntnet-2.2.1[ssl=]
+	>=dev-libs/cxxtools-2.2.1
 	pcre? ( >=dev-libs/libpcre-8.12[cxx] )"
 RDEPEND="${DEPEND}"
 
-VDR_CONFD_FILE="${FILESDIR}/confd-0.2"
-VDR_RCADDON_FILE="${FILESDIR}/rc-addon-0.2.sh"
+VDR_CONFD_FILE="${FILESDIR}/confd-2.3"
+VDR_RCADDON_FILE="${FILESDIR}/rc-addon-2.3.sh"
 
 KEEP_I18NOBJECT="yes"
 
@@ -61,6 +62,11 @@ make_live_cert() {
 }
 
 src_prepare() {
+	default
+
+	# remove untranslated language files
+	rm "${S}"/po/{ca_ES,da_DK,el_GR,et_EE,hr_HR,hu_HU,nl_NL,nn_NO,pt_PT,ro_RO,sl_SI,tr_TR}.po
+
 	vdr-plugin-2_src_prepare
 
 	if ! use pcre; then
@@ -89,7 +95,7 @@ pkg_postinst() {
 	elog "\tadmin:live"
 
 	if use ssl ; then
-		if path_exists -a "${ROOT}"/etc/vdr/plugins/live/live.pem; then
+		if [[ -f ${ROOT}/etc/vdr/plugins/live/live.pem ]]; then
 			einfo "found an existing SSL cert, to create a new SSL cert, run:\n"
 			einfo "emerge --config ${PN}"
 		else
@@ -102,4 +108,3 @@ pkg_postinst() {
 pkg_config() {
 	make_live_cert
 }
-

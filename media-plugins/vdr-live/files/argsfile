@@ -1,0 +1,17 @@
+# Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
+
+# live (2.3.1) - Live Interactive VDR Environment
+
+[live]
+
+#  -p PORT,  --port=PORT        use PORT to listen for incoming connections
+#                               (default: 8008)
+#  -i IP,    --ip=IP            bind server only to specified IP, may appear
+#                               multiple times
+#                               (default: 0.0.0.0)
+#  -s PORT,  --sslport=PORT     use PORT to listen for incoming ssl connections
+#                               (default: 8443)
+#  -c CERT,  --cert=CERT        full path to a custom ssl certificate file
+#  -k KEY,  --key=KEY           full path to a custom ssl certificate key file
+#  -l level, --log=level        log level for tntnet (values: WARN, ERROR, INFO, DEBUG, TRACE)
+#  -e <dir>, --epgimages=<dir>  directory for epgimages
