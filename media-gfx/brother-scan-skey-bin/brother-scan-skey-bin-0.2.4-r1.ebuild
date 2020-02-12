@@ -1,4 +1,4 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2020 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
@@ -26,7 +26,7 @@ IUSE=""
 
 RESTRICT="mirror strip"
 
-RDEPEND="media-gfx/brother-scan4
+RDEPEND="media-gfx/brother-scan4-bin
 	media-libs/netpbm
 	media-gfx/gimp
 	virtual/mta
