@@ -46,6 +46,7 @@ src_prepare() {
 src_install() {
 	cp -R * "${D}" || die
 	dosym ../../../../opt/brother/Printers/${BROTHER_MODEL}/lpd/filter_${BROTHER_MODEL} /usr/libexec/cups/filter/brother_lpdwrapper_${BROTHER_MODEL}
+	dosym ../../inf/paperinfij2 /opt/brother/Printers/${BROTHER_MODEL}/lpd/filter_${BROTHER_MODEL}inf/paperinfij2
 }
 
 pkg_postinst() {
