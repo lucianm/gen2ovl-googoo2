@@ -1,10 +1,10 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2020 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
 EAPI=5
 
-inherit channel-logos git-2
+inherit channel-logos git-r3
 
 HOMEPAGE=""
 SRC_URI="
@@ -37,7 +37,6 @@ SRC_URI="
 	http://www.lyngsat-logo.com/hires/aa/acasa_tv_gold.png
 	http://www.lyngsat-logo.com/hires/aa/acasa_tv_hd.png
 	http://www.lyngsat-logo.com/hires/aa/antena1_ro.png
-	http://www.lyngsat-logo.com/hires/cc/cinemax_ce.png
 	http://www.lyngsat-logo.com/hires/cc/cinemax2_ce.png
 	http://www.lyngsat-logo.com/hires/dd/da_vinci_learning.png
 	http://www.lyngsat-logo.com/hires/dd/digi_24_ro.png
@@ -81,28 +80,30 @@ SRC_URI="
 	http://www.lyngsat-logo.com/logo/tv/ss/sport_ro_hd.png
 	http://www.lyngsat-logo.com/hires/cc/credo_tv.png
 	http://www.lyngsat-logo.com/hires/hh/hora_tv.png
-	http://www.lyngsat-logo.com/hires/nn/neptun_tv.png
 	http://www.lyngsat-logo.com/hires/ss/sport1_ro.png
-	http://upload.wikimedia.org/wikipedia/en/0/02/National_TV.png
-	https://github.com/picons/picons-source/raw/master/build-source/logos/travelchannelhd.default.svg
-	https://github.com/picons/picons-source/raw/master/build-source/logos/sundancechannelhd.default.svg
-	https://github.com/picons/picons-source/raw/master/build-source/logos/cartoonnetwork_tcm.default.svg
 "
+# failing:
+#	http://www.lyngsat-logo.com/hires/cc/cinemax_ce.png
+#	http://www.lyngsat-logo.com/hires/nn/neptun_tv.png
+#	http://upload.wikimedia.org/wikipedia/en/0/02/National_TV.png
+#	https://github.com/picons/picons-source/raw/master/build-source/logos/travelchannelhd.default.svg
+#	https://github.com/picons/picons-source/raw/master/build-source/logos/sundancechannelhd.default.svg
+#	https://github.com/picons/picons-source/raw/master/build-source/logos/cartoonnetwork_tcm.default.svg
 
-EGIT_REPO_URI="git://github.com/3PO/Senderlogos.git"
-EGIT_PROJECT="${PN}.git"
+EGIT_REPO_URI="https://github.com/3PO/Senderlogos.git"
+#EGIT_PROJECT="${PN}.git"
 
 LICENSE="3PO"
 SLOT="0"
 KEYWORDS="~x86 ~amd64 ~arm"
 IUSE=""
 
-S=${WORKDIR}
+S="${WORKDIR}/${P}"
 
 RRDEPEND="${DEPEND}"
 
 src_unpack() {
-	git-2_src_unpack
+	git-r3_src_unpack
 
 	#rm -f "${S}/prima tv.png"
 
@@ -155,19 +156,19 @@ src_prepare() {
 	ln -f -s "prima tv.png" "prima tv ro.png"
 	ln -f -s "mooz dance hd.png" "mooz dance.png"
 	ln -f -s "pro tv international.png" "protv international.png"
-	ln -f -s "digi sport1.png" "digi sport 1.png"
-	ln -f -s "digi sport2.png" "digi sport 2.png"
-	ln -f -s "digi sport3.png" "digi sport 3.png"
-	ln -f -s "travelchannelhd.png" "travel channel hd.png"
-	ln -f -s "sundancechannelhd.png" "sundance hd.png"
-	ln -f -s "cartoonnetwork tcm.png" "cartoon-tcm.png"
-	ln -f -s "cartoonnetwork tcm.png" "tcm cartoon.png"
-	ln -f -s "neptun tv.png" "tv neptun.png"
+	ln -f -s "digi sport1 ro.png" "digi sport 1.png"
+	ln -f -s "digi sport2 ro.png" "digi sport 2.png"
+	ln -f -s "digi sport3 ro.png" "digi sport 3.png"
+#	ln -f -s "travelchannelhd.png" "travel channel hd.png"
+#	ln -f -s "sundancechannelhd.png" "sundance hd.png"
+#	ln -f -s "cartoonnetwork tcm.png" "cartoon-tcm.png"
+#	ln -f -s "cartoonnetwork tcm.png" "tcm cartoon.png"
+#	ln -f -s "neptun tv.png" "tv neptun.png"
 	ln -f -s "fishing and hunting.png" "fishing&hunting.png"
-	mv -f "National TV.png" "national tv.png"
-	ln -f -s "national tv.png" "national.png"
+#	mv -f "National TV.png" "national tv.png"
+#	ln -f -s "national tv.png" "national.png"
 	ln -f -s "pro tv hd.png" "protv hd.png"
-	mv -f "kanal_d_tr_hd.png" "kanal_d_hd.png"
+#	mv -f "kanal_d_tr_hd.png" "kanal_d_hd.png"
 }
 
 src_install() {
