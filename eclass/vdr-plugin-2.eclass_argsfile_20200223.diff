@@ -1,5 +1,5 @@
---- vdr-plugin-2.eclass.orig_20181223	2018-08-15 10:04:34.000000000 +0200
-+++ vdr-plugin-2.eclass	2018-12-23 11:49:00.000000000 +0100
+--- vdr-plugin-2.eclass.orig	2020-02-23 17:39:40.000000000 +0100
++++ vdr-plugin-2.eclass	2020-05-06 16:50:34.751984261 +0200
 @@ -21,6 +21,20 @@
  # defaults to ${FILESDIR}/confd. Each config file will be installed as e.g.
  # ${D}/etc/conf.d/vdr.${VDRPLUGIN}
@@ -43,7 +43,7 @@
  	fi
  
 +	local confd_name="confd"
-+	if has_version ">=media-tv/gentoo-vdr-scripts-2.9.9"; then
++	if has_version ">=media-tv/gentoo-vdr-scripts-3.0_rc2"; then
 +		confd_name="confd_4argsdir"
 +		[[ -n ${VDR_CONFD_FILE_4ARGSDIR} ]] && [[ -e ${VDR_CONFD_FILE_4ARGSDIR} ]] && VDR_CONFD_FILE=${VDR_CONFD_FILE_4ARGSDIR}
 +	fi
@@ -56,7 +56,7 @@
  	fi
  
 +	local rcaddon_name="rc-addon.sh"
-+	if has_version ">=media-tv/gentoo-vdr-scripts-2.9.9"; then
++	if has_version ">=media-tv/gentoo-vdr-scripts-3.0_rc2"; then
 +		confd_name="rc-addon_4argsdir.sh"
 +		[[ -n ${VDR_RCADDON_FILE_4ARGSDIR} ]] && [[ -e ${VDR_RCADDON_FILE_4ARGSDIR} ]] && VDR_RCADDON_FILE=${VDR_RCADDON_FILE_4ARGSDIR}
 +	fi

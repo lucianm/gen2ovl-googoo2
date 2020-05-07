@@ -1,12 +1,11 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
-EAPI=5
+EAPI=7
 
 DESCRIPTION="Manages the VDR plugins"
-HOMEPAGE="https://www.gentoo.org/"
-#SRC_URI="mirror://gentoo/${P}.tar.bz2"
+HOMEPAGE="https://gitweb.gentoo.org/proj/gentoo-vdr-scripts.git/?h=eselect-module"
+#SRC_URI="http://vdr.websitec.de/download/eselect-vdr/${P}.tar.bz2"
 EGIT_REPO_URI="https://github.com/lucianm/${PN}.git"
 
 inherit git-r3
@@ -16,11 +15,11 @@ SLOT="0"
 KEYWORDS=""
 IUSE=""
 
-RDEPEND=">=app-admin/eselect-1.2.3"
+RDEPEND="app-admin/eselect"
 
 src_install() {
 	insinto /usr/share/eselect/modules
-	doins vdr-plugin.eselect || die "Could not install eselect module"
+	doins vdr-plugin.eselect
 
-	dosym /usr/bin/eselect /usr/bin/vdr-plugin-config
+	dosym eselect /usr/bin/vdr-plugin-config
 }
