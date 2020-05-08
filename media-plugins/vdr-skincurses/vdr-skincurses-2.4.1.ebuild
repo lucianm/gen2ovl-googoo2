@@ -19,3 +19,5 @@ IUSE=""
 DEPEND=">=media-video/vdr-${PV}"
 
 S="${WORKDIR}/vdr-${PV}/PLUGINS/src/${VDRPLUGIN}"
+
+PATCHES="${FILESDIR}/vdr-2.4.1-fix-skincurses-min.diff"
