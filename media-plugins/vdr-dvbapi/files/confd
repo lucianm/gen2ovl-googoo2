@@ -1,4 +1,4 @@
-# dvbapi (2.2.4) - SoftCAM for OSCam
+# dvbapi (2.2.5) - SoftCAM for OSCam
 
 #  -o N,     --offset=N     add constant value to all adapter indexes when
 #                           communicating with OSCam (default: 0)
