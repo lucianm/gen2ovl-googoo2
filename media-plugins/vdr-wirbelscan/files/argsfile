@@ -1,6 +1,6 @@
 # Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
 
-# wirbelscan (2018.11.04) - DVB channel scan for VDR
+# wirbelscan (2020.05.03) - DVB channel scan for VDR
 
 [wirbelscan]
 

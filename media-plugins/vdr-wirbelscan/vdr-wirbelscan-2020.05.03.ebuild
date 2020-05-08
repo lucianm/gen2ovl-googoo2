@@ -1,4 +1,4 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2020 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
@@ -7,15 +7,15 @@ EAPI=7
 inherit vdr-plugin-2
 
 DESCRIPTION="VDR Plugin: Scan for channels on DVB-? and on PVR*-Cards"
-HOMEPAGE="http://wirbel.htpc-forum.de/wirbelscan/index2.html"
-SRC_URI="http://wirbel.htpc-forum.de/wirbelscan/${PN}-${PV}.tgz"
+HOMEPAGE="http://www.gen2vdr.de/wirbel/wirbelscan/index2.html"
+SRC_URI="http://www.gen2vdr.de/wirbel/wirbelscan/${P}.tgz"
 
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~amd64 ~x86 ~arm"
 IUSE=""
 
-DEPEND=">=media-video/vdr-2.3.1
+DEPEND=">=media-video/vdr-2.4.1
 	!<media-tv/ivtv-0.8"
 RDEPEND="${DEPEND}"
 
