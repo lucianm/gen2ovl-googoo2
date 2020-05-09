@@ -1,8 +1,8 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2020 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-EAPI=5
+EAPI=7
 
 inherit eutils cmake-utils systemd
 
@@ -88,64 +88,64 @@ src_prepare() {
 		sed -i "s:svnversion -n .:git describe --always:" config.sh || die "Failed to patch the GIT commit as build string"
 	fi
 	sed -i "s:share/doc/oscam:share/doc/oscam-${PV}:" CMakeLists.txt || die "Failed to modify doc path"
-	epatch_user
+	eapply_user
+	cmake-utils_src_prepare
 }
 
 src_configure() {
-	local mycmakeargs="
+	local mycmakeargs=(
 		-DCS_CONFDIR=/etc/oscam
 		-DCMAKE_VERBOSE_MAKEFILE=ON
 		-INCLUDED=Yes
-		$(cmake-utils_use debug WITH_DEBUG)
-		$(cmake-utils_use www WEBIF)
-		$(cmake-utils_use touch TOUCH)
-		$(cmake-utils_use dvbapi HAVE_DVBAPI)
-		$(cmake-utils_use irdeto_guessing IRDETO_GUESSING)
-		$(cmake-utils_use anticasc CS_ANTICASC)
-		$(cmake-utils_use monitor MODULE_MONITOR)
-		$(cmake-utils_use ssl WITH_SSL)
-		$(cmake-utils_use loadbalancing WITH_LB)
-		$(cmake-utils_use cacheex CS_CACHEEX)
-		$(cmake-utils_use led LEDSUPPORT)
-		$(cmake-utils_use lcd LCDSUPPORT)
-		$(cmake-utils_use ipv6 IPV6SUPPORT)
-		$(cmake-utils_use cw_cycle_check CW_CYCLE_CHECK)
-		$(cmake-utils_use protocol_camd33 MODULE_CAMD33)
-		$(cmake-utils_use protocol_camd35 MODULE_CAMD35)
-		$(cmake-utils_use protocol_camd35_tcp MODULE_CAMD35_TCP)
-		$(cmake-utils_use protocol_newcamd MODULE_NEWCAMD)
-		$(cmake-utils_use protocol_cccam MODULE_CCCAM)
-		$(cmake-utils_use protocol_cccshare MODULE_CCCSHARE)
-		$(cmake-utils_use protocol_gbox MODULE_GBOX)
-		$(cmake-utils_use protocol_radegast MODULE_RADEGAST)
-		$(cmake-utils_use protocol_serial MODULE_SERIAL)
-		$(cmake-utils_use protocol_constcw MODULE_CONSTCW)
-		$(cmake-utils_use protocol_pandora MODULE_PANDORA)
-		$(cmake-utils_use protocol_ghttp MODULE_GHTTP)
-		$(cmake-utils_use reader WITH_CARDREADER)
-		$(cmake-utils_use reader_nagra READER_NAGRA)
-		$(cmake-utils_use reader_irdeto READER_IRDETO)
-		$(cmake-utils_use reader_conax READER_CONAX)
-		$(cmake-utils_use reader_cryptoworks READER_CRYPTOWORKS)
-		$(cmake-utils_use reader_seca READER_SECA)
-		$(cmake-utils_use reader_viaccess READER_VIACCESS)
-		$(cmake-utils_use reader_videoguard READER_VIDEOGUARD)
-		$(cmake-utils_use reader_dre READER_DRE)
-		$(cmake-utils_use reader_tongfang READER_TONGFANG)
-		$(cmake-utils_use reader_bulcrypt READER_BULCRYPT)
-		$(cmake-utils_use reader_griffin READER_GRIFFIN)
-		$(cmake-utils_use reader_dgcrypt READER_DGCRYPT)
-		$(cmake-utils_use cardreader_phoenix CARDREADER_PHOENIX)
-		$(cmake-utils_use cardreader_internal CARDREADER_INTERNAL)
-		$(cmake-utils_use cardreader_sc8in1 CARDREADER_SC8IN1)
-		$(cmake-utils_use cardreader_mp35 CARDREADER_MP35)
-		$(cmake-utils_use cardreader_smargo CARDREADER_SMARGO)
-		$(cmake-utils_use cardreader_smartreader CARDREADER_SMART)
-		$(cmake-utils_use cardreader_db2com CARDREADER_DB2COM)
-		$(cmake-utils_use cardreader_stapi CARDREADER_STAPI)
-		"
-
-		use usb && mycmakeargs="-DSTATIC_LIBUSB=0 ${mycmakeargs}"
+		-DWITH_DEBUG="$(usex debug)"
+		-DWEBIF="$(usex www)"
+		-DTOUCH="$(usex touch)"
+		-DHAVE_DVBAPI="$(usex dvbapi)"
+		-DIRDETO_GUESSING="$(usex irdeto_guessing)"
+		-DCS_ANTICASC="$(usex anticasc)"
+		-DMODULE_MONITOR="$(usex monitor)"
+		-DWITH_SSL="$(usex ssl)"
+		-DWITH_LB="$(usex loadbalancing)"
+		-DCS_CACHEEX="$(usex cacheex)"
+		-DLEDSUPPORT="$(usex led)"
+		-DLCDSUPPORT="$(usex lcd)"
+		-DIPV6SUPPORT="$(usex ipv6)"
+		-DCW_CYCLE_CHECK="$(usex cw_cycle_check)"
+		-DMODULE_CAMD33="$(usex protocol_camd33)"
+		-DMODULE_CAMD35="$(usex protocol_camd35)"
+		-DMODULE_CAMD35_TCP="$(usex protocol_camd35_tcp)"
+		-DMODULE_NEWCAMD="$(usex protocol_newcamd)"
+		-DMODULE_CCCAM="$(usex protocol_cccam)"
+		-DMODULE_CCCSHARE="$(usex protocol_cccshare)"
+		-DMODULE_GBOX="$(usex protocol_gbox)"
+		-DMODULE_RADEGAST="$(usex protocol_radegast)"
+		-DMODULE_SERIAL="$(usex protocol_serial)"
+		-DMODULE_CONSTCW="$(usex protocol_constcw)"
+		-DMODULE_PANDORA="$(usex protocol_pandora)"
+		-DMODULE_GHTTP="$(usex protocol_ghttp)"
+		-DWITH_CARDREADER="$(usex reader)"
+		-DREADER_NAGRA="$(usex reader_nagra)"
+		-DREADER_IRDETO="$(usex reader_irdeto)"
+		-DREADER_CONAX="$(usex reader_conax)"
+		-DREADER_CRYPTOWORKS="$(usex reader_cryptoworks)"
+		-DREADER_SECA="$(usex reader_seca)"
+		-DREADER_VIACCESS="$(usex reader_viaccess)"
+		-DREADER_VIDEOGUARD="$(usex reader_videoguard)"
+		-DREADER_DRE="$(usex reader_dre)"
+		-DREADER_TONGFANG="$(usex reader_tongfang)"
+		-DREADER_BULCRYPT="$(usex reader_bulcrypt)"
+		-DREADER_GRIFFIN="$(usex reader_griffin)"
+		-DREADER_DGCRYPT="$(usex reader_dgcrypt)"
+		-DCARDREADER_PHOENIX="$(usex cardreader_phoenix)"
+		-DCARDREADER_INTERNAL="$(usex cardreader_internal)"
+		-DCARDREADER_SC8IN1="$(usex cardreader_sc8in1)"
+		-DCARDREADER_MP35="$(usex cardreader_mp35)"
+		-DCARDREADER_SMARGO="$(usex cardreader_smargo)"
+		-DCARDREADER_SMART="$(usex cardreader_smartreader)"
+		-DCARDREADER_DB2COM="$(usex cardreader_db2com)"
+		-DCARDREADER_STAPI="$(usex cardreader_stapi)"
+		-DSTATIC_LIBUSB="$(usex !usb)"
+		)
 
 	cmake-utils_src_configure
 }
