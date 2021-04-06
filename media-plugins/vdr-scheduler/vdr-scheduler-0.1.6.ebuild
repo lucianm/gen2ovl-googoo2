@@ -1,8 +1,7 @@
-# Copyright 2003-2012 Gentoo Foundation
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
-# $Header: Exp $
 
-EAPI="4"
+EAPI=7
 
 inherit vdr-plugin-2
 
@@ -12,7 +11,8 @@ SRC_URI="http://winni.vdr-developer.org/scheduler/downloads/${P}.tgz"
 
 SLOT="0"
 LICENSE="GPL-2"
-KEYWORDS="~x86 ~amd64"
-IUSE=""
+KEYWORDS="~amd64 ~x86"
 
-DEPEND=">=media-video/vdr-1.4"
+DEPEND=">=media-video/vdr-2.3.5"
+
+PATCHES=( "${FILESDIR}/vdr-2.3.5_compat.patch" )
