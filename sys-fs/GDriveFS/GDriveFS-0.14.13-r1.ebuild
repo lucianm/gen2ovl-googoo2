@@ -6,7 +6,7 @@ inherit rindeal
 
 GH_RN="github:dsoprea"
 
-PYTHON_COMPAT=( python2_7 python3_6 )
+PYTHON_COMPAT=( python2_7 python3_8 python3_9 )
 
 inherit git-hosting
 inherit distutils-r1
@@ -20,10 +20,10 @@ KEYWORDS="~amd64 ~arm ~arm64"
 
 # requirements are in `gdrivefs/resources/requirements.txt`
 CDEPEND_A=(
-	">=dev-python/fusepy-2.0.2[${PYTHON_USEDEP}]"
-	"=dev-python/gevent-1*[${PYTHON_USEDEP}]"
+	">=dev-python/fusepy-3.0.1[${PYTHON_USEDEP}]"
+	"=dev-python/gevent-21*[${PYTHON_USEDEP}]"
 	"=dev-python/google-api-python-client-1*[${PYTHON_USEDEP}]"
-	"=dev-python/greenlet-0.4*[${PYTHON_USEDEP}]"
+	"=dev-python/greenlet-1*[${PYTHON_USEDEP}]"
 	"=dev-python/httplib2-0*[${PYTHON_USEDEP}]"
 	"=dev-python/python-dateutil-2*[${PYTHON_USEDEP}]"
 	"=dev-python/six-1*[${PYTHON_USEDEP}]"
