@@ -3,11 +3,11 @@ as we use for Linux FHS a different handling in gentoo
 demoplugins from core vdr install disabled
 support from Linguas variable
 
-Signed-off-by: Martin Dummer <martin.dummer@gmx.net>
-Reviewed-by: Joerg Bornkessel <hd_brummy@gentoo.org>
---- a/Makefile
-+++ b/Makefile
-@@ -182,7 +182,7 @@
+Signed-off-by: Joerg Bornkessel <hd_brummy@gentoo.org> 2021/Feb/11
+diff -Naur vdr-2.4.6.orig/Makefile vdr-2.4.6/Makefile
+--- vdr-2.4.6.orig/Makefile	2020-06-27 11:13:04.000000000 +0200
++++ vdr-2.4.6/Makefile	2020-08-08 18:16:02.519719542 +0200
+@@ -193,7 +193,7 @@
  
  PODIR     = po
  LOCALEDIR = locale
@@ -16,7 +16,7 @@ Reviewed-by: Joerg Bornkessel <hd_brummy@gentoo.org>
  I18Nmo    = $(addsuffix .mo, $(foreach file, $(I18Npo), $(basename $(file))))
  I18Nmsgs  = $(addprefix $(LOCALEDIR)/, $(addsuffix /LC_MESSAGES/vdr.mo, $(notdir $(foreach file, $(I18Npo), $(basename $(file))))))
  I18Npot   = $(PODIR)/vdr.pot
-@@ -209,7 +209,7 @@
+@@ -220,7 +220,7 @@
  
  install-i18n: i18n
  	@mkdir -p $(DESTDIR)$(LOCDIR)
@@ -25,7 +25,7 @@ Reviewed-by: Joerg Bornkessel <hd_brummy@gentoo.org>
  
  # The 'include' directory (for plugins):
  
-@@ -283,12 +283,11 @@
+@@ -294,12 +294,11 @@
  
  install-dirs:
  	@mkdir -p $(DESTDIR)$(VIDEODIR)
@@ -39,7 +39,7 @@ Reviewed-by: Joerg Bornkessel <hd_brummy@gentoo.org>
  	@cp -pn *.conf $(DESTDIR)$(CONFDIR)
  
  # Documentation:
-@@ -296,9 +295,9 @@
+@@ -307,9 +306,9 @@
  install-doc:
  	@mkdir -p $(DESTDIR)$(MANDIR)/man1
  	@mkdir -p $(DESTDIR)$(MANDIR)/man5
@@ -52,7 +52,7 @@ Reviewed-by: Joerg Bornkessel <hd_brummy@gentoo.org>
  
  # Plugins:
  
-@@ -315,8 +314,9 @@
+@@ -326,8 +325,9 @@
  # Includes:
  
  install-includes: include-dir

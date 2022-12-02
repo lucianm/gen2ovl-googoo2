@@ -1,42 +1,41 @@
-# Copyright 2020 Gentoo Authors
+# Copyright 2021-2022 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=7
+EAPI=8
 
-inherit eutils flag-o-matic multilib toolchain-funcs
+inherit flag-o-matic strip-linguas toolchain-funcs user-info
 
 DESCRIPTION="Video Disk Recorder - turns a pc into a powerful set top box for DVB"
 HOMEPAGE="http://www.tvdr.de/"
-SRC_URI="ftp://ftp.tvdr.de/vdr/${P}.tar.bz2
-	mainmenuhooks? ( http://vdr.websitec.de/download/${PN}/${P}/${P}_mainmenuhook-1.0.1.patch.bz2 )
-	menuorg? ( https://projects.vdr-developer.org/projects/plg-menuorg/repository/revisions/master/raw/vdr-patch/vdr-menuorg-2.3.x.diff )
-	naludump? ( http://www.udo-richter.de/vdr/files/vdr-2.1.5-naludump-0.1.diff )
-	pinplugin? ( http://vdr.websitec.de/download/${PN}/${P}/${P}_pinplugin.patch.bz2 )
-	ttxtsubs? ( http://vdr.websitec.de/download/${PN}/${P}/${PN}-2.4.0-ttxtsubs.patch.bz2 )
-	permashift? ( https://raw.githubusercontent.com/eikesauer/Permashift/master/vdr-2.4-patch-for-permashift.diff )"
+SRC_URI="http://git.tvdr.de/?p=vdr.git;a=snapshot;h=refs/tags/${PV};sf=tbz2 -> ${P}.tbz2
+	menuorg? ( https://github.com/vdr-projects/vdr-plugin-menuorg/raw/master/vdr-patch/vdr-menuorg-2.3.x.diff )
+	ttxtsubs? ( https://md11.it.cx/download/${PN}/${PN}-2.6.1_ttxtsubs_v2.patch )"
 
 LICENSE="GPL-2+"
 SLOT="0"
-KEYWORDS="~amd64 ~arm ~arm64 ~ppc ~x86"
-IUSE="bidi debug demoplugins html keyboard mainmenuhooks menuorg naludump pinplugin permashift systemd ttxtsubs verbose"
+KEYWORDS="amd64 ~arm ~arm64 ~ppc x86"
+IUSE="bidi debug demoplugins html keyboard mainmenuhooks menuorg naludump permashift pinplugin systemd ttxtsubs verbose"
 
 COMMON_DEPEND="
-	virtual/jpeg:*
-	sys-libs/libcap
-	>=media-libs/fontconfig-2.4.2
-	>=media-libs/freetype-2"
+	acct-group/vdr
+	acct-user/vdr
+	media-libs/fontconfig
+	media-libs/freetype
+	media-libs/libjpeg-turbo
+	sys-libs/libcap"
 DEPEND="${COMMON_DEPEND}
 	>=virtual/linuxtv-dvb-headers-5.3"
 RDEPEND="${COMMON_DEPEND}
 	dev-lang/perl
-	>=media-tv/gentoo-vdr-scripts-3.0_rc2
+	media-tv/gentoo-vdr-scripts
 	media-fonts/corefonts
 	bidi? ( dev-libs/fribidi )
 	systemd? ( sys-apps/systemd )"
-BDEPEND="sys-devel/gettext"
+BDEPEND="
+	sys-devel/gettext
+	virtual/pkgconfig"
 
-REQUIRED_USE="pinplugin? ( !mainmenuhooks )
-	permashift? ( !naludump !pinplugin )"
+REQUIRED_USE="permashift? ( !naludump !pinplugin )"
 
 CONF_DIR="/etc/vdr"
 CAP_FILE="${S}/capabilities.sh"
@@ -46,13 +45,7 @@ pkg_setup() {
 	use debug && append-flags -g
 
 	PLUGIN_LIBDIR="/usr/$(get_libdir)/vdr/plugins"
-
-	# use the corrected DIR /var/lib/vdr/* for acct/{user,group) handling
-	if has_version ">=media-tv/gentoo-vdr-scripts-3.0_rc1"; then
-		VIDEO_DIR="/var/lib/vdr/video"
-	else
-		VIDEO_DIR="/var/vdr/video"
-	fi
+	VIDEO_DIR="$(egethome vdr)/video"
 
 	tc-export CC CXX AR
 }
@@ -65,18 +58,7 @@ add_cap() {
 }
 
 lang_po() {
-	LING_PO=$( ls ${S}/po | sed -e "s:.po::g" | cut -d_ -f1 | tr \\\012 ' ' )
-}
-
-src_configure() {
-	# support languages, written from right to left
-	export "BIDI=$(usex bidi 1 0)"
-	# systemd notification support
-	export "SDNOTIFY=$(usex systemd 1 0)"
-	# with/without keyboard
-	export "USE_KBD=$(usex keyboard 1 0)"
-	# detailed compile output for debug
-	export "VERBOSE=$(usex verbose 1 0)"
+	LING_PO=$( ls "${S}"/po | sed -e "s:.po::g" | cut -d_ -f1 | tr \\\012 ' ' )
 }
 
 src_prepare() {
@@ -129,22 +111,22 @@ src_prepare() {
 	EOT
 	eend 0
 
-	eapply "${FILESDIR}/${P}_gentoo.patch"
-	eapply "${FILESDIR}/vdr-2.2.0-jpeg-9c.patch"
+	eapply "${FILESDIR}/${PN}-2.4.6_gentoo.patch"
 	use demoplugins || eapply "${FILESDIR}/vdr-2.4_remove_plugins.patch"
-	eapply "${FILESDIR}/${P}_makefile-variables.patch"
-	eapply "${FILESDIR}/${P}_glibc-2.31.patch"
-	eapply "${FILESDIR}/${P}_tmplargs-1_command-line-help-consolidated.patch"
-	eapply "${FILESDIR}/${P}_tmplargs-2_generate-argfile-templates-out-of-command-line.patch"
-	eapply "${FILESDIR}/${P}_gentoo-warning-user-option.patch"
+	eapply "${FILESDIR}/${PN}-2.4.1_tmplargs-1_command-line-help-consolidated.patch"
+	eapply "${FILESDIR}/${PN}-2.4.1_tmplargs-2_generate-argfile-templates-out-of-command-line.patch"
+	eapply "${FILESDIR}/${PN}-2.4.1_gentoo-warning-user-option.patch"
+	eapply "${FILESDIR}/${PN}-2.4.6_makefile-variables.patch"
 
-	use naludump && eapply "${DISTDIR}/${PN}-2.1.5-naludump-0.1.diff"
-	use permashift && eapply "${DISTDIR}/${PN}-2.4-patch-for-permashift.diff"
-	use pinplugin && eapply "${WORKDIR}/${P}_pinplugin.patch"
-	use ttxtsubs && eapply "${WORKDIR}/${PN}-2.4.0-ttxtsubs.patch"
-	use ttxtsubs && eapply "${FILESDIR}/${P}_ttxtsubs_segfault.patch"
+	# fix clang/LLVM compile
+	eapply "${FILESDIR}/${PN}-2.4.6_clang.patch"
+
+	use naludump && eapply "${FILESDIR}/${P}_naludump.patch"
+	use permashift && eapply "${FILESDIR}/${P}-patch-for-permashift.patch"
+	use pinplugin && eapply "${FILESDIR}/${P}_pinplugin.patch"
+	use ttxtsubs && eapply "${DISTDIR}/${P}_ttxtsubs_v2.patch"
 	use menuorg && eapply "${DISTDIR}/vdr-menuorg-2.3.x.diff"
-	use mainmenuhooks && eapply "${WORKDIR}/${P}_mainmenuhook-1.0.1.patch"
+	use mainmenuhooks && eapply "${FILESDIR}/${PN}-2.4.1_mainmenuhook-1.0.1.patch"
 
 	add_cap CAP_UTF8 \
 		CAP_IRCTRL_RUNTIME_PARAM \
@@ -170,6 +152,17 @@ src_prepare() {
 	strip-linguas ${LING_PO} en
 
 	default
+}
+
+src_configure() {
+	# support languages, written from right to left
+	export "BIDI=$(usex bidi 1 0)"
+	# systemd notification support
+	export "SDNOTIFY=$(usex systemd 1 0)"
+	# with/without keyboard
+	export "USE_KBD=$(usex keyboard 1 0)"
+	# detailed compile output for debug
+	export "VERBOSE=$(usex verbose 1 0)"
 }
 
 src_install() {
@@ -207,4 +200,3 @@ pkg_postinst() {
 	elog "To get an idea how to proceed now, have a look at our vdr-guide:"
 	elog "\thttps://wiki.gentoo.org/wiki/VDR"
 }
-
