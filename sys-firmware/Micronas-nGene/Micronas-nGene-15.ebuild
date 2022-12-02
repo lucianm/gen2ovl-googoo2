@@ -1,4 +1,4 @@
-# Copyright 1999-2014 Gentoo Foundation
+# Copyright 1999-2022 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
@@ -8,11 +8,11 @@ RESTRICT="mirror bindist"
 
 DESCRIPTION="Firmware for Micronas nGene based PCIe multimedia devices, like Linux4Media cineS2 DVB-S2 Twin tuner"
 HOMEPAGE="http://linuxtv.org/wiki/index.php/Linux4Media_cineS2_DVB-S2_Twin_Tuner"
-SRC_URI="http://www.digitaldevices.de/download/ngene_${PV}.fw"
+SRC_URI="https://linux4media.de/official_downloads/drivers/ngene_${PV}.fw"
 
 LICENSE="all-rights-reserved"
 SLOT="${PV}"
-KEYWORDS="~amd64 ~x86"
+KEYWORDS="~amd64 ~x86 ~arm"
 IUSE=""
 
 DEPEND="sys-apps/coreutils"
