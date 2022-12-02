@@ -1,6 +1,6 @@
---- vdr-plugin-2.eclass.orig	2013-03-05 10:31:15.000000000 +0100
-+++ vdr-plugin-2.eclass	2013-03-10 22:48:45.695145000 +0100
-@@ -196,6 +196,21 @@
+--- vdr-plugin-2.eclass.orig2	2022-12-02 01:46:43.473968801 +0100
++++ vdr-plugin-2.eclass	2022-12-02 01:50:03.098659319 +0100
+@@ -276,6 +276,21 @@
  	# Use a file instead of a variable as single-stepping via ebuild
  	# destroys environment.
  	touch "${WORKDIR}"/.vdr-plugin_makefile_patched
@@ -21,4 +21,4 @@
 +	fi
  }
  
- # Begin new vdr-plugin-2.eclass content
+ # @FUNCTION: vdr_gettext_missing

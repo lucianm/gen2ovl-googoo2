@@ -1,6 +1,6 @@
---- vdr-plugin-2.eclass.orig	2020-02-23 17:39:40.000000000 +0100
-+++ vdr-plugin-2.eclass	2020-05-06 16:50:34.751984261 +0200
-@@ -21,6 +21,20 @@
+--- vdr-plugin-2.eclass.orig	2022-09-12 21:42:45.000000000 +0200
++++ vdr-plugin-2.eclass	2022-12-02 01:46:43.473968801 +0100
+@@ -27,6 +27,20 @@
  # defaults to ${FILESDIR}/confd. Each config file will be installed as e.g.
  # ${D}/etc/conf.d/vdr.${VDRPLUGIN}
  
@@ -18,10 +18,10 @@
 +# defaults to ${FILESDIR}/${VDRPLUGIN}.conf. Each config file will be installed as e.g.
 +# ${D}/etc/vdr/conf.avail/${VDRPLUGIN}.conf
 +
- # @ECLASS-VARIABLE: VDR_RCADDON_FILE
+ # @ECLASS_VARIABLE: VDR_RCADDON_FILE
  # @DEFAULT_UNSET
  # @DESCRIPTION:
-@@ -30,6 +44,16 @@
+@@ -36,6 +50,16 @@
  # ${FILESDIR}/rc-addon.sh and will be installed as
  # ${VDR_RC_DIR}/plugin-${VDRPLUGIN}.sh
  #
@@ -38,7 +38,7 @@
  # The rc-addon files will be sourced by the startscript when the specific plugin
  # has been enabled.
  # rc-addon files may be used to prepare everything that is necessary for the
-@@ -579,25 +603,49 @@
+@@ -635,25 +659,49 @@
  			done
  	fi
  
