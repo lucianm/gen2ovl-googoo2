@@ -14,5 +14,9 @@ Then you can effectively add the overlay by issuing the command:
 
 <pre>layman -f -a gen2ovl-googoo2</pre>
 
+If using eselect repository, you can use the command:
+
+<pre>eselect repository add gen2ovl-googoo2 git git@github.com:lucianm/gen2ovl-googoo2.git</pre>
 
 Have phun!
+
