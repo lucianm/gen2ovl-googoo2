@@ -55,6 +55,15 @@ pkg_postinst() {
 	elog "Plugins which should be used are configured in"
 	elog "the config-file /etc/conf.d/vdr.plugins"
 	elog "or enable/disable them with \"eselect vdr-plugin\".\n"
+	elog ""
+	elog "A more modern alternative is using vdr's own ability to read"
+	elog "configuration files in order from /etc/vdr/conf.d"
+	elog "which have the *.conf extension, it will evaluate any active"
+	elog "CLI-like options encountered after a [section] named [vdr] or"
+	elog "[plugin-name]. It is most advisable to use a file per plugin"
+	elog "instance and sort them in desired order by giving them appropriatte names."
+	elog "This is most easily achieved using the text dialog configuration utility"
+	elog "vdrcm - just emerge media-tv/vdrcm"
 
 	if [[ -f "${EROOT}"/etc/conf.d/vdr.dvdswitch ]] &&
 		grep -q ^DVDSWITCH_BURNSPEED= "${EROOT}"/etc/conf.d/vdr.dvdswitch
