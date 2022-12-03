@@ -7,19 +7,19 @@ inherit tmpfiles user-info
 
 if [[ ${PV} == "9999" ]]; then
 	SRC_URI=""
-	EGIT_REPO_URI="https://github.com/lucianm/gentoo-vdr-scripts.git"
-	EGIT_CHECKOUT_DIR="${PHP_EXT_S}"
-
-	inherit git-r3
 	KEYWORDS="~amd64 ~arm ~arm64 ~ppc ~x86"
+	S="${WORKDIR}/${P}"
+
+	EGIT_REPO_URI="https://github.com/lucianm/${PN}.git"
+	inherit git-r3
 else
-	SRC_URI="https://github.com/lucianm/gentoo-vdr-scripts/archive/refs/tags/${P}.tar.gz"
+	SRC_URI="https://github.com/lucianm/${PN}/archive/refs/tags/${P}.tar.gz"
 	KEYWORDS="amd64 ~arm ~arm64 ~ppc x86"
+	S="${WORKDIR}/${PN}-${P}"
 fi
 
 DESCRIPTION="Scripts necessary for use of VDR as a set-top-box"
 HOMEPAGE="https://gitweb.gentoo.org/proj/gentoo-vdr-scripts.git/about/"
-S="${WORKDIR}/${PN}-${P}"
 
 LICENSE="GPL-2"
 SLOT="0"
