@@ -7,7 +7,7 @@ inherit tmpfiles user-info
 
 if [[ ${PV} == "9999" ]]; then
 	SRC_URI=""
-	KEYWORDS="~amd64 ~arm ~arm64 ~ppc ~x86"
+	KEYWORDS=""
 	S="${WORKDIR}/${P}"
 
 	EGIT_REPO_URI="https://github.com/lucianm/${PN}.git"
