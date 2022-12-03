@@ -1,0 +1,97 @@
+diff -Naur librepfunc-9999_orig/Makefile librepfunc-9999/Makefile
+--- librepfunc-9999_orig/Makefile	2022-12-03 18:13:12.505665162 +0100
++++ librepfunc-9999/Makefile	2022-12-03 18:25:33.902798616 +0100
+@@ -15,13 +15,13 @@
+ PATCH = 4
+ 
+ 
+-
+-LIBRARY = librepfunc.so
++LIBRARY_NAME = librepfunc
++LIBRARY = $(LIBRARY_NAME).so
+ LIBRARY_MAJOR = $(LIBRARY).$(MAJOR)
+ LIBRARY_MINOR = $(LIBRARY_MAJOR).$(MINOR)
+ LIBRARY_PATCH = $(LIBRARY_MINOR).$(PATCH)
+-VERSION = $(MAJOR).$(MINOR).$(PATCH)
+-URL = https://github.com/wirbel-at-vdr-portal/librepfunc
++VERSION ?= $(MAJOR).$(MINOR).$(PATCH)
++URL = https://github.com/wirbel-at-vdr-portal/$(LIBRARY_NAME)
+ 
+ 
+ 
+@@ -42,7 +42,7 @@
+ # * packages instead of fixing your broken distro, you may overwrite the
+ # * package_name here.
+ # *****************************************************************************/
+-package_name ?= $(LIBRARY_PATCH)
++package_name ?= $(LIBRARY_NAME)-$(VERSION)
+ 
+ 
+ #/******************************************************************************
+@@ -97,7 +97,8 @@
+ bindir           = $(exec_prefix)/bin
+ sbindir          = $(exec_prefix)/sbin
+ libexecdir       = $(exec_prefix)/libexec
+-libdir           = $(exec_prefix)/lib
++libdirname      ?= lib
++libdir           = $(exec_prefix)/$(libdirname)
+ datadir          = $(datarootdir)
+ docdir           = $(datarootdir)/doc/$(package_name)
+ infodir          = $(datarootdir)/info
+@@ -108,7 +109,7 @@
+ man3dir          = $(mandir)/man3
+ man4dir          = $(mandir)/man4
+ man5dir          = $(mandir)/man5
+-pkgconfigdir     = /usr/lib/pkgconfig
++pkgconfigdir     = /usr/$(libdirname)/pkgconfig
+ 
+ SOURCES  := $(sort $(wildcard $(srcdir)/*.cpp))
+ OBJS      = $(SOURCES:.cpp=.o)
+@@ -121,9 +122,9 @@
+ prefix=$(prefix)
+ exec_prefix=$${prefix}
+ includedir=$${prefix}/include
+-libdir=$${exec_prefix}/lib
++libdir=$${exec_prefix}/$(libdirname)
+ 
+-Name: librepfunc
++Name: $(LIBRARY_NAME)
+ Description: tools library for w_scan_cpp and wirbelscan
+ URL: $(URL)
+ Version: $(VERSION)
+@@ -153,10 +154,10 @@
+ 
+ .PHONY: clean Version.h
+ clean:
+-	@$(RM) -f $(OBJS) $(LIBRARY) $(LIBRARY_PATCH) $(DLL) $(DLL).a librepfunc.pc
++	@$(RM) -f $(OBJS) $(LIBRARY) $(LIBRARY_PATCH) $(DLL) $(DLL).a $(LIBRARY_NAME).pc
+ 
+ install: $(LIBRARY_PATCH)
+-	$(file >librepfunc.pc,$(PKG_DATA))
++	$(file >$(LIBRARY_NAME).pc,$(PKG_DATA))
+ 	$(MKDIR_P) $(DESTDIR)$(libdir)
+ 	$(MKDIR_P) $(DESTDIR)$(includedir)
+ 	$(MKDIR_P) $(DESTDIR)$(docdir)
+@@ -168,9 +169,9 @@
+ 	$(LN_SFR) $(DESTDIR)$(libdir)/$(LIBRARY_MINOR) $(DESTDIR)$(libdir)/$(LIBRARY_MAJOR)
+ 	$(LN_SFR) $(DESTDIR)$(libdir)/$(LIBRARY_MAJOR) $(DESTDIR)$(libdir)/$(LIBRARY)
+ 	$(INSTALL_DATA) CONTRIBUTORS COPYING README $(DESTDIR)$(docdir)
+-	$(INSTALL_DATA) librepfunc.pc $(DESTDIR)$(pkgconfigdir)
++	$(INSTALL_DATA) $(LIBRARY_NAME).pc $(DESTDIR)$(pkgconfigdir)
+ 
+-#	$(INSTALL_DATA) doc/librepfunc.1 $(DESTDIR)$(man1dir)
++#	$(INSTALL_DATA) doc/$(LIBRARY_NAME).1 $(DESTDIR)$(man1dir)
+ 
+ uninstall:
+ 	$(RM) -f $(DESTDIR)$(libdir)/$(LIBRARY_PATCH)
+@@ -182,8 +183,8 @@
+ 	$(RM) -f $(DESTDIR)$(docdir)/COPYING
+ 	$(RM) -f $(DESTDIR)$(docdir)/README
+ 	$(RM) -rf $(DESTDIR)$(docdir)
+-	$(RM) -f $(DESTDIR)$(man1dir)/librepfunc.1
+-	$(RM) -f $(DESTDIR)$(pkgconfigdir)/librepfunc.pc
++	$(RM) -f $(DESTDIR)$(man1dir)/$(LIBRARY_NAME).1
++	$(RM) -f $(DESTDIR)$(pkgconfigdir)/$(LIBRARY_NAME).pc
+ 
+ 
+ 
