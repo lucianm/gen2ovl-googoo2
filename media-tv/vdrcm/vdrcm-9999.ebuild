@@ -1,23 +1,25 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 2022 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
-EAPI=7
-
-inherit eutils
+EAPI=8
 
 DESCRIPTION="VDR Config Manager - interactive console dialogs script for managing VDR configuration files"
 HOMEPAGE="https://github.com/lucianm/${PN}"
 
 case "${PV}" in
 	9999)
+		SRC_URI=""
+		KEYWORDS=""
+		S="${WORKDIR}/${P}"
+
 		EGIT_REPO_URI="${HOMEPAGE}.git"
 		inherit git-r3
-		KEYWORDS=""
 		;;
 	*)
-		SRC_URI="${HOMEPAGE}/archive/${PV}.tar.gz -> ${P}.tar.gz"
-		KEYWORDS="~amd64 ~x86 ~arm"
+		SRC_URI="${HOMEPAGE}/archive/refs/tags/${P}.tar.gz"
+		KEYWORDS="amd64 x86 ~arm ~arm64"
+		S="${WORKDIR}/${PN}-${P}"
 		;;
 esac
 
