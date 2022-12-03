@@ -16,7 +16,7 @@ Then you can effectively add the overlay by issuing the command:
 
 If using eselect repository, you can use the command:
 
-<pre>eselect repository add gen2ovl-googoo2 git git@github.com:lucianm/gen2ovl-googoo2.git</pre>
+<pre>eselect repository add gen2ovl-googoo2 git https://github.com/lucianm/gen2ovl-googoo2.git</pre>
 
 Have phun!
 
