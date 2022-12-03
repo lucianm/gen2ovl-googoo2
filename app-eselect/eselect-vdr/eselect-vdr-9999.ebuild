@@ -5,13 +5,15 @@ EAPI=8
 
 if [[ ${PV} == "9999" ]]; then
 	SRC_URI=""
-	EGIT_REPO_URI="https://github.com/lucianm/${PN}.git"
-
-	inherit git-r3
 	KEYWORDS="~amd64 ~arm ~arm64 ~ppc ~x86"
+	S="${WORKDIR}/${P}"
+
+	EGIT_REPO_URI="https://github.com/lucianm/${PN}.git"
+	inherit git-r3
 else
 	SRC_URI="https://github.com/lucianm/${PN}/archive/refs/tags/${P}.tar.gz"
 	KEYWORDS="amd64 ~arm ~arm64 ~ppc x86"
+	S="${WORKDIR}/${PN}-${P}"
 fi
 
 DESCRIPTION="Manages the VDR plugins"
