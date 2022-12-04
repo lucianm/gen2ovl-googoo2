@@ -32,7 +32,7 @@ SLOT="0"
 IUSE=""
 
 DEPEND=">=media-video/vdr-2.4.1
-	sys-libs/librepfunc
+	dev-libs/librepfunc
 	!<media-tv/ivtv-0.8"
 RDEPEND="${DEPEND}"
 
