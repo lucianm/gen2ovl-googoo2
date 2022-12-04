@@ -18,7 +18,7 @@ DESCRIPTION="VDR plugin: show content of menu in a shell window"
 HOMEPAGE="http://www.tvdr.de/"
 SRC_URI="http://git.tvdr.de/?p=vdr.git;a=snapshot;h=refs/tags/${VDR_PV};sf=tbz2 -> vdr-${VDR_PV}.tbz2"
 
-KEYWORDS="~amd64 ~x86 ~arm"
+KEYWORDS="amd64 x86 ~arm ~arm64"
 SLOT="0"
 LICENSE="GPL-2"
 IUSE=""
