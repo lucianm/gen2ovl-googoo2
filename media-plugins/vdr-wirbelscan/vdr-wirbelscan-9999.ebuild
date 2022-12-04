@@ -10,23 +10,25 @@ DESCRIPTION="VDR Plugin: Scan for channels on DVB-? and on PVR*-Cards"
 HOMEPAGE="http://www.gen2vdr.de/wirbel/wirbelscan/index2.html"
 
 
-if [[ ${PV} == "9999" ]]; then
-	SRC_URI=""
-	KEYWORDS=""
-	S="${WORKDIR}/${P}"
+case "${PV}" in
+	9999)
+		SRC_URI=""
+		KEYWORDS=""
+		S="${WORKDIR}/${P}"
 
-	EGIT_REPO_URI="https://github.com/wirbel-at-vdr-portal/${VDRPLUGIN}-dev.git"
-	inherit git-r3
-else
-	SRC_URI="https://github.com/wirbel-at-vdr-portal/${VDRPLUGIN}-dev/archive/refs/tags/${PV}.tar.gz -> ${P}.tar.gz"
-	KEYWORDS="amd64 ~arm ~arm64 ~ppc x86"
-	S="${WORKDIR}/${VDRPLUGIN}-dev-${PV}"
-fi
+		EGIT_REPO_URI="https://github.com/wirbel-at-vdr-portal/${VDRPLUGIN}-dev.git"
+		inherit git-r3
+		;;
+	*)
+		SRC_URI="https://github.com/wirbel-at-vdr-portal/${VDRPLUGIN}-dev/archive/refs/tags/${PV}.tar.gz -> ${P}.tar.gz"
+		KEYWORDS="amd64 ~arm ~arm64 ~ppc x86"
+		S="${WORKDIR}/${VDRPLUGIN}-dev-${PV}"
+		;;
+esac
 
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="amd64 x86 ~arm ~arm64"
 IUSE=""
 
 DEPEND=">=media-video/vdr-2.4.1
