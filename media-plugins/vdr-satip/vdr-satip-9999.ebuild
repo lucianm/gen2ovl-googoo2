@@ -26,22 +26,24 @@ case "${PV}" in
 		;;
 esac
 
-
-LICENSE="GPL-2"
+LICENSE="GPL-2+"
 SLOT="0"
 IUSE=""
 
-DEPEND=">=media-video/vdr-2.2.0
-		>=net-misc/curl-7.36
-		|| ( dev-libs/tinyxml
-			dev-libs/pugixml )"
+DEPEND="
+	>=media-video/vdr-2.4.0
+	>=net-misc/curl-7.36
+	|| ( dev-libs/tinyxml dev-libs/pugixml )"
 RDEPEND="${DEPEND}"
+
+QA_FLAGS_IGNORED="
+	usr/lib/vdr/plugins/libvdr-satip.*
+	usr/lib64/vdr/plugins/libvdr-satip.*"
 
 src_prepare() {
 	vdr-plugin-2_src_prepare
 
-	if has_version "dev-libs/tinyxml" ; then
-		sed -e "s:#SATIP_USE_TINYXML:SATIP_USE_TINYXML:" -i Makefile
-		#BUILD_PARAMS+=" SATIP_USE_TINYXML = 1 "
+	if has_version "dev-libs/tinyxml"; then
+		sed -e "s:#SATIP_USE_TINYXML:SATIP_USE_TINYXML:" -i Makefile || die "sed failed"
 	fi
 }
