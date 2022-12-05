@@ -1,0 +1,12 @@
+diff -Naur w_scan_cpp-9999_orig/Makefile w_scan_cpp-9999/Makefile
+--- w_scan_cpp-9999_orig/Makefile	2022-12-05 02:26:31.432574321 +0100
++++ w_scan_cpp-9999/Makefile	2022-12-05 02:29:05.516154437 +0100
+@@ -217,7 +217,7 @@
+ 
+ 
+ SOURCES           := $(sort $(wildcard $(srcdir)/*.cpp))
+-VDR_SOURCES       := $(shell find $(vdrdir)  -maxdepth 1 ! -name "vdr.c" -name "*.c" 2>/dev/null | LC_ALL=C sort)
++VDR_SOURCES       := $(sort $(wildcard $(vdrdir)/*.c))
+ LIBSI_SOURCES     := $(sort $(wildcard $(vdrlibsidir)/*.c))
+ WIRBELSCAN_SOURCES = $(sort $(wildcard $(pluginsrcdir)/wirbelscan/*.cpp))
+ SATIP_SOURCES      = $(sort $(wildcard $(pluginsrcdir)/satip/*.c))
