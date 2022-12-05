@@ -1,0 +1,21 @@
+diff -Naur w_scan_cpp-99999999_orig/Makefile w_scan_cpp-99999999/Makefile
+--- w_scan_cpp-99999999_orig/Makefile	2022-12-05 09:37:17.759677325 +0100
++++ w_scan_cpp-99999999/Makefile	2022-12-05 09:45:51.915619568 +0100
+@@ -144,7 +144,7 @@
+ 
+ #------------------------
+ # documentation files (other than Info)
+-docdir = $(datarootdir)/doc/$(package_name)
++docdir = $(datarootdir)/doc/$(package_name)$(PKG_VERSION)
+ 
+ #------------------------
+ # the Info files for this package
+@@ -231,7 +231,7 @@
+ SATIP_OBJS      = $(SATIP_SOURCES:.c=.o)
+ 
+ 
+-VERSION = $(shell date +%Y%m%d)
++VERSION ?= $(shell date +%Y%m%d)
+ PACKAGE = $(package_name)-$(VERSION)
+ MACHINE = $(shell uname -m )
+ 
