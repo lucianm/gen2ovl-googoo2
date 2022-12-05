@@ -1,69 +1,76 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 2020-2022 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
-# $Header: $
 
-EAPI=7
+EAPI=8
 
-inherit vdr-plugin-2 git-r3
-
-#VERSION="969" # every bump, new version !
+inherit toolchain-funcs vdr-plugin-2
 
 DESCRIPTION="VDR Plugin: Client/Server and http streaming plugin"
-HOMEPAGE="http://projects.vdr-developer.org/projects/plg-streamdev"
-EGIT_REPO_URI="https://projects.vdr-developer.org/git/vdr-plugin-${VDRPLUGIN}.git"
-S="${WORKDIR}/${P}"
+HOMEPAGE="https://github.com/vdr-projects/vdr-plugin-streamdev"
+
+case "${PV}" in
+	9999)
+		SRC_URI=""
+		KEYWORDS=""
+		S="${WORKDIR}/${P}"
+
+		EGIT_REPO_URI="${HOMEPAGE}.git"
+		inherit git-r3
+		;;
+	*)
+		SRC_URI="${HOMEPAGE}/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz"
+		KEYWORDS="amd64 ~arm ~arm64 ~ppc x86"
+		S="${WORKDIR}/vdr-plugin-${VDRPLUGIN}-${PV}"
+		;;
+esac
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS=""
-IUSE="client +server upnp"
+IUSE="client +server"
+REQUIRED_USE="|| ( client server )"
 
-DEPEND=">=media-video/vdr-1.7.25"
+DEPEND="acct-user/vdr
+	>=media-video/vdr-2.3"
+BDEPEND="${DEPEND}"
 RDEPEND="${DEPEND}"
 
-REQUIRED_USE="|| ( client server )
-	upnp? ( server )"
+QA_FLAGS_IGNORED="
+	usr/lib/vdr/plugins/libvdr-streamdev-.*
+	usr/lib64/vdr/plugins/libvdr-streamdev-.*"
+PATCHES=(
+	"${FILESDIR}/${PN}_Makefile.patch"
+	"${FILESDIR}/${PN}_upnp.diff"
+)
 
 # vdr-plugin-2.eclass changes
 PO_SUBDIR="client server"
 
 src_prepare() {
-	use upnp && eapply "${FILESDIR}/${P}_upnp.diff"
+	# make detection in vdr-plugin-2.eclass for new Makefile handling happy
+	echo "# SOFILE" >> Makefile || die "modify Makefile failed"
+
+	# remove unnecessary include
+	sed -i Makefile -e "s:-I\$(VDRDIR)/include::" || die "modify Makefile failed"
 
 	vdr-plugin-2_src_prepare
 
-	# make subdir libdvbmpeg respect CXXFLAGS
-	sed -i Makefile \
-		-e '/CXXFLAGS.*+=/s:^:#:'
-
+	local flag
 	for flag in client server; do
 		if ! use ${flag}; then
 			sed -i Makefile \
 				-e '/^.PHONY:/s/'${flag}'//' \
-				-e '/^all:/s/'${flag}'//'
+				-e '/^.PHONY:/s/'install-${flag}'//' \
+				-e '/^all:/s/'${flag}'//' \
+				-e '/^install:/s/'install-${flag}'//' || die "modify Makefile failed"
 		fi
 	done
 
-	sed -i server/Makefile \
-		-i client/Makefile \
-		-e "s:\$(CXXFLAGS) -shared:\$(CXXFLAGS) \$(LDFLAGS) -shared:"
-
-	sed -i "s:include \$(VDRDIR)/Make.global:-include \$(VDRDIR)/Make.global:" Makefile
-
 	fix_vdr_libsi_include server/livestreamer.c
-
-	make -C ./tools .dependencies
-	sed -i "s:tools\/:..\/tools\/:" tools/.dependencies
-	sed -i "s:h tools\/:h ..\/tools\/:" tools/.dependencies
-	sed -i "s:h common.h:h ..\/common.h:" tools/.dependencies
-
-	eapply_user
 }
 
 src_compile() {
-	INCLUDES=-I.. vdr-plugin-2_src_compile
+	emake AR="$(tc-getAR)"
 }
-
 
 src_install() {
 	cd "${S}"
@@ -80,47 +87,25 @@ src_install() {
 	vdr-plugin-2_src_install
 
 	if use server; then
-		exeinto /usr/share/vdr/plugins/streamdev-server
-		doexe streamdev-server/externremux.sh
+		insinto /usr/share/vdr/streamdev
+		doins streamdev-server/externremux.sh
 
 		insinto /usr/share/vdr/rcscript
-		newins "${FILESDIR}"/rc-addon-9999.sh plugin-streamdev-server.sh
+		newins "${FILESDIR}"/rc-addon-VERSIONDUMMY.sh plugin-streamdev-server.sh
 
-		insinto /etc/conf.d
-		newins "${FILESDIR}"/confd-9999 vdr.streamdev-server
+		newconfd "${FILESDIR}"/confd vdr.streamdev-server
 
 		insinto /etc/vdr/plugins/streamdev-server
 		newins streamdev-server/streamdevhosts.conf streamdevhosts.conf
-		fowners vdr:vdr /etc/vdr/plugins/streamdev-server -R
+		fowners vdr:vdr /etc/vdr -R
 	fi
-}
-
-pkg_preinst() {
-	has_version "<${CATEGORY}/${PN}-0.6.0"
-	previous_less_than_0_6_0=$?
 }
 
 pkg_postinst() {
 	vdr-plugin-2_pkg_postinst
 
-	if [[ -e "${ROOT}"/etc/vdr/plugins/streamdev/streamdevhosts.conf ]]; then
-		einfo "move config file to new config DIR ${ROOT}/etc/vdr/plugins/streamdev-server/"
-		mv "${ROOT}"/etc/vdr/plugins/streamdev/streamdevhosts.conf "${ROOT}"/etc/vdr/plugins/streamdev-server/streamdevhosts.conf
-	fi
-
-	if [[ $previous_less_than_0_6_0 = 0 ]]; then
-		einfo "The server-side setting \"Suspend behaviour\" has been dropped in 0.6.0 in favour"
-		einfo "of priority based precedence. A priority of 0 and above means that clients"
-		einfo "have precedence. A negative priority gives precedence to local live TV on the"
-		einfo "server. So if \"Suspend behaviour\" was previously set to \"Client may suspend\" or"
-		einfo "\"Never suspended\", you will have to configure a negative priority. If the"
-		einfo "\"Suspend behaviour\" was set to \"Always suspended\", the default values should do."
-		einfo ""
-		einfo "Configure the desired priorities for HTTP and IGMP Multicast streaming in the"
-		einfo "settings of streamdev-server. If you haven't updated all your streamdev-clients"
-		einfo "to at least 0.5.2, configure \"Legacy Client Priority\", too."
-		einfo ""
-		einfo "In streamdev-client, you should set \"Minimum Priority\" to -99. Adjust \"Live TV"
-		einfo "Priority\" if necessary."
+	if [[ -e "${EROOT}"/etc/vdr/plugins/streamdev/streamdevhosts.conf ]]; then
+		einfo "move config file to new config DIR ${EROOT}/etc/vdr/plugins/streamdev-server/"
+		mv "${EROOT}"/etc/vdr/plugins/streamdev/streamdevhosts.conf "${EROOT}"/etc/vdr/plugins/streamdev-server/streamdevhosts.conf || die
 	fi
 }

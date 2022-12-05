@@ -1,4 +1,3 @@
-# $Header: $
 #
 # rc-addon-script for plugin streamdev-server
 #
@@ -6,7 +5,7 @@
 
 plugin_pre_vdr_start() {
 
-	: ${STREAMDEV_REMUX_SCRIPT:=/usr/share/vdr/plugins/streamdev-server/externremux.sh}
+	: ${STREAMDEV_REMUX_SCRIPT:=/usr/share/vdr/streamdev/externremux.sh}
 	add_plugin_param "-r ${STREAMDEV_REMUX_SCRIPT}"
 
 	if yesno ${STREAMDEV_HTTP_AUTH_ENABLE:-no}; then
