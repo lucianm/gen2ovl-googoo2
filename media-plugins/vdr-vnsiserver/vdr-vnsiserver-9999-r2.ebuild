@@ -1,8 +1,8 @@
-# Copyright 1999-2020 Gentoo Foundation
+# Copyright 2022 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
-EAPI=7
+EAPI=8
 
 inherit vdr-plugin-2
 
