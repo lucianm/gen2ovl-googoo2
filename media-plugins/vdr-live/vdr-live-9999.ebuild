@@ -1,13 +1,12 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 2021-2024 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=6
+EAPI=7
 
-inherit vdr-plugin-2 ssl-cert
+inherit ssl-cert toolchain-funcs vdr-plugin-2
 
 DESCRIPTION="VDR Plugin: Web Access To Settings"
-HOMEPAGE="http://live.vdr-developer.org"
-
+HOMEPAGE="https://github.com/MarkusEh/vdr-plugin-live"
 if [[ "${PV}" = "9999" ]]; then
 	SRC_URI=""
 	KEYWORDS=""
@@ -16,22 +15,22 @@ if [[ "${PV}" = "9999" ]]; then
 	inherit git-r3
 	S="${WORKDIR}/${P}"
 else
-	MY_P="release_2-3-1"
-	SRC_URI="https://projects.vdr-developer.org/git/vdr-plugin-live.git/snapshot/${MY_P}.tar.bz2"
-	KEYWORDS="~amd64 ~x86"
-	S="${WORKDIR}/${MY_P}"
+	MY_P="v3.3.4"
+	SRC_URI="https://github.com/MarkusEh/vdr-plugin-${VDRPLUGIN}/archive/${MY_P}.tar.gz -> ${P}.tar.gz"
+	KEYWORDS="amd64 x86 arm"
+	S="${WORKDIR}/vdr-plugin-${VDRPLUGIN}-${PV}"
 fi
 
-
-LICENSE="GPL-2"
+LICENSE="Apache-2.0 GPL-2+ RSA"
 SLOT="0"
 IUSE="pcre ssl"
 
 DEPEND="media-video/vdr
-	>=dev-libs/tntnet-2.2.1[ssl=]
-	>=dev-libs/cxxtools-2.2.1
+	>=dev-libs/tntnet-3[ssl=]
+	>=dev-libs/cxxtools-3
 	pcre? ( >=dev-libs/libpcre-8.12[cxx] )"
 RDEPEND="${DEPEND}"
+
 
 VDR_CONFD_FILE="${FILESDIR}/confd-2.3"
 VDR_RCADDON_FILE="${FILESDIR}/rc-addon-2.3.sh"
@@ -58,15 +57,12 @@ make_live_cert() {
 	install -d "${ROOT}${keydir}"
 	install -m0400 "${base}.key" "${ROOT}${keydir}/live-key.pem"
 	install -m0444 "${base}.crt" "${ROOT}${keydir}/live.pem"
-	chown vdr:vdr "${ROOT}"/etc/vdr/plugins/live/live{,-key}.pem
+
+	chown vdr:vdr "${ROOT}${keydir}/live.pem"
+	chown vdr:vdr "${ROOT}${keydir}/live-key.pem"
 }
 
 src_prepare() {
-	default
-
-	# remove untranslated language files
-	rm "${S}"/po/{ca_ES,da_DK,el_GR,et_EE,hr_HR,hu_HU,nl_NL,nn_NO,pt_PT,ro_RO,sl_SI,tr_TR}.po
-
 	vdr-plugin-2_src_prepare
 
 	if ! use pcre; then
@@ -90,21 +86,12 @@ pkg_postinst() {
 	elog "you should emerge and enable"
 	elog "media-plugins/vdr-epgsearch to search the EPG,"
 	elog "media-plugins/vdr-streamdev for Live-TV streaming"
+	elog "media-plugins/vdr-tvscraper for movie information"
 
 	elog "The default username/password is:"
 	elog "\tadmin:live"
 
 	if use ssl ; then
-		if [[ -f ${ROOT}/etc/vdr/plugins/live/live.pem ]]; then
-			einfo "found an existing SSL cert, to create a new SSL cert, run:\n"
-			einfo "emerge --config ${PN}"
-		else
-			einfo "No SSL cert found, creating a default one now"
 			make_live_cert
-		fi
 	fi
-}
-
-pkg_config() {
-	make_live_cert
 }

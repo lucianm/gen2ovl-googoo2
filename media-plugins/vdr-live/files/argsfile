@@ -1,6 +1,6 @@
 # Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
 
-# live (2.3.1) - Live Interactive VDR Environment
+# live (3.3.4) - Live Interactive VDR Environment
 
 [live]
 
@@ -11,7 +11,11 @@
 #                               (default: 0.0.0.0)
 #  -s PORT,  --sslport=PORT     use PORT to listen for incoming ssl connections
 #                               (default: 8443)
+#  -u URL,  --url=URL           url to this live server, e.g. http://rpi.fritz.box
+#                               only required if live is used as image server, e.g. for vnsi
 #  -c CERT,  --cert=CERT        full path to a custom ssl certificate file
 #  -k KEY,  --key=KEY           full path to a custom ssl certificate key file
 #  -l level, --log=level        log level for tntnet (values: WARN, ERROR, INFO, DEBUG, TRACE)
 #  -e <dir>, --epgimages=<dir>  directory for epgimages
+#  -t <dir>, --tvscraperimages=<dir> directory for tvscraper images
+#            --chanlogos=<dir>  directory for channel logos (PNG)
