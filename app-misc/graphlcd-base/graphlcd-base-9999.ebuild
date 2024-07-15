@@ -1,92 +1,113 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2024 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=5
-SRC_URI=""
+EAPI=8
 
-#GRAPHLCD_BASE_GIT_BRANCH="touchcol" 
+inherit optfeature toolchain-funcs udev
 
-: ${EGIT_REPO_URI:=${GRAPHLCD_BASE_GIT_REPO_URI:-git://projects.vdr-developer.org/graphlcd-base.git}}
-: ${EGIT_BRANCH:=${GRAPHLCD_BASE_GIT_BRANCH:-master}}
+DESCRIPTION="Contains the lowlevel lcd drivers for GraphLCD"
+HOMEPAGE="https://github.com/M-Reimer/${PN}/"
 
-inherit git-2 eutils flag-o-matic multilib
+if [ "${PV}" = "9999" ]; then
+	inherit git-r3
+	EGIT_REPO_URI="https://github.com/M-Reimer/${PN}.git"
+	S="${WORKDIR}/${P}"
+	KEYWORDS=""
+else
+	SRC_URI="https://github.com/M-Reimer/graphlcd-base/archive/refs/tags/${PV}.tar.gz -> ${P}.tar.gz"
+	S="${WORKDIR}/${P}"
+	KEYWORDS="amd64 x86"
 
-DESCRIPTION="Graphical LCD Driver"
-HOMEPAGE="http://graphlcd.berlios.de/"
-SRC_URI=""
+PATCHES=(
+	"${FILESDIR}/${PN}-2.0.3-clang.patch"
+	"${FILESDIR}/${PN}-2.0.3-cpp.patch"
+	"${FILESDIR}/${PN}-2.0.3-imagemagick7.patch"
+	"${FILESDIR}/${PN}-2.0.3-musl.patch"
+)
 
 
-KEYWORDS=""
-SLOT="0"
+
+fi
+
 LICENSE="GPL-2"
-IUSE="debug driver_ax206_experimental driver_picolcd_256x64_experimental +fontconfig g15 graphicsmagick +imagemagick serdisplib +truetype vnc"
-REQUIRED_USE="imagemagick? ( !graphicsmagick )"
+SLOT="0"
 
-DEPEND="truetype? ( media-libs/freetype )
-	imagemagick? ( media-gfx/imagemagick )
-	graphicsmagick? ( media-gfx/graphicsmagick )
-	dev-libs/libxml2
-	g15? ( app-misc/g15daemon )
-	serdisplib? ( dev-libs/serdisplib )
-	fontconfig? ( media-libs/fontconfig )
-	vnc? ( net-libs/libvncserver )
+IUSE="fontconfig freetype graphicsmagick imagemagick lcd_devices_ax206dpf lcd_devices_picolcd_256x64 lcd_devices_vnc"
+
+RDEPEND="
+	dev-libs/libhid
+	net-libs/libvncserver
+	freetype? ( media-libs/freetype:2= )
+	fontconfig? ( media-libs/fontconfig:1.0= )
+	imagemagick? (
+		!graphicsmagick? ( media-gfx/imagemagick:= )
+		graphicsmagick? ( media-gfx/graphicsmagick:0/1.3[cxx] )
+	)
+	lcd_devices_ax206dpf? ( virtual/libusb:0 )
+	lcd_devices_picolcd_256x64? ( virtual/libusb:0 )
 "
 
-RDEPEND="truetype? ( media-fonts/corefonts )"
+DEPEND="${RDEPEND}"
+
+BDEPEND="virtual/pkgconfig"
+
+DOCS=( "HISTORY" "README" "TODO" "docs/." )
+
 
 src_prepare() {
+	default
 
-	sed -i Make.config -e "s:usr\/local:usr:" -e "s:FLAGS *=:FLAGS ?=:" || die "sed /usr/local path failed"
+	# Change '/usr/local/' to '/usr'
+	# Change '/usr/lib' to '/usr/$(get_libdir)'
+	sed -e "22s:/usr/local:/usr:" -e "25s:/lib:/$(get_libdir):" -i Make.config || die
 
-	sed -i "s:PRESTRIP:#PRESTRIP:" Make.config || die "sed PRESTRIP failed"
+	# Fix newer GCC version with the Futaba MDM166A lcd driver
+	sed -e "s:0xff7f0004:(int) 0xff7f0004:" -i glcddrivers/futabaMDM166A.cpp || die
 
-	epatch_user
+	tc-export CC CXX
+}
 
-	if use !truetype; then
-		sed -i "s:HAVE_FREETYPE2:#HAVE_FREETYPE2:" Make.config || die "sed #HAVE_FREETYPE2 failed"
+src_configure() {
+	# Build optional drivers
+	if use lcd_devices_ax206dpf; then
+		sed -e "66s:#::" -i Make.config || die
+	fi
+	if use lcd_devices_picolcd_256x64; then
+		sed -e "69s:#::" -i Make.config || die
+	fi
+	if ! use lcd_devices_vnc; then
+		sed -e "60s:1:0:" -i Make.config || die
 	fi
 
-	if use !fontconfig; then
-		sed -i "s:HAVE_FONTCONFIG:#HAVE_FONTCONFIG:" Make.config || die "sed #HAVE_FONTCONFIG failed"
+	# Build optional features
+	if ! use freetype; then
+		sed -e "47s:HAVE:#HAVE:" -i Make.config || die
+	fi
+	if ! use fontconfig; then
+		sed -e "50s:HAVE:#HAVE:" -i Make.config || die
 	fi
 
 	if use imagemagick; then
-		sed -i "s:#HAVE_IMAGEMAGICK:HAVE_IMAGEMAGICK:" Make.config || die "sed HAVE_IMAGEMAGICK failed"
+		if use graphicsmagick; then
+			sed -e "57s:#::" -i Make.config || die
+		else
+			sed -e "56s:#::" -i Make.config || die
+		fi
 	fi
-
-	if use graphicsmagick; then
-		sed -i "s:#HAVE_GRAPHICSMAGICK:HAVE_GRAPHICSMAGICK:" Make.config || die "sed HAVE_GRAPHICSMAGICK failed"
-		sed -i "s/^IMAGELIB\ =\s*$/IMAGELIB\ =\ imagemagick/" glcdgraphics/Makefile || die "sed IMAGELIB failed"
-	fi
-
-	if use driver_ax206_experimental; then
-		sed -i "s:#HAVE_AX206DPF_EXPERIMENTAL:HAVE_AX206DPF_EXPERIMENTAL:" Make.config || die "sed HAVE_AX206DPF_EXPERIMENTAL failed"
-	fi
-
-	if use driver_picolcd_256x64_experimental; then
-		sed -i "s:#HAVE_picoLCD_256x64_EXPERIMENTAL:HAVE_picoLCD_256x64_EXPERIMENTAL:" Make.config || die "sed HAVE_picoLCD_256x64_EXPERIMENTAL failed"
-	fi
-
-	if use !vnc; then
-		sed -i "s:HAVE_DRIVER_VNCSERVER:#HAVE_DRIVER_VNCSERVER:" Make.config || die "sed #HAVE_DRIVER_VNCSERVER failed"
-	fi
-
-}
-
-src_compile() {
-	local BUILD_PARAMS=""
-	use debug && BUILD_PARAMS="HAVE_DEBUG=1"
-	emake $BUILD_PARAMS || die "emake failed"
 }
 
 src_install() {
+	emake DESTDIR="${D}" UDEVRULESDIR="$(get_udevdir)/rules.d" install
 
-	dodir /lib/udev/rules.d
-	emake DESTDIR="${D}"usr LIBDIR="${D}"usr/$(get_libdir) UDEVRULESDIR="${D}"lib/udev/rules.d install
+	einstalldocs
+}
 
-	insinto /etc
-	doins graphlcd.conf
+pkg_postinst() {
+	udev_reload
 
-	dodoc docs/*
+	optfeature "supporting the logitech g15 keyboard lcd." app-misc/g15daemon
+}
 
+pkg_postrm() {
+	udev_reload
 }

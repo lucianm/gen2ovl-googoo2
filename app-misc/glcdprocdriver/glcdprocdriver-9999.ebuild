@@ -1,53 +1,49 @@
-# Copyright 1999-2014 Gentoo Foundation
+# Copyright 1999-2022 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
-# $Header: Exp $
 
-EAPI="5"
-
-inherit eutils flag-o-matic multilib toolchain-funcs
+EAPI=8
 
 MY_PN="GLCDprocDriver"
+MY_P="${MY_PN}-${PV}"
+
+inherit toolchain-funcs
+
+DESCRIPTION="A glue between the graphlcd-base library from the GraphLCD project"
+HOMEPAGE="
+	https://lucianm.github.io/GLCDprocDriver
+	https://github.com/lucianm/GLCDprocDriver
+"
 
 if [ "${PV}" = "9999" ]; then
-	inherit git-2
-	EGIT_REPO_URI="git://github.com/lucianm/${MY_PN}.git"
+	inherit git-r3
+	EGIT_REPO_URI="https://github.com/lucianm/${MY_PN}.git"
+	S="${WORKDIR}/${P}"
 	KEYWORDS=""
-	S="${WORKDIR}/${MY_PN}"
 else
-	SRC_URI="https://github.com/lucianm/${MY_PN}/archive/${PV}.tar.gz -> ${MY_PN}-${PV}.tar.gz"
-	KEYWORDS="~amd64 ~x86 ~ppc"
-	S="${WORKDIR}/${MY_PN}-${PV}"
+	SRC_URI="https://github.com/lucianm/${MY_PN}/archive/${PV}.tar.gz -> ${MY_P}.tar.gz"
+	S="${WORKDIR}/${MY_P}"
+	KEYWORDS="amd64 x86"
 fi
-
-DESCRIPTION="Glue library for the glcdlib LCDproc driver based on GraphLCD"
-HOMEPAGE="http://lucianm.github.com/${MY_PN}/"
 
 SLOT="0"
 LICENSE="GPL-2"
 
-DEPEND=">app-misc/graphlcd-base-0.1.9"
-RDEPEND=${DEPEND}
-
-IUSE="debug"
+DEPEND="app-misc/graphlcd-base"
+RDEPEND="${DEPEND}"
 
 src_prepare() {
-	epatch_user
+	default
+
+	# Respect users CXX
+	sed -e 's/g++/$(CXX)/g' -i Makefile || die
 }
 
 src_compile() {
-	if use debug; then
-		filter-flags -O2 -O1
-		append-flags -g -ggdb -O0
-		filter-ldflags -O2 -O1
-		append-ldflags -g -ggdb -O0
-	fi
-
-	emake
-#	emake LDFLAGS="${LDFLAGS}" CXX="$(tc-getCXX)" CXXFLAGS="${CXXFLAGS}"
+	emake CC="$(tc-getCC)" CXX="$(tc-getCXX)"
 }
 
-src_install()
-{
-	emake DESTDIR="${D}/usr" LIBDIR="${D}/usr/$(get_libdir)" install
-	dodoc AUTHORS README.md INSTALL TODO ChangeLog
+src_install() {
+	emake DESTDIR="${ED}/usr" INCDIR="${ED}/usr/share/include" LIBDIR="${ED}/usr/$(get_libdir)" install
+
+	einstalldocs
 }
