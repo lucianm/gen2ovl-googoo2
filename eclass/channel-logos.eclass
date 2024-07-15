@@ -13,7 +13,7 @@
 # vdr-plugin-2.eclass
 #   Joerg Bornkessel <hd_brummy@gentoo.org>
 
-inherit eutils
+# inherit eutils
 
 EXPORT_FUNCTIONS src_prepare
 
@@ -35,6 +35,6 @@ DEPEND="app-text/convmv
 	app-arch/unzip"
 
 channel-logos_src_prepare() {
-	epatch_user
+	eapply_user
 	convmv --notest --replace -f iso-8859-1 -t utf-8 -r "${S}"/
 }
