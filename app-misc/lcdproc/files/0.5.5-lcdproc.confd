@@ -1,4 +1,0 @@
-# /etc/init.d/lcdproc
-
-# add options as shown by 'lcdproc -h'
-LCDPROC_CLIENT_OPTS=""
