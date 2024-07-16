@@ -1,6 +1,6 @@
 # Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
 
-# vnsiserver (1.8.0) - VDR-Network-Streaming-Interface (VNSI) Server
+# vnsiserver (1.8.3) - VDR-Network-Streaming-Interface (VNSI) Server
 
 [vnsiserver]
 
