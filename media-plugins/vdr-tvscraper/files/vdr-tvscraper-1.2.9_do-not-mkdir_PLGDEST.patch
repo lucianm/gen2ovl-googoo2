@@ -1,0 +1,11 @@
+diff '--color=auto' -Naur vdr-plugin-tvscraper-1.2.9_orig/Makefile vdr-plugin-tvscraper-1.2.9/Makefile
+--- vdr-plugin-tvscraper-1.2.9_orig/Makefile	2024-04-09 07:38:17.000000000 -0000
++++ vdr-plugin-tvscraper-1.2.9/Makefile	2024-07-16 23:09:05.199336619 -0000
+@@ -92,7 +92,6 @@
+ 	@cp -a conf/override_tvs.conf $(DESTDIR)$(RESDIR)/plugins/$(PLUGIN)/
+ 
+ install-plugins: plugins
+-	mkdir -p "$(PLGDEST)"
+ 	mkdir -p "$(_PLGDEST)"
+ 	for i in ${PLGSRCDIR}/*/Makefile; do\
+       grep -q "PLUGIN.*=" "$$i" || continue;\

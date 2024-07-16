@@ -1,0 +1,12 @@
+# /etc/conf.d/vdr.tvscraper
+# Please add options as necessary to _EXTRAOPTS below
+
+# tvscraper (1.2.9) - Scraping movie and series info
+
+#  -d <CACHEDIR>, --dir=<CACHEDIR> Set directory where database and images are stored
+#  -c, --readOnlyClient Don't update any data, just read the data
+#  -p, --autoTimersPath Overide the default path for auto timer recordings
+#  -t, --timersOnNumberOfTsFiles Create auto timers if number of ts files != 1
+
+_EXTRAOPTS=""
+

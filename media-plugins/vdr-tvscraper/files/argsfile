@@ -1,0 +1,10 @@
+# Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
+
+# tvscraper (1.2.9) - Scraping movie and series info
+
+[tvscraper]
+
+#  -d <CACHEDIR>, --dir=<CACHEDIR> Set directory where database and images are stored
+#  -c, --readOnlyClient Don't update any data, just read the data
+#  -p, --autoTimersPath Overide the default path for auto timer recordings
+#  -t, --timersOnNumberOfTsFiles Create auto timers if number of ts files != 1
