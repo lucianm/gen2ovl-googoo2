@@ -1,0 +1,12 @@
+diff '--color=auto' -Naur w_scan_cpp-20231015_orig/Makefile w_scan_cpp-20231015/Makefile
+--- w_scan_cpp-20231015_orig/Makefile	2023-10-15 10:05:13.000000000 -0000
++++ w_scan_cpp-20231015/Makefile	2024-07-16 20:19:29.224514493 -0000
+@@ -217,7 +217,7 @@
+ 
+ 
+ SOURCES           := $(sort $(wildcard $(srcdir)/*.cpp))
+-VDR_SOURCES       := $(shell find $(vdrdir)  -maxdepth 1 ! -name "vdr.c" -name "*.c" 2>/dev/null | LC_ALL=C sort)
++VDR_SOURCES       := $(wildcard $(vdrdir)/*.c)
+ LIBSI_SOURCES     := $(sort $(wildcard $(vdrlibsidir)/*.c))
+ WIRBELSCAN_SOURCES = $(sort $(wildcard $(pluginsrcdir)/wirbelscan/*.cpp))
+ SATIP_SOURCES      = $(sort $(wildcard $(pluginsrcdir)/satip/*.c))
