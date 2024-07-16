@@ -1,4 +1,4 @@
-# Copyright 1999-2022 Gentoo Foundation
+# Copyright 1999-2024 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: Exp $
 
@@ -7,7 +7,8 @@ EAPI=8
 inherit vdr-plugin-2
 
 DESCRIPTION="VDR Plugin: integrates SAT>IP network devices seamlessly into VDR"
-HOMEPAGE="https://github.com/rofafor/vdr-plugin-satip"
+#HOMEPAGE="https://github.com/rofafor/vdr-plugin-satip"
+HOMEPAGE="https://github.com/wirbel-at-vdr-portal/vdr-plugin-satip"
 
 
 case "${PV}" in
@@ -20,7 +21,8 @@ case "${PV}" in
 		inherit git-r3
 		;;
 	*)
-		SRC_URI="${HOMEPAGE}/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz"
+		#SRC_URI="${HOMEPAGE}/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz"
+		SRC_URI="${HOMEPAGE}/archive/refs/tags/${PV}.tar.gz -> ${P}.tar.gz"
 		KEYWORDS="amd64 ~arm ~arm64 ~ppc x86"
 		S="${WORKDIR}/vdr-plugin-${VDRPLUGIN}-${PV}"
 		;;

@@ -1,11 +1,11 @@
 # Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
 
-# satip (2.4.1) - SAT>IP Devices
+# satip (20240224) - SAT>IP Devices
 
 [satip]
 
 #  -d <num>, --devices=<number>  set number of devices to be created
-#  -t <mode>, --trace=<mode>     set the tracing mode
+#  -t <mode>, --trace=<mode>     set the debug mode
 #  -s <ipaddr>|<model>|<desc>, --server=[<srcaddress>@]<ipaddress>[:<port>]|<model>[:<filter>]|<description>[:<quirk>];...
 #                                define hard-coded SAT>IP server(s)
 #
