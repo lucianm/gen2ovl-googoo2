@@ -1,22 +1,23 @@
 # Copyright 2024 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=7
+EAPI=8
 
 inherit vdr-plugin-2
 
 DESCRIPTION="VDR plugin: create timers from epg content based on saved search expressions"
 HOMEPAGE="http://winni.vdr-developer.org/epgsearch/index_eng.html"
-if [ "${PV}" = "9999" ]; then
+
+if [[ "${PV}" = "9999" ]]; then
 	inherit git-r3
-	EGIT_REPO_URI="git://projects.vdr-developer.org/vdr-plugin-${VDRPLUGIN}.git"
+	SRC_URI=""
 	KEYWORDS=""
+	EGIT_REPO_URI="https://github.com/vdr-projects/vdr-plugin-${VDRPLUGIN}.git"
 	S="${WORKDIR}/${P}"
 else
-	GIT_COMMIT_ID="cff8dfe58853aa0cc4f6e9a8896104a920b98730"
-	SRC_URI="https://projects.vdr-developer.org/git/vdr-plugin-${VDRPLUGIN}.git/snapshot/vdr-plugin-${VDRPLUGIN}-${GIT_COMMIT_ID}.tar.gz -> ${P}.tar.gz"
+	SRC_URI="https://github.com/vdr-projects/vdr-plugin-${VDRPLUGIN}/archive/v${PV}.tar.gz -> ${P}.tar.gz"
 	KEYWORDS="amd64 x86 arm"
-	S="${WORKDIR}/vdr-plugin-epgsearch-${GIT_COMMIT_ID}"
+	S="${WORKDIR}/vdr-plugin-${VDRPLUGIN}-${PV}"
 fi
 
 LICENSE="GPL-2+"
@@ -34,7 +35,6 @@ BDEPEND="
 	dev-lang/perl"
 
 PATCHES=(
-	"${FILESDIR}/${PN}-2.4.0_makefile.patch"
 	"${FILESDIR}/${PN}-2.4.0_docsrc2man-no-gzip.patch"
 )
 

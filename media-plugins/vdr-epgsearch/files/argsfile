@@ -1,6 +1,6 @@
 # Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
 
-# epgsearch (2.4.1) - search the EPG for repeats and more
+# epgsearch (2.4.2) - search the EPG for repeats and more
 
 [epgsearch]
 
