@@ -1,9 +1,8 @@
 # /etc/conf.d/vdr.osdteletext
-# $Id$
 
 # ################################################
 #
-# for minimal activity on your Harddisc
+# for minimal activity on your harddisc
 # store the vtx files in a temp filesystem
 #	allowed values: yes no
 #	default: yes
@@ -20,8 +19,8 @@
 
 # set the dir of the tmpfs
 #	allowed values: directory names
-#	default: /var/cache/vdr/plugins/osdteletext
-#OSDTELETEXT_DIR=/var/cache/vdr/plugins/osdteletext
+#	default: /var/cache/vdr/osdteletext
+#OSDTELETEXT_DIR=/var/cache/vdr/osdteletext
 
 # store top text pages at cache. (unviewable pages)
 #	allowed values: yes no

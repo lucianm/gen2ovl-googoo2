@@ -1,21 +1,28 @@
 # Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
 
-# osdteletext (0.9.5) - Displays teletext on the OSD
+# osdteletext (2.3.1) - Displays teletext on the OSD
 
 [osdteletext]
 
-#  -d        --directory=DIR    The directory where the temporary
-#                               files will be stored.
-#                               (default: /var/cache/vdr/vtx)
-#                               Ensure that the directory exists and is writable.
---directory=/var/cache/vdr/plugins/osdteletext
+#  -d        --directory=DIR    The directory where the temporary files will be stored.
+#                                default: /var/cache/vdr/vtx
+#                                Ensure that the directory exists and is writable.
 #  -n        --max-cache=NUM    Maximum size in megabytes of cache used
-#                               to store the pages on the harddisk.
-#                               (default: a calculated value below 50 MB)
---max-cache=30
+#                                to store the pages on the harddisk.
+#                                default: a calculated value below 50 MB
 #  -s        --cache-system=SYS Set the cache system to be used.
-#                               Choose "legacy" for the traditional
-#                               one-file-per-page system.
-#                               Default is "packed" for the 
-#                               one-file-for-a-few-pages system.
+#                                Choose "legacy" for the traditional
+#                                 one-file-per-page system.
+#                                Default is "packed" for the 
+#                                 one-file-for-a-few-pages system.
 #  -t,       --toptext          Store top text pages at cache. (unviewable pages)
+#  -k        --key-levels=NUM   Maximum amount of Hotkey levels selectable and stored
+#                                default: 1 (which deactivate this feature)
+#                                maximum: 9 levels
+#  -o        --osd-presets=NUM  Maximum amount of OSD presets selectable and stored
+#                                default: 1 (which deactivate this feature)
+#                                maximum: 9 presets
+#  -P|--debugpage <int|hexint>  Specify page to debug (int: autoconvert internally to hex)
+#  -S|--debugpsub <int|hexint>  Specify sub-page to debug (int: autoconvert internally to hex)
+#  -L|--debugline <int>         Specify line of page to debug
+#  -D|--debugmask <int|hexint>  Enable debugmask (see logging.h for details)

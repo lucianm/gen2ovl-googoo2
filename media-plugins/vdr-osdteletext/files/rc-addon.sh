@@ -1,32 +1,27 @@
-# $Id$
 #
 # rc-addon-script for plugin osdteletext
 #
-# Lucian Muresan <lucianm@users.sourceforge.net>
 # Joerg Bornkessel <hd_brummy@gentoo.org>
 # Matthias Schwarzott <zzam@gentoo.org>
 
-# this is from /etc/conf.d/vdr.sodteletext, as always
 : ${OSDTELETEXT_TMPFS:=yes}
+: ${OSDTELETEXT_SIZE:=20}
+: ${OSDTELETEXT_DIR:=/var/cache/vdr/osdteletext}
+: ${OSDTELETEXT_STORETOPTEXT:=no}
 
-# read from /etc/vdr/conf.avail/osdteletext.conf if the proper g-v-s installed:
-argsdir_funcs="/usr/share/vdr/inc/argsdir-functions.sh"
-if [ -f "${argsdir_funcs}" ]; then
-	source ${argsdir_funcs}
-	OSDTELETEXT_DIR="$(get_cfg_opt osdteletext --directory -d)"
-	OSDTELETEXT_SIZE="$(get_cfg_opt osdteletext --max-cache -n)"
-fi
-
-# depends on QA, create paths in /var/cache on the fly at runtime as needed
-init_cache_dir() {
+plugin_pre_vdr_start() {
+	# depends on QA, create paths in /var/cache on the fly at runtime as needed
 	if [ ! -d "${OSDTELETEXT_DIR}" ]; then
 		mkdir -p ${OSDTELETEXT_DIR}
 		chown vdr:vdr ${OSDTELETEXT_DIR}
 	fi
-}
 
-plugin_pre_vdr_start() {
-	init_cache_dir
+	add_plugin_param "-d ${OSDTELETEXT_DIR}"
+	add_plugin_param "-n ${OSDTELETEXT_SIZE}"
+
+	if [ "${OSDTELETEXT_STORETOPTEXT}" = "yes" ]; then
+		add_plugin_param "-t"
+	fi
 
 	if [ "${OSDTELETEXT_TMPFS}" = "yes" ]; then
 		## test on mountet TMPFS
