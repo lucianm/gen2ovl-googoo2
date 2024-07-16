@@ -1,4 +1,4 @@
-# Copyright 2022 Gentoo Foundation
+# Copyright 2024 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
@@ -11,7 +11,7 @@ inherit vdr-plugin-2
 # Therefore the plugin version often stays behind the fixes, so it is safer to grab the plugin source
 # from a more recent vdr package. As of now, 2022.12.04, vdr-2.6.2 is out, so let's use this version:
 
-VDR_PV="2.6.2"
+VDR_PV="2.6.9"
 
 
 DESCRIPTION="VDR plugin: show content of menu in a shell window"
