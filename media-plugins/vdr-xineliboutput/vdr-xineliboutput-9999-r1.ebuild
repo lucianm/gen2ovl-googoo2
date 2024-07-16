@@ -1,34 +1,32 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2023 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
-EAPI=5
+EAPI=7
+
 GENTOO_VDR_CONDITIONAL=yes
 
-inherit vdr-plugin-2 cvs toolchain-funcs
+inherit flag-o-matic git-r3 toolchain-funcs vdr-plugin-2
 
-DESCRIPTION="Video Disk Recorder Xinelib PlugIn"
-HOMEPAGE="http://sourceforge.net/projects/xineliboutput/"
+DESCRIPTION="VDR Plugin: Xinelib PlugIn"
+HOMEPAGE="https://sourceforge.net/projects/xineliboutput/"
 
-ECVS_SERVER="xineliboutput.cvs.sourceforge.net:/cvsroot/xineliboutput"
-ECVS_MODULE="${PN}"
+EGIT_REPO_URI="https://git.code.sf.net/p/xineliboutput/git"
 
+LICENSE="GPL-2+"
 SLOT="0"
-LICENSE="GPL-2"
 KEYWORDS=""
-IUSE="bluray caps cec dbus fbcon jpeg libextractor nls opengl +vdr vdpau +X +xine xinerama"
+IUSE="bluray caps cec dbus fbcon jpeg nls opengl +vdr vdpau +X +xine xinerama"
 
 COMMON_DEPEND="
 	vdr? (
 		>=media-video/vdr-1.6.0
-		libextractor? ( >=media-libs/libextractor-0.5.20 )
 		caps? ( sys-libs/libcap )
 	)
 
 	xine? (
 		( >=media-libs/xine-lib-1.2
-			virtual/ffmpeg )
-		fbcon? ( jpeg? ( virtual/jpeg:* ) )
+			media-video/ffmpeg )
+		fbcon? ( jpeg? ( media-libs/libjpeg-turbo:= ) )
 		X? (
 			x11-libs/libX11
 			x11-libs/libXext
@@ -36,7 +34,7 @@ COMMON_DEPEND="
 			xinerama? ( x11-libs/libXinerama )
 			dbus? ( dev-libs/dbus-glib dev-libs/glib:2 )
 			vdpau? ( x11-libs/libvdpau >=media-libs/xine-lib-1.2 )
-			jpeg? ( virtual/jpeg:* )
+			jpeg? ( media-libs/libjpeg-turbo:= )
 			bluray? ( media-libs/libbluray )
 			opengl? ( virtual/opengl )
 		)
@@ -45,18 +43,19 @@ COMMON_DEPEND="
 	cec? ( dev-libs/libcec )"
 
 DEPEND="${COMMON_DEPEND}
-	virtual/pkgconfig
 	sys-kernel/linux-headers
 	nls? ( sys-devel/gettext )
 	xine? (
 		X? (
-			x11-proto/xproto
+			x11-base/xorg-proto
 			x11-libs/libXxf86vm
 		)
 	)"
 RDEPEND="${COMMON_DEPEND}"
+BDEPEND="virtual/pkgconfig"
 
-S=${WORKDIR}/${PN}
+S=${WORKDIR}/${P}
+
 VDR_CONFD_FILE="${FILESDIR}/confd-2.0.0"
 VDR_CONFD_FILE_4ARGSDIR="${FILESDIR}/confd_4argsdir"
 
@@ -68,14 +67,14 @@ pkg_setup() {
 	vdr-plugin-2_pkg_setup
 
 	if use xine; then
-		XINE_PLUGIN_DIR=$(pkg-config --variable=plugindir libxine)
+		XINE_PLUGIN_DIR=$($(tc-getPKG_CONFIG) --variable=plugindir libxine)
 		[ -z "${XINE_PLUGIN_DIR}" ] && die "Could not find xine plugin dir"
 	fi
 }
 
 src_prepare() {
 	# Allow user patches to be applied without modifyfing the ebuild
-	epatch_user
+	eapply_user
 
 	vdr-plugin-2_src_prepare
 
@@ -94,8 +93,8 @@ src_configure() {
 
 	# No autotools based configure script
 	./configure \
-		--cc=$(tc-getCC) \
-		--cxx=$(tc-getCXX) \
+		--cc="$(tc-getCC)" \
+		--cxx="$(tc-getCXX)" \
 		$(use_enable X x11) \
 		$(use_enable X xshm) \
 		$(use_enable X xdpms) \
@@ -104,7 +103,7 @@ src_configure() {
 		$(use_enable fbcon fb) \
 		$(use_enable vdr) \
 		$(use_enable xine libxine) \
-		$(use_enable libextractor) \
+		--disable-libextractor \
 		$(use_enable caps libcap) \
 		$(use_enable jpeg libjpeg) \
 		$(use_enable xinerama) \
@@ -132,7 +131,7 @@ src_install() {
 		fi
 
 		if use xine; then
-			doinitd "${FILESDIR}"/vdr-frontend
+			newinitd "${FILESDIR}"/vdr-frontend-r1 vdr-frontend
 
 			insinto $XINE_PLUGIN_DIR
 			doins xineplug_inp_xvdr.so
