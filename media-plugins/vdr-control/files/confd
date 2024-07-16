@@ -1,7 +1,7 @@
 # /etc/conf.d/vdr.control
 # Please add options as necessary to _EXTRAOPTS below
 
-# control (0.0.2a) - Control VDR over terminal or telnet
+# control (1.0.2) - Control VDR over terminal or telnet
 #  -t TTY,   --terminal=TTY tty to control vdr per virtual terminal
 #                           (default: none)
 #  -p PORT,  --port=PORT    port to receive remote connections

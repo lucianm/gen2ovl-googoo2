@@ -1,10 +1,10 @@
 # Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
 
-# control (0.0.2a-kw3) - Control VDR over terminal or telnet
+# control (1.0.2) - telnet remote control
 
 [control]
 
-#  -t TTY,   --terminal=TTY tty to control vdr per virtual terminal
+#  -t TTY,   --terminal=TTY tty for local control
 #                           (default: none)
-#  -p PORT,  --port=PORT    port to receive remote connections
+#  -p PORT,  --port=PORT    telnet port for incoming connections
 #                           (default: 2002)
