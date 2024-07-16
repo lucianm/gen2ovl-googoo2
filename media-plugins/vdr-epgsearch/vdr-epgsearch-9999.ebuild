@@ -35,6 +35,7 @@ BDEPEND="
 	dev-lang/perl"
 
 PATCHES=(
+	"${FILESDIR}/${PN}-2.4.0_makefile.patch"
 	"${FILESDIR}/${PN}-2.4.0_docsrc2man-no-gzip.patch"
 )
 
