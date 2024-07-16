@@ -1,7 +1,7 @@
 # Copyright 2021-2024 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=7
+EAPI=8
 
 inherit ssl-cert toolchain-funcs vdr-plugin-2
 
@@ -11,7 +11,7 @@ if [[ "${PV}" = "9999" ]]; then
 	SRC_URI=""
 	KEYWORDS=""
 	#EGIT_REPO_URI="https://projects.vdr-developer.org/git/vdr-plugin-${VDRPLUGIN}.git"
-	EGIT_REPO_URI="https://github.com/REELcoder/vdr-plugin-${VDRPLUGIN}.git"
+	EGIT_REPO_URI="https://github.com/MarkusEh/vdr-plugin-${VDRPLUGIN}.git"
 	inherit git-r3
 	S="${WORKDIR}/${P}"
 else
