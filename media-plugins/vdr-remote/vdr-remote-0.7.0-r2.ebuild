@@ -1,18 +1,17 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
-EAPI=5
+EAPI=7
 
 inherit vdr-plugin-2
 
-DESCRIPTION="VDR Plugin: use various devices for controlling vdr (keyboards, lirc, remotes bundled with tv-cards)"
+DESCRIPTION="VDR Plugin: use various devices for controlling vdr (keyboards, lirc...)"
 HOMEPAGE="http://www.escape-edv.de/endriss/vdr/"
 SRC_URI="http://www.escape-edv.de/endriss/vdr/${P}.tgz"
 
 SLOT="0"
 LICENSE="GPL-2"
-KEYWORDS="~amd64 ~x86"
+KEYWORDS="amd64 x86"
 IUSE="systemd"
 
 DEPEND=">=media-video/vdr-2.2.0"
