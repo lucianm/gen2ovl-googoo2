@@ -113,8 +113,9 @@ src_prepare() {
 
 	eapply "${FILESDIR}/vdr-2.6.6_gentoo.patch"
 	use demoplugins || eapply "${FILESDIR}/vdr-2.4_remove_plugins.patch"
-	eapply "${FILESDIR}/${PN}-2.4.1_tmplargs-1_command-line-help-consolidated.patch"
-	eapply "${FILESDIR}/${PN}-2.4.1_tmplargs-2_generate-argfile-templates-out-of-command-line.patch"
+	eapply "${FILESDIR}/${PN}_tmplargs-1_command-line-help-consolidated.patch"
+	eapply "${FILESDIR}/${PN}_tmplargs-2_generate-argfile-templates-out-of-command-line.patch"
+	eapply "${FILESDIR}/${PN}_tmplargs-3_gentoo-warning-user-option.patch"
 	eapply "${FILESDIR}/${PN}-2.4.6_makefile-variables.patch"
 
 	# fix clang/LLVM compile

@@ -1,0 +1,28 @@
+From ce626abd1ca58376e6e5c6ec46baa2021db04e0a Mon Sep 17 00:00:00 2001
+From: Lucian Muresan <lucianm@users.sourceforge.net>
+Date: Wed, 6 May 2020 23:45:29 +0200
+Subject: [PATCH] gentoo warning user option
+
+---
+ vdr.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/vdr.c b/vdr.c
+index e49d049b..315330dc 100644
+--- a/vdr.c
++++ b/vdr.c
+@@ -284,6 +284,11 @@ cString CommandLineHelp(void)
+        "  -t TTY,   --terminal=TTY controlling tty\n"
+        "  -u USER,  --user=USER    run as user USER; only applicable if started as\n"
+        "                           root; USER can be a user name or a numerical id\n"
++       "                               DO NOT USE THIS OPTION with media-tv/gentoo-vdr-scripts !!!\n"
++       "                               - if using OpenRC as the init system, please check\n"
++       "                                   START_VDR_AS_ROOT in /etc/conf.d/vdr\n"
++       "                               - if using SystemD as the init system, please consult\n"
++       "                                   README.systemd deployed with media-tv/gentoo-vdr-scripts\n"
+        "            --updindex=REC update index for recording REC and exit\n"
+        "            --userdump     allow coredumps if -u is given (debugging)\n"
+        "  -v DIR,   --video=DIR    use DIR as video directory (default: %s)\n"
+-- 
+2.45.2.windows.1
+
