@@ -1,6 +1,6 @@
 # Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
 
-# menuorg (0.5.1) - Reorganizes the main menu
+# menuorg (0.5.2) - Reorganizes the main menu
 
 [menuorg]
 
