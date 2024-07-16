@@ -39,7 +39,7 @@ RDEPEND="${DEPEND}"
 src_prepare() {
 	vdr-plugin-2_src_prepare
 
-	fix_vdr_libsi_include scanfilter.cpp
+	fix_vdr_libsi_include scanfilter.cpp si_ext.h
 	eapply_user
 }
 
