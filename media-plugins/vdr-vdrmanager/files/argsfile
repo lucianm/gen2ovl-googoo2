@@ -1,6 +1,6 @@
 # Please move/rename this file to argsdir with just the .conf extension and edit it with one option per line as needed.
 
-# vdrmanager (0.14) - VDR-Manager plugin
+# vdrmanager (0.15) - VDR-Manager plugin
 
 [vdrmanager]
 
